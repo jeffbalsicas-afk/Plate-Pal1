@@ -350,4 +350,29 @@ class ClientDashboardController extends Controller
             ))
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
+
+    public function editProfile()
+    {
+        $user = auth()->user();
+        $initials = strtoupper(substr($user->name, 0, 1) . (str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
+
+        return response()
+            ->view('client.profile', compact('user', 'initials'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'phone' => ['nullable', 'string', 'max:20'],
+        ]);
+
+        $user->update($validated);
+
+        return back()->with('success', 'Profile updated successfully!');
+    }
 }

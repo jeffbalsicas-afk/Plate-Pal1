@@ -58,7 +58,7 @@
                                 <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10"/></svg>
                                 Welcome Page
                             </a>
-                            <a href="{{ route('caterer.profile') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
+                            <a href="{{ auth()->user()->role === 'caterer' ? route('caterer.profile') : route('client.profile') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
                                 <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 Profile
                             </a>

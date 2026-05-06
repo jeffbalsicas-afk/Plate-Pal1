@@ -45,8 +45,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/client/saved-caterers', [ClientDashboardController::class, 'savedCaterers'])->name('client.saved-caterers');
     Route::post('/client/saved-caterers/{caterer}', [ClientDashboardController::class, 'toggleSavedCaterer'])->name('client.saved-caterers.toggle');
     Route::get('/client/reviews', [ClientDashboardController::class, 'myReviews'])->name('client.reviews');
-
-    // Caterer routes
+    Route::get('/client/profile', [ClientDashboardController::class, 'editProfile'])->name('client.profile');
+    Route::post('/client/profile', [ClientDashboardController::class, 'updateProfile'])->name('client.profile.update');
     Route::get('/caterer/dashboard', [CatererController::class, 'dashboard'])->name('caterer.dashboard');
     Route::get('/caterer/bookings', [CatererController::class, 'bookings'])->name('caterer.bookings');
     Route::get('/caterer/menu-pricing', [CatererController::class, 'menuAndPricing'])->name('caterer.menu-pricing');
