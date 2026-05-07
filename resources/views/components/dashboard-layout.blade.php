@@ -15,6 +15,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
 <body class="bg-brand-cream-light font-body antialiased">
     <div class="flex flex-col min-h-screen">
@@ -113,7 +116,7 @@
 
             {{-- Mobile Sidebar Overlay --}}
             @isset($sidebar)
-            <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-black/50 z-20 lg:hidden" x-transition></div>
+            <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false" class="fixed inset-0 bg-black/50 z-20 lg:hidden" x-transition></div>
             @endisset
         </div>
     </div>
