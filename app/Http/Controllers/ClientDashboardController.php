@@ -84,11 +84,20 @@ class ClientDashboardController extends Controller
             $query->where('cuisine', request('cuisine'));
         }
 
-        if (request('price_min') && request('price_max')) {
-            $minPrice = (int) request('price_min');
-            $maxPrice = (int) request('price_max');
-            $query->whereBetween('price_min', [$minPrice, $maxPrice])
-                  ->orWhereBetween('price_max', [$minPrice, $maxPrice]);
+        if (request('price_range')) {
+            $priceRange = explode('-', request('price_range'));
+            if (count($priceRange) === 2) {
+                $minPrice = (int) $priceRange[0];
+                $maxPrice = (int) $priceRange[1];
+                $query->where(function($q) use ($minPrice, $maxPrice) {
+                    $q->whereBetween('price_min', [$minPrice, $maxPrice])
+                      ->orWhereBetween('price_max', [$minPrice, $maxPrice])
+                      ->orWhere(function($q2) use ($minPrice, $maxPrice) {
+                          $q2->where('price_min', '<=', $minPrice)
+                             ->where('price_max', '>=', $maxPrice);
+                      });
+                });
+            }
         }
 
         if (request('rating')) {
