@@ -17,6 +17,9 @@
             <p style="margin: 10px 0;"><strong>Event Title:</strong> {{ $booking->event_title }}</p>
             <p style="margin: 10px 0;"><strong>Event Date:</strong> {{ $booking->event_date->format('F d, Y') }}</p>
             <p style="margin: 10px 0;"><strong>Number of Guests:</strong> {{ $booking->guests }}</p>
+            @if($booking->selected_package_name)
+                <p style="margin: 10px 0;"><strong>Package:</strong> {{ $booking->selected_package_name }}</p>
+            @endif
             <p style="margin: 10px 0;"><strong>Caterer:</strong> {{ $booking->caterer->business_name ?? $booking->caterer->name }}</p>
             <p style="margin: 10px 0;"><strong>Status:</strong> <span style="background-color: #EAF5E9; color: #2E7D32; padding: 5px 10px; border-radius: 4px;">Confirmed</span></p>
         </div>

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('unit')->default('head');
             $table->enum('type', ['menu', 'addon'])->default('menu');
             $table->string('category')->default('main');
-            $table->enum('status', ['live', 'draft'])->default('draft');
+            $table->enum('status', ['draft', 'pending', 'live', 'rejected'])->default('draft');
             $table->string('image_path')->nullable();
             $table->timestamps();
         });

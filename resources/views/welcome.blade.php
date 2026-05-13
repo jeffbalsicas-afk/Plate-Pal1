@@ -18,9 +18,9 @@
         </a> --}}
 {{--
 <div class="hidden md:flex items-center gap-8">
-    <a href="#" class="nav-underline text-sm font-medium text-brand-muted hover:text-brand-dark transition-colors">Browse caterers</a>
-    <a href="#" class="nav-underline text-sm font-medium text-brand-muted hover:text-brand-dark transition-colors">How it works</a>
-    <a href="#" class="nav-underline text-sm font-medium text-brand-muted hover:text-brand-dark transition-colors">For caterers</a> --}}
+    <a href="{{ route('browse.caterers') }}" class="nav-underline text-sm font-medium text-brand-muted hover:text-brand-dark transition-colors">Browse caterers</a>
+    <a href="{{ route('how.it.works') }}" class="nav-underline text-sm font-medium text-brand-muted hover:text-brand-dark transition-colors">How it works</a>
+    <a href="{{ route('for.caterers') }}" class="nav-underline text-sm font-medium text-brand-muted hover:text-brand-dark transition-colors">For caterers</a> --}}
     {{-- @auth
         <a href="{{ route('home') }}" class="flex items-center gap-3 group">
             <div class="flex flex-col items-end">
@@ -55,9 +55,9 @@
 
     {{-- Mobile menu --}}
 {{-- <div id="mobile-menu" class="hidden md:hidden border-t border-brand-cream-dark px-6 py-4 flex flex-col gap-4 bg-white">
-    <a href="#" class="text-sm font-medium text-brand-muted">Browse caterers</a>
-    <a href="#" class="text-sm font-medium text-brand-muted">How it works</a>
-    <a href="#" class="text-sm font-medium text-brand-muted">For caterers</a>
+    <a href="{{ route('browse.caterers') }}" class="text-sm font-medium text-brand-muted">Browse caterers</a>
+    <a href="{{ route('how.it.works') }}" class="text-sm font-medium text-brand-muted">How it works</a>
+    <a href="{{ route('for.caterers') }}" class="text-sm font-medium text-brand-muted">For caterers</a>
 
     @guest
         <a href="{{ route('login') }}" class="w-fit px-5 py-2 rounded-full bg-brand-orange text-white text-sm font-bold">Sign In</a>
@@ -150,9 +150,9 @@
                     </svg>
                 </div>
 
-                <button class="px-7 py-3 rounded-xl bg-brand-orange text-white text-sm font-bold whitespace-nowrap hover:bg-brand-orange-light active:scale-95 transition-all shadow-md shadow-brand-orange/30">
+                <a href="{{ route('browse.caterers') }}" class="inline-flex items-center justify-center px-7 py-3 rounded-xl bg-brand-orange text-white text-sm font-bold whitespace-nowrap hover:bg-brand-orange-light active:scale-95 transition-all shadow-md shadow-brand-orange/30">
                     Find Caterers
-                </button>
+                </a>
             </div>
         </div>
 
@@ -176,7 +176,7 @@
 
         <div class="flex items-end justify-between mb-8 flex-wrap gap-4">
             <h2 class="font-display text-3xl md:text-4xl font-bold text-brand-dark">Featured Local Caterers</h2>
-            <a href="#" class="group flex items-center gap-1 text-sm font-bold text-brand-orange hover:text-brand-orange-light transition-colors">
+            <a href="{{ route('browse.caterers') }}" class="group flex items-center gap-1 text-sm font-bold text-brand-orange hover:text-brand-orange-light transition-colors">
                 View All
                 <svg class="size-4 transition-transform group-hover:translate-x-1"
                      fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -199,7 +199,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($caterers as $index => $caterer)
             <article
-                class="card-lift animate-fade-up bg-white rounded-2xl overflow-hidden cursor-pointer shadow-lg"
+                class="card-lift animate-fade-up bg-white rounded-2xl overflow-hidden shadow-lg"
                 style="animation-delay: {{ 0.05 + $index * 0.07 }}s"
             >
                 {{-- Image --}}
@@ -271,8 +271,12 @@
             <div>
                 <p class="text-xs font-bold uppercase tracking-widest text-white/80 mb-4">For Clients</p>
                 <ul class="flex flex-col gap-2.5">
-                    @foreach(['Browse Caterers', 'How It Works', 'Client Reviews'] as $link)
-                    <li><a href="#" class="text-sm text-white/45 hover:text-white transition-colors">{{ $link }}</a></li>
+                    @foreach([
+                        ['label' => 'Browse Caterers', 'route' => 'browse.caterers'],
+                        ['label' => 'How It Works', 'route' => 'how.it.works'],
+                        ['label' => 'Client Reviews', 'route' => 'browse.caterers'],
+                    ] as $link)
+                    <li><a href="{{ route($link['route']) }}" class="text-sm text-white/45 hover:text-white transition-colors">{{ $link['label'] }}</a></li>
                     @endforeach
                 </ul>
             </div>
@@ -280,8 +284,12 @@
             <div>
                 <p class="text-xs font-bold uppercase tracking-widest text-white/80 mb-4">For Caterers</p>
                 <ul class="flex flex-col gap-2.5">
-                    @foreach(['Join as Caterer', 'Pricing', 'Success Stories'] as $link)
-                    <li><a href="#" class="text-sm text-white/45 hover:text-white transition-colors">{{ $link }}</a></li>
+                    @foreach([
+                        ['label' => 'Join as Caterer', 'route' => 'caterer.register'],
+                        ['label' => 'Pricing', 'route' => 'for.caterers'],
+                        ['label' => 'Success Stories', 'route' => 'for.caterers'],
+                    ] as $link)
+                    <li><a href="{{ route($link['route']) }}" class="text-sm text-white/45 hover:text-white transition-colors">{{ $link['label'] }}</a></li>
                     @endforeach
                 </ul>
             </div>

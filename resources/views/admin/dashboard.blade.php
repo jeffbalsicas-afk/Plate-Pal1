@@ -33,15 +33,21 @@
 
     <x-slot:sidebarFooter>
         <div class="border-t border-[#EDE4D8] pt-3 mt-3">
-            <form action="{{ route('logout') }}" method="POST" style="display: none;" id="logout-form">
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
+                <button type="submit" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors text-sm font-medium">
+                    <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    Logout
+                </button>
             </form>
-            <a href="{{ route('logout') }}" class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors text-sm font-medium" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                Logout
-            </a>
         </div>
     </x-slot:sidebarFooter>
+
+    @if(session('success'))
+        <div class="mb-5 p-4 rounded-xl bg-green-50 border border-green-300 text-green-700 text-sm font-medium">
+            {{ session('success') }}
+        </div>
+    @endif
 
     {{-- Stats --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
@@ -135,11 +141,11 @@
                         <div class="flex items-center gap-2">
                             <form method="POST" action="{{ route('admin.caterer.approve', $caterer) }}">
                                 @csrf
-                                <button class="px-3 py-1 rounded-lg bg-[#EAF5E9] text-[#2E7D32] text-xs font-bold hover:bg-green-200 transition-colors">Approve</button>
+                                <button type="submit" class="px-3 py-1 rounded-lg bg-[#EAF5E9] text-[#2E7D32] text-xs font-bold hover:bg-green-200 transition-colors">Approve</button>
                             </form>
                             <form method="POST" action="{{ route('admin.caterer.reject', $caterer) }}">
                                 @csrf
-                                <button class="px-3 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors">Reject</button>
+                                <button type="submit" class="px-3 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors">Reject</button>
                             </form>
                         </div>
                     </div>
@@ -147,6 +153,89 @@
                 </div>
             @endif
         </div>
+    </div>
+
+    {{-- Pending Menu & Pricing --}}
+    <div class="bg-white rounded-2xl p-[22px] border border-[#EDE4D8] mb-5">
+        <div class="flex items-center justify-between gap-4 mb-4">
+            <div>
+                <h3 class="text-base font-black text-[#1C1A17]">Pending Menu & Pricing</h3>
+                <p class="text-xs text-[#8A7F72] mt-1">Approve packages, menu items, and add-ons before they become visible to clients.</p>
+            </div>
+            <span class="text-xs font-bold text-[#E8642A]">{{ $pendingPackages->count() + $pendingMenuItems->count() }} pending</span>
+        </div>
+
+        @if($pendingPackages->isEmpty() && $pendingMenuItems->isEmpty())
+            <p class="text-sm text-[#8A7F72] text-center py-6">No pending menu submissions.</p>
+        @else
+            <div class="grid lg:grid-cols-2 gap-4">
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-wide text-[#8A7F72] mb-2">Packages</h4>
+                    @if($pendingPackages->isEmpty())
+                        <p class="text-sm text-[#8A7F72] py-4">No pending packages.</p>
+                    @else
+                        <div class="flex flex-col gap-2.5">
+                            @foreach($pendingPackages as $package)
+                                <div class="px-3.5 py-3 border border-[#EDE4D8] rounded-xl">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <div class="text-sm font-bold text-[#1C1A17]">{{ $package->name }}</div>
+                                            <div class="text-xs text-[#8A7F72]">{{ $package->caterer->business_name ?? $package->caterer->name }} · ₱{{ number_format($package->price, 0) }} bundle · Min {{ $package->min_guests }}</div>
+                                            @if($package->description)
+                                                <div class="text-xs text-[#8A7F72] mt-1 line-clamp-2">{{ $package->description }}</div>
+                                            @endif
+                                        </div>
+                                        <div class="flex items-center gap-2 flex-shrink-0">
+                                            <form method="POST" action="{{ route('admin.packages.approve', $package) }}">
+                                                @csrf
+                                                <button type="submit" class="px-3 py-1 rounded-lg bg-[#EAF5E9] text-[#2E7D32] text-xs font-bold hover:bg-green-200 transition-colors">Approve</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('admin.packages.reject', $package) }}">
+                                                @csrf
+                                                <button type="submit" class="px-3 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors">Reject</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-wide text-[#8A7F72] mb-2">Menu Items & Add-ons</h4>
+                    @if($pendingMenuItems->isEmpty())
+                        <p class="text-sm text-[#8A7F72] py-4">No pending menu items or add-ons.</p>
+                    @else
+                        <div class="flex flex-col gap-2.5">
+                            @foreach($pendingMenuItems as $item)
+                                <div class="px-3.5 py-3 border border-[#EDE4D8] rounded-xl">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <div class="text-sm font-bold text-[#1C1A17]">{{ $item->name }}</div>
+                                            <div class="text-xs text-[#8A7F72]">{{ $item->caterer->business_name ?? $item->caterer->name }} · {{ $item->type === 'addon' ? 'Add-on' : ucfirst($item->category) }} · ₱{{ number_format($item->price, 0) }}/{{ $item->unit }}</div>
+                                            @if($item->description)
+                                                <div class="text-xs text-[#8A7F72] mt-1 line-clamp-2">{{ $item->description }}</div>
+                                            @endif
+                                        </div>
+                                        <div class="flex items-center gap-2 flex-shrink-0">
+                                            <form method="POST" action="{{ route('admin.menu-items.approve', $item) }}">
+                                                @csrf
+                                                <button type="submit" class="px-3 py-1 rounded-lg bg-[#EAF5E9] text-[#2E7D32] text-xs font-bold hover:bg-green-200 transition-colors">Approve</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('admin.menu-items.reject', $item) }}">
+                                                @csrf
+                                                <button type="submit" class="px-3 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors">Reject</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- Recent Bookings --}}

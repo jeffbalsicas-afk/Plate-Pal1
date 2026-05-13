@@ -33,13 +33,13 @@
 
     <x-slot:sidebarFooter>
         <div class="border-t border-[#EDE4D8] pt-3 mt-3">
-            <form action="{{ route('logout') }}" method="POST" style="display: none;" id="logout-form">
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
+                <button type="submit" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors text-sm font-medium">
+                    <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    Logout
+                </button>
             </form>
-            <a href="{{ route('logout') }}" class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors text-sm font-medium" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                Logout
-            </a>
         </div>
     </x-slot:sidebarFooter>
 

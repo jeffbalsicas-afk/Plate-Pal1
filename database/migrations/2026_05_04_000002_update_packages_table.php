@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('packages', function (Blueprint $table) {
-            $table->enum('status', ['live', 'draft'])->default('draft')->after('min_guests');
+            $table->enum('status', ['draft', 'pending', 'live', 'rejected'])->default('draft')->after('min_guests');
             $table->string('category')->default('bundled')->after('status'); // bundled, ala-carte, addon
         });
     }

@@ -1,3 +1,5 @@
+@props(['caterers' => collect()])
+
 <section class="bg-[linear-gradient(#F1DEC5_30%,#F4EEEE_100%)] py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
 
@@ -21,7 +23,24 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {{-- Add caterer cards manually here --}}
+            @forelse($caterers as $index => $caterer)
+                <x-home.card
+                    :name="$caterer['name']"
+                    :location="$caterer['location']"
+                    :cuisine="$caterer['cuisine']"
+                    :rating="$caterer['rating']"
+                    :reviews="$caterer['reviews']"
+                    :price="$caterer['price']"
+                    :image="$caterer['image']"
+                    :guests="$caterer['guests']"
+                    :response="$caterer['response']"
+                    :delay="($index * 0.08).'s'"
+                />
+            @empty
+                <div class="sm:col-span-2 lg:col-span-3 rounded-2xl border border-brand-cream-dark bg-white p-8 text-center">
+                    <p class="text-sm font-medium text-brand-muted">Featured caterers will appear here once profiles are approved.</p>
+                </div>
+            @endforelse
         </div>
 
     </div>

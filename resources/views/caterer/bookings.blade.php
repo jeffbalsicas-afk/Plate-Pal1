@@ -52,61 +52,87 @@
         ];
 
         $statusStyles = [
-            'pending' => 'bg-amber-100 text-amber-800 border-amber-200',
-            'confirmed' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
-            'completed' => 'bg-blue-100 text-blue-800 border-blue-200',
-            'cancelled' => 'bg-red-100 text-red-800 border-red-200',
+            'pending' => [
+                'label' => 'Pending',
+                'badge' => 'bg-[#FFF8E1] text-[#B26A00] border-[#F3D68B]',
+                'dot' => 'bg-[#B26A00]',
+                'rail' => 'bg-[#E8642A]',
+                'soft' => 'bg-[#FEF3EC] text-[#E8642A]',
+            ],
+            'confirmed' => [
+                'label' => 'Confirmed',
+                'badge' => 'bg-[#EAF5E9] text-[#2E7D32] border-[#CDE8CC]',
+                'dot' => 'bg-[#2E7D32]',
+                'rail' => 'bg-[#2E7D32]',
+                'soft' => 'bg-[#EAF5E9] text-[#2E7D32]',
+            ],
+            'completed' => [
+                'label' => 'Completed',
+                'badge' => 'bg-[#EAF2FF] text-[#1F5FA8] border-[#CFE0F6]',
+                'dot' => 'bg-[#1F5FA8]',
+                'rail' => 'bg-[#1F5FA8]',
+                'soft' => 'bg-[#EAF2FF] text-[#1F5FA8]',
+            ],
+            'cancelled' => [
+                'label' => 'Cancelled',
+                'badge' => 'bg-red-50 text-red-700 border-red-200',
+                'dot' => 'bg-red-600',
+                'rail' => 'bg-red-500',
+                'soft' => 'bg-red-50 text-red-700',
+            ],
         ];
 
-        $activeBookings = ($statusCounts['pending'] ?? 0) + ($statusCounts['confirmed'] ?? 0);
     @endphp
 
-    <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mb-6">
-            <div>
-                <h1 class="text-3xl sm:text-4xl font-black text-[#1C1A17] mb-2">Bookings</h1>
-                <p class="text-base text-[#8A6D3F]">Review new requests, prepare confirmed events, and track completed catering jobs.</p>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-2.5">
-                <button type="button" class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#EDE4D8] bg-white text-sm font-bold text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
-                    <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M7 12h10M10 20h4"/></svg>
-                    Filter
-                </button>
-                <button type="button" class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors">
-                    <svg class="size-4 stroke-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    Calendar View
-                </button>
-            </div>
-        </div>
-
-        <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-3.5 mb-6">
-            <div class="bg-white rounded-2xl p-5 border border-[#EDE4D8] shadow-sm">
-                <div class="text-xs font-bold uppercase text-[#8A7F72] mb-2">Active events</div>
-                <div class="text-3xl font-black text-[#1C1A17] leading-none">{{ $activeBookings }}</div>
-                <div class="text-xs text-[#8A7F72] mt-2">Pending and confirmed bookings</div>
-            </div>
-            <div class="bg-white rounded-2xl p-5 border border-[#EDE4D8] shadow-sm">
-                <div class="text-xs font-bold uppercase text-[#8A7F72] mb-2">Pending requests</div>
-                <div class="text-3xl font-black text-[#E8642A] leading-none">{{ $statusCounts['pending'] ?? 0 }}</div>
-                <div class="text-xs text-[#8A7F72] mt-2">Need your response</div>
-            </div>
-            <div class="bg-white rounded-2xl p-5 border border-[#EDE4D8] shadow-sm">
-                <div class="text-xs font-bold uppercase text-[#8A7F72] mb-2">Guests to serve</div>
-                <div class="text-3xl font-black text-[#1C1A17] leading-none">{{ number_format($totalGuests) }}</div>
-                <div class="text-xs text-[#8A7F72] mt-2">From active bookings</div>
-            </div>
-            <div class="bg-white rounded-2xl p-5 border border-[#EDE4D8] shadow-sm">
-                <div class="text-xs font-bold uppercase text-[#8A7F72] mb-2">Next event</div>
-                <div class="text-xl font-black text-[#1C1A17] leading-tight">
-                    {{ $nextBooking ? $nextBooking->event_date->format('M d') : 'None yet' }}
+    <div class="max-w-7xl mx-auto space-y-5">
+        <section class="group relative overflow-hidden rounded-2xl border border-[#EDE4D8] bg-white p-5 sm:p-6 shadow-sm">
+            <div class="absolute inset-x-0 top-0 h-1 bg-[#926b01]"></div>
+            <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
+                <div class="min-w-0">
+                    <h1 class="text-3xl sm:text-4xl font-black text-[#1C1A17]">Bookings</h1>
+                    <p class="mt-2 max-w-2xl text-sm sm:text-base text-[#8A6D3F]">Review client requests, keep confirmed events visible, and move completed jobs out of the prep queue.</p>
                 </div>
-                <div class="text-xs text-[#8A7F72] mt-2 truncate">{{ $nextBooking->event_title ?? 'No active events scheduled' }}</div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-y-4 sm:divide-x sm:divide-[#EDE4D8] xl:min-w-[560px]">
+                    <div class="sm:px-4">
+                        <div class="text-[11px] font-black uppercase text-[#8A7F72]">Requests</div>
+                        <div class="mt-1 text-2xl font-black text-[#E8642A]">{{ number_format($statusCounts['pending'] ?? 0) }}</div>
+                        <div class="text-xs text-[#8A7F72]">Need reply</div>
+                    </div>
+                    <div class="sm:px-4">
+                        <div class="text-[11px] font-black uppercase text-[#8A7F72]">Confirmed</div>
+                        <div class="mt-1 text-2xl font-black text-[#2E7D32]">{{ number_format($statusCounts['confirmed'] ?? 0) }}</div>
+                        <div class="text-xs text-[#8A7F72]">Scheduled</div>
+                    </div>
+                    <div class="sm:px-4">
+                        <div class="text-[11px] font-black uppercase text-[#8A7F72]">Guests</div>
+                        <div class="mt-1 text-2xl font-black text-[#1C1A17]">{{ number_format($totalGuests) }}</div>
+                        <div class="text-xs text-[#8A7F72]">To serve</div>
+                    </div>
+                    <div class="sm:px-4">
+                        <div class="text-[11px] font-black uppercase text-[#8A7F72]">Next</div>
+                        <div class="mt-1 truncate text-2xl font-black text-[#1C1A17]">
+                            {{ $nextBooking ? $nextBooking->event_date->format('M d') : 'None' }}
+                        </div>
+                        <div class="truncate text-xs text-[#8A7F72]">{{ $nextBooking->event_title ?? 'No upcoming event' }}</div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <div class="grid xl:grid-cols-[1fr_340px] gap-6">
-            <section class="min-w-0">
-                <div class="bg-white rounded-2xl border border-[#EDE4D8] shadow-sm p-2 mb-5 overflow-x-auto">
+        @if(session('success'))
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
+        <section class="min-w-0 space-y-4">
+                <div class="bg-white rounded-2xl border border-[#EDE4D8] shadow-sm p-2 overflow-x-auto">
                     <div class="grid grid-cols-5 min-w-[680px] gap-2">
                         @foreach($tabs as $status => $label)
                             <a href="{{ route('caterer.bookings', $status === 'all' ? [] : ['status' => $status]) }}"
@@ -119,7 +145,7 @@
                 </div>
 
                 @if($bookings->isEmpty())
-                    <div class="bg-white rounded-2xl border border-[#EDE4D8] shadow-sm p-10 text-center">
+                    <div class="bg-white rounded-2xl border border-dashed border-[#EDE4D8] shadow-sm p-10 text-center">
                         <div class="size-14 rounded-2xl bg-[#FDF0EA] flex items-center justify-center mx-auto mb-4">
                             <svg class="size-7 stroke-[#E8642A]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
@@ -131,42 +157,99 @@
                         @foreach($bookings as $booking)
                             @php
                                 $status = strtolower($booking->status ?? 'pending');
+                                $style = $statusStyles[$status] ?? $statusStyles['pending'];
                                 $clientName = $booking->user->name ?? 'Client';
                                 $clientInitials = strtoupper(substr($clientName, 0, 1) . (str_contains($clientName, ' ') ? substr($clientName, strpos($clientName, ' ') + 1, 1) : ''));
+                                $packageName = $booking->selected_package_name;
+                                $eventTiming = $booking->event_date->isToday()
+                                    ? 'Today'
+                                    : ($booking->event_date->isFuture() ? $booking->event_date->diffForHumans() : 'Past event');
                             @endphp
 
-                            <article class="bg-white rounded-2xl border border-[#EDE4D8] shadow-sm px-5 sm:px-6 py-5">
-                                <div class="flex flex-col lg:flex-row lg:items-center gap-5">
-                                    <div class="flex items-start gap-4 flex-1 min-w-0">
-                                        <div class="size-12 rounded-xl bg-[#E8642A] text-white text-sm font-black flex items-center justify-center shrink-0">
-                                            {{ $clientInitials }}
-                                        </div>
-                                        <div class="min-w-0">
-                                            <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                                                <h2 class="text-xl font-black text-[#1C1A17] leading-tight">{{ $booking->event_title }}</h2>
-                                                <span class="px-2.5 py-1 rounded-full border text-xs font-bold {{ $statusStyles[$status] ?? 'bg-gray-100 text-gray-700 border-gray-200' }}">
-                                                    {{ ucfirst($status) }}
-                                                </span>
+                            <article class="group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all hover:shadow-md {{ $status === 'pending' ? 'border-[#F6B78E]' : 'border-[#EDE4D8]' }}">
+                                <div class="absolute inset-y-0 left-0 w-1 {{ $style['rail'] }}"></div>
+                                <div class="grid lg:grid-cols-[108px_minmax(0,1fr)_180px]">
+                                    <div class="border-b border-[#F4E7D8] p-5 lg:border-b-0 lg:border-r">
+                                        <div class="flex items-center justify-between gap-4 lg:block">
+                                            <div>
+                                                <div class="text-xs font-black uppercase text-[#8A7F72]">{{ $booking->event_date->format('D') }}</div>
+                                                <div class="mt-1 text-4xl font-black leading-none text-[#1C1A17]">{{ $booking->event_date->format('d') }}</div>
+                                                <div class="mt-1 text-xs font-bold text-[#8A6D3F]">{{ $booking->event_date->format('M Y') }}</div>
                                             </div>
-                                            <p class="text-sm font-bold text-[#8A6D3F] mb-3">{{ $clientName }}</p>
-                                            <div class="grid sm:grid-cols-3 gap-2.5 text-sm text-[#8A7F72]">
-                                                <span class="inline-flex items-center gap-2">
-                                                    <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                                    {{ $booking->event_date->format('M d, Y') }}
-                                                </span>
-                                                <span class="inline-flex items-center gap-2">
-                                                    <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m8-4a4 4 0 10-8 0 4 4 0 008 0z"/></svg>
-                                                    {{ number_format($booking->guests) }} guests
-                                                </span>
-                                                <span class="inline-flex items-center gap-2">
-                                                    <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                    Requested {{ $booking->created_at->diffForHumans() }}
-                                                </span>
+                                            <div class="rounded-full {{ $style['soft'] }} px-2.5 py-1 text-[11px] font-black lg:mt-4 lg:inline-flex">
+                                                {{ $eventTiming }}
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="flex flex-col sm:flex-row lg:flex-col gap-2 lg:w-36">
+                                    <div class="min-w-0 p-5 sm:p-6">
+                                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                                            <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-black {{ $style['badge'] }}">
+                                                <span class="size-1.5 rounded-full {{ $style['dot'] }}"></span>
+                                                {{ $style['label'] }}
+                                            </span>
+                                            <span class="text-xs font-bold text-[#8A7F72]">Requested {{ $booking->created_at->diffForHumans() }}</span>
+                                        </div>
+
+                                        <h2 class="text-xl font-black leading-tight text-[#1C1A17]">{{ $booking->event_title }}</h2>
+                                        <div class="mt-2 flex items-center gap-2 text-sm font-bold text-[#8A6D3F]">
+                                            <span class="flex size-7 items-center justify-center rounded-full bg-[#FDF6EE] text-[11px] font-black text-[#E8642A]">{{ $clientInitials }}</span>
+                                            {{ $clientName }}
+                                        </div>
+
+                                        <div class="mt-4 grid sm:grid-cols-3 gap-2.5 text-sm">
+                                            <div class="rounded-xl bg-[#FDF6EE] px-3 py-2.5">
+                                                <div class="text-[11px] font-black uppercase text-[#8A7F72]">Guests</div>
+                                                <div class="mt-0.5 font-black text-[#1C1A17]">{{ number_format($booking->guests) }}</div>
+                                            </div>
+                                            <div class="rounded-xl bg-[#FDF6EE] px-3 py-2.5">
+                                                <div class="text-[11px] font-black uppercase text-[#8A7F72]">Package</div>
+                                                <div class="mt-0.5 truncate font-black text-[#1C1A17]">{{ $packageName ?? 'Custom request' }}</div>
+                                            </div>
+                                            <div class="rounded-xl bg-[#FDF6EE] px-3 py-2.5">
+                                                <div class="text-[11px] font-black uppercase text-[#8A7F72]">Bundle Price</div>
+                                                <div class="mt-0.5 font-black text-[#1C1A17]">
+                                                    @if($booking->package_price)
+                                                        &#8369;{{ number_format($booking->package_price, 0) }}
+                                                    @else
+                                                        To quote
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if($booking->special_requests || $booking->decline_reason)
+                                            <div class="mt-4 space-y-2">
+                                                @if($booking->special_requests)
+                                                    <div class="rounded-xl border border-[#EDE4D8] bg-white px-3.5 py-3 text-sm text-[#8A7F72]">
+                                                        <span class="font-black text-[#1C1A17]">Client notes:</span>
+                                                        {{ $booking->special_requests }}
+                                                    </div>
+                                                @endif
+                                                @if($booking->decline_reason)
+                                                    <div class="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+                                                        <span class="font-black">Decline reason:</span>
+                                                        {{ $booking->decline_reason }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="flex flex-col justify-center gap-2 border-t border-[#F4E7D8] bg-[#FFFCF8] p-5 sm:p-6 lg:border-l lg:border-t-0">
+                                        <div class="mb-1">
+                                            <div class="text-[11px] font-black uppercase text-[#8A7F72]">Next action</div>
+                                            <div class="mt-1 text-sm font-black text-[#1C1A17]">
+                                                @if($status === 'pending')
+                                                    Reply to request
+                                                @elseif($status === 'confirmed')
+                                                    Finish event
+                                                @else
+                                                    Keep in touch
+                                                @endif
+                                            </div>
+                                        </div>
+
                                         @if($status === 'pending')
                                             <form method="POST" action="{{ route('bookings.accept', $booking) }}" class="w-full">
                                                 @csrf
@@ -178,77 +261,31 @@
                                                 @csrf
                                                 <button type="submit" class="w-full px-4 py-2.5 rounded-xl bg-[#1C1A17] text-white text-sm font-bold hover:bg-black transition-colors">Mark Complete</button>
                                             </form>
-                                            <button type="button" class="w-full px-4 py-2.5 rounded-xl border border-[#EDE4D8] text-[#8A6D3F] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">Message</button>
+                                            <a href="{{ route('messages.show', $booking->user) }}" class="w-full text-center px-4 py-2.5 rounded-xl border border-[#EDE4D8] text-[#8A6D3F] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">Message</a>
                                         @else
-                                            <button type="button" class="w-full px-4 py-2.5 rounded-xl border border-[#EDE4D8] text-[#8A6D3F] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">View</button>
+                                            <a href="{{ route('messages.show', $booking->user) }}" class="w-full text-center px-4 py-2.5 rounded-xl border border-[#EDE4D8] text-[#8A6D3F] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">Message</a>
                                         @endif
                                     </div>
-
-                                    @if($status === 'pending')
-                                        <dialog id="declineModal{{ $booking->id }}" class="rounded-2xl backdrop:bg-black/50 w-full max-w-md">
-                                            <form method="POST" action="{{ route('bookings.decline', $booking) }}" class="p-6">
-                                                @csrf
-                                                <h2 class="text-xl font-black text-[#1C1A17] mb-4">Decline Booking</h2>
-                                                <p class="text-sm text-[#8A6D3F] mb-4">Tell the client why you're declining this booking request.</p>
-                                                <textarea name="reason" rows="4" placeholder="Optional reason..." class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A] mb-4"></textarea>
-                                                <div class="flex gap-3">
-                                                    <button type="button" onclick="document.getElementById('declineModal{{ $booking->id }}').close()" class="flex-1 px-4 py-3 rounded-xl border border-[#EDE4D8] text-[#8A6D3F] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">Cancel</button>
-                                                    <button type="submit" class="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors">Decline</button>
-                                                </div>
-                                            </form>
-                                        </dialog>
-                                    @endif
                                 </div>
+
+                                @if($status === 'pending')
+                                    <dialog id="declineModal{{ $booking->id }}" class="w-full max-w-md rounded-2xl backdrop:bg-black/50">
+                                        <form method="POST" action="{{ route('bookings.decline', $booking) }}" class="p-6">
+                                            @csrf
+                                            <h2 class="text-xl font-black text-[#1C1A17] mb-4">Decline Booking</h2>
+                                            <p class="text-sm text-[#8A6D3F] mb-4">Tell the client why you're declining this booking request.</p>
+                                            <textarea name="reason" rows="4" placeholder="Optional reason..." class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A] mb-4"></textarea>
+                                            <div class="flex gap-3">
+                                                <button type="button" onclick="document.getElementById('declineModal{{ $booking->id }}').close()" class="flex-1 px-4 py-3 rounded-xl border border-[#EDE4D8] text-[#8A6D3F] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">Cancel</button>
+                                                <button type="submit" class="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors">Decline</button>
+                                            </div>
+                                        </form>
+                                    </dialog>
+                                @endif
                             </article>
                         @endforeach
                     </div>
                 @endif
-            </section>
-
-            <aside class="space-y-5">
-                <div class="bg-[#1C1A17] rounded-2xl p-5 text-white shadow-sm">
-                    <div class="flex items-center justify-between mb-5">
-                        <h2 class="text-lg font-black">Today</h2>
-                        <span class="text-xs font-bold text-white/70">{{ now()->format('M d, Y') }}</span>
-                    </div>
-                    @if($nextBooking)
-                        <div class="rounded-xl bg-white/10 p-4 border border-white/10">
-                            <div class="text-xs font-bold uppercase text-white/60 mb-2">Next active booking</div>
-                            <div class="text-xl font-black leading-tight mb-1">{{ $nextBooking->event_title }}</div>
-                            <div class="text-sm text-white/70">{{ $nextBooking->event_date->format('M d, Y') }} - {{ number_format($nextBooking->guests) }} guests</div>
-                        </div>
-                    @else
-                        <p class="text-sm text-white/70">No active booking is scheduled yet.</p>
-                    @endif
-                </div>
-
-                <div class="bg-white rounded-2xl border border-[#EDE4D8] shadow-sm p-5">
-                    <h2 class="text-lg font-black text-[#1C1A17] mb-4">Booking Flow</h2>
-                    <div class="space-y-4">
-                        <div class="flex gap-3">
-                            <div class="size-7 rounded-full bg-amber-100 text-amber-700 text-xs font-black flex items-center justify-center shrink-0">1</div>
-                            <div>
-                                <div class="text-sm font-black text-[#1C1A17]">Review request</div>
-                                <div class="text-xs text-[#8A7F72]">Check date, guest count, and client details.</div>
-                            </div>
-                        </div>
-                        <div class="flex gap-3">
-                            <div class="size-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black flex items-center justify-center shrink-0">2</div>
-                            <div>
-                                <div class="text-sm font-black text-[#1C1A17]">Confirm booking</div>
-                                <div class="text-xs text-[#8A7F72]">Move accepted events into your prep list.</div>
-                            </div>
-                        </div>
-                        <div class="flex gap-3">
-                            <div class="size-7 rounded-full bg-blue-100 text-blue-700 text-xs font-black flex items-center justify-center shrink-0">3</div>
-                            <div>
-                                <div class="text-sm font-black text-[#1C1A17]">Complete event</div>
-                                <div class="text-xs text-[#8A7F72]">Mark the booking done after service.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-        </div>
+        </section>
     </div>
 </x-dashboard-layout>

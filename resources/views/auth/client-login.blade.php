@@ -23,6 +23,12 @@
             <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 text-center">Welcome Back, Client</h1>
             <p class="text-gray-500 text-sm sm:text-base md:text-lg mb-6 sm:mb-10 text-center">Sign in to browse caterers and book your next event</p>
 
+            @if(session('status'))
+                <div class="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs sm:text-sm">
+                    {{ session('status') }}
+                </div>
+            @endif
+
             @if($errors->any())
                 <div class="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs sm:text-sm">
                     {{ $errors->first() }}
@@ -55,7 +61,7 @@
                         </button>
                     </div>
                     <div class="flex justify-end mt-1.5 sm:mt-2">
-                        <a href="#" class="text-xs sm:text-sm font-bold text-[#f44e08] hover:underline">Forgot password?</a>
+                        <a href="{{ route('password.request', ['role' => 'client']) }}" class="text-xs sm:text-sm font-bold text-[#f44e08] hover:underline">Forgot password?</a>
                     </div>
                 </div>
 

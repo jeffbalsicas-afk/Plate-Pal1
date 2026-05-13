@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Booking;
+use App\Models\MenuItem;
+use App\Models\Package;
 use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
@@ -14,8 +16,10 @@ class AdminDashboardController extends Controller
         $totalUsers      = User::where('role', 'client')->count();
         $totalCaterers   = User::where('role', 'caterer')->where('approval_status', 'approved')->count();
         $totalBookings   = Booking::count();
-        $totalRevenue    = Booking::where('status', 'completed')->sum('guests') * 400;
+        $totalRevenue    = Booking::where('status', 'completed')->sum('package_price');
         $pendingCaterers = User::where('role', 'caterer')->where('approval_status', 'pending')->get();
+        $pendingPackages = Package::with('caterer')->where('status', 'pending')->latest()->get();
+        $pendingMenuItems = MenuItem::with('caterer')->where('status', 'pending')->latest()->get();
         $recentUsers     = User::where('role', 'client')->latest()->take(5)->get();
         $recentBookings  = Booking::with(['user', 'caterer'])->latest()->take(5)->get();
 
@@ -27,6 +31,8 @@ class AdminDashboardController extends Controller
                 'totalBookings',
                 'totalRevenue',
                 'pendingCaterers',
+                'pendingPackages',
+                'pendingMenuItems',
                 'recentUsers',
                 'recentBookings'
             ))
@@ -56,6 +62,34 @@ class AdminDashboardController extends Controller
         ]);
 
         return back()->with('success', "{$user->business_name} has been rejected.");
+    }
+
+    public function approvePackage(Package $package)
+    {
+        $package->update(['status' => 'live']);
+
+        return back()->with('success', "{$package->name} is now live.");
+    }
+
+    public function rejectPackage(Package $package)
+    {
+        $package->update(['status' => 'rejected']);
+
+        return back()->with('success', "{$package->name} has been rejected.");
+    }
+
+    public function approveMenuItem(MenuItem $menuItem)
+    {
+        $menuItem->update(['status' => 'live']);
+
+        return back()->with('success', "{$menuItem->name} is now live.");
+    }
+
+    public function rejectMenuItem(MenuItem $menuItem)
+    {
+        $menuItem->update(['status' => 'rejected']);
+
+        return back()->with('success', "{$menuItem->name} has been rejected.");
     }
 
     public function featuredCaterers()
@@ -89,7 +123,7 @@ class AdminDashboardController extends Controller
         $confirmedBookings = Booking::where('status', 'confirmed')->count();
         $pendingBookings = Booking::where('status', 'pending')->count();
         $cancelledBookings = Booking::where('status', 'cancelled')->count();
-        $totalRevenue = Booking::where('status', 'completed')->sum('guests') * 400;
+        $totalRevenue = Booking::where('status', 'completed')->sum('package_price');
         $avgRating = User::where('role', 'caterer')->avg('rating') ?? 0;
         $topCaterers = User::where('role', 'caterer')
             ->withCount('bookings')

@@ -151,32 +151,34 @@
                     @enderror
                 </div>
 
-                <div>
-                    <label for="status" class="block text-sm font-bold text-[#1C1A17] mb-2">Status *</label>
-                    <select
-                        id="status"
-                        name="status"
-                        required
-                        class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A]"
-                    >
-                        <option value="draft" @selected(old('status', $item->status) === 'draft')>Draft</option>
-                        <option value="live" @selected(old('status', $item->status) === 'live')>Live</option>
-                    </select>
-                    @error('status')
-                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                @error('status')
+                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                @enderror
+
+                <div class="rounded-xl bg-sky-50 border border-sky-200 px-4 py-3 text-sm text-sky-800">
+                    Approved changes become live after admin review.
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                <div class="grid sm:grid-cols-3 gap-3 pt-4">
                     <button
                         type="submit"
-                        class="flex-1 px-5 py-3 rounded-xl bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors"
+                        name="status"
+                        value="draft"
+                        class="px-5 py-3 rounded-xl border border-[#EDE4D8] text-[#1C1A17] text-sm font-bold hover:bg-[#FDF6EE] transition-colors"
                     >
-                        Save Changes
+                        Save Draft
+                    </button>
+                    <button
+                        type="submit"
+                        name="status"
+                        value="pending"
+                        class="px-5 py-3 rounded-xl bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors"
+                    >
+                        Submit for Approval
                     </button>
                     <a
                         href="{{ route('caterer.menu-pricing') }}"
-                        class="flex-1 inline-flex justify-center px-5 py-3 rounded-xl border border-[#E8642A] text-[#E8642A] text-sm font-bold hover:bg-[#FDF6EE] transition-colors"
+                        class="inline-flex justify-center px-5 py-3 rounded-xl border border-[#E8642A] text-[#E8642A] text-sm font-bold hover:bg-[#FDF6EE] transition-colors"
                     >
                         Cancel
                     </a>

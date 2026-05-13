@@ -47,33 +47,48 @@
     </x-slot:sidebar>
 
     {{-- Stats --}}
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3.5 mb-5">
-        <div class="bg-white rounded-2xl p-5 border border-[#EDE4D8]">
-            <div class="w-11 h-11 rounded-xl bg-[#FDF6EE] flex items-center justify-center mb-3.5">
-                <svg class="w-[22px] h-[22px]" fill="none" stroke="#E8642A" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
+        <div class="relative overflow-hidden rounded-2xl border border-[#EDE4D8] bg-white p-5 shadow-sm">
+            <div class="absolute inset-x-0 top-0 h-1 bg-[#E8642A]"></div>
+            <div class="mb-4 flex items-start justify-between gap-3">
+                <div class="flex size-11 items-center justify-center rounded-xl bg-[#FEF3EC]">
+                    <svg class="size-[22px] stroke-[#E8642A]" fill="none" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <span class="rounded-full bg-[#FEF3EC] px-2.5 py-1 text-[11px] font-bold text-[#E8642A]">Lifetime</span>
             </div>
-            <div class="text-[30px] font-black text-[#1C1A17] leading-none mb-1">₱{{ number_format($totalEarnings, 0) }}</div>
-            <div class="text-xs text-[#8A7F72]">Total Earnings</div>
+            <div class="text-[32px] font-black leading-none text-[#1C1A17]">&#8369;{{ number_format($totalEarnings, 0) }}</div>
+            <div class="mt-1 text-sm font-black text-[#1C1A17]">Total Earnings</div>
+            <div class="mt-2 text-xs leading-4 text-[#8A7F72]">Completed booking revenue</div>
         </div>
-        <div class="bg-white rounded-2xl p-5 border border-[#EDE4D8]">
-            <div class="w-11 h-11 rounded-xl bg-[#FDF6EE] flex items-center justify-center mb-3.5">
-                <svg class="w-[22px] h-[22px]" fill="none" stroke="#E8642A" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
+        <div class="relative overflow-hidden rounded-2xl border border-[#EDE4D8] bg-white p-5 shadow-sm">
+            <div class="absolute inset-x-0 top-0 h-1 bg-[#2E7D32]"></div>
+            <div class="mb-4 flex items-start justify-between gap-3">
+                <div class="flex size-11 items-center justify-center rounded-xl bg-[#EAF5E9]">
+                    <svg class="size-[22px] stroke-[#2E7D32]" fill="none" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <span class="rounded-full bg-[#EAF5E9] px-2.5 py-1 text-[11px] font-bold text-[#2E7D32]">Current</span>
             </div>
-            <div class="text-[30px] font-black text-[#1C1A17] leading-none mb-1">₱{{ number_format($monthlyEarnings, 0) }}</div>
-            <div class="text-xs text-[#8A7F72]">This Month</div>
+            <div class="text-[32px] font-black leading-none text-[#1C1A17]">&#8369;{{ number_format($monthlyEarnings, 0) }}</div>
+            <div class="mt-1 text-sm font-black text-[#1C1A17]">This Month</div>
+            <div class="mt-2 text-xs leading-4 text-[#8A7F72]">Revenue from recent events</div>
         </div>
-        <div class="bg-white rounded-2xl p-5 border border-[#EDE4D8]">
-            <div class="w-11 h-11 rounded-xl bg-[#FDF6EE] flex items-center justify-center mb-3.5">
-                <svg class="w-[22px] h-[22px]" fill="none" stroke="#E8642A" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+        <div class="relative overflow-hidden rounded-2xl border border-[#EDE4D8] bg-white p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+            <div class="absolute inset-x-0 top-0 h-1 bg-[#8A6D3F]"></div>
+            <div class="mb-4 flex items-start justify-between gap-3">
+                <div class="flex size-11 items-center justify-center rounded-xl bg-[#F6EFE7]">
+                    <svg class="size-[22px] stroke-[#8A6D3F]" fill="none" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <span class="rounded-full bg-[#F6EFE7] px-2.5 py-1 text-[11px] font-bold text-[#8A6D3F]">Done</span>
             </div>
-            <div class="text-[30px] font-black text-[#1C1A17] leading-none mb-1">{{ $completedBookings }}</div>
-            <div class="text-xs text-[#8A7F72]">Completed Events</div>
+            <div class="text-[32px] font-black leading-none text-[#1C1A17]">{{ $completedBookings }}</div>
+            <div class="mt-1 text-sm font-black text-[#1C1A17]">Completed Events</div>
+            <div class="mt-2 text-xs leading-4 text-[#8A7F72]">Finished catering jobs</div>
         </div>
     </div>
 
@@ -89,6 +104,7 @@
                         <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Client</th>
                         <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Event</th>
                         <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Date</th>
+                        <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Package</th>
                         <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Guests</th>
                         <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Earnings</th>
                     </tr>
@@ -99,12 +115,19 @@
                         <td class="px-6 py-4 font-medium text-[#1C1A17]">{{ $booking->user->name }}</td>
                         <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->event_title }}</td>
                         <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->event_date->format('M d, Y') }}</td>
-                        <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->guests }}</td>
-                        <td class="px-6 py-4 font-bold text-[#E8642A]">₱{{ number_format($booking->guests * 400, 0) }}</td>
+                        <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->selected_package_name ?? 'Custom booking' }}</td>
+                        <td class="px-6 py-4 text-[#8A7F72]">{{ number_format($booking->guests) }}</td>
+                        <td class="px-6 py-4 font-bold text-[#E8642A]">
+                            @if($booking->estimated_total)
+                                ₱{{ number_format($booking->estimated_total, 0) }}
+                            @else
+                                Unpriced
+                            @endif
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-12 text-center text-[#8A7F72]">No completed bookings yet.</td>
+                        <td colspan="6" class="px-6 py-12 text-center text-[#8A7F72]">No completed bookings yet.</td>
                     </tr>
                     @endforelse
                 </tbody>
