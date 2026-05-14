@@ -31,17 +31,7 @@
         </a>
     </x-slot:sidebar>
 
-    <x-slot:sidebarFooter>
-        <div class="border-t border-[#EDE4D8] pt-3 mt-3">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors text-sm font-medium">
-                    <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                    Logout
-                </button>
-            </form>
-        </div>
-    </x-slot:sidebarFooter>
+    
 
     @if(session('success'))
         <div class="mb-5 p-4 rounded-xl bg-green-50 border border-green-300 text-green-700 text-sm font-medium">
@@ -93,10 +83,11 @@
     <div class="grid lg:grid-cols-2 gap-5 mb-5">
         <div class="bg-white rounded-2xl p-[22px] border border-[#EDE4D8]">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-black text-[#1C1A17]">Recent Users</h3>
+                <h3 class="text-base font-black text-[#1C1A17]">Recent Clients</h3>
+                <a href="{{ route('admin.users') }}" class="text-xs font-bold text-[#E8642A] hover:text-[#F07C42] transition-colors">View All</a>
             </div>
             @if($recentUsers->isEmpty())
-                <p class="text-sm text-[#8A7F72] text-center py-6">No users yet.</p>
+                <p class="text-sm text-[#8A7F72] text-center py-6">No clients yet.</p>
             @else
                 <div class="flex flex-col gap-2.5">
                     @foreach($recentUsers as $u)
@@ -124,35 +115,69 @@
 
         <div class="bg-white rounded-2xl p-[22px] border border-[#EDE4D8]">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-black text-[#1C1A17]">Pending Caterer Approvals</h3>
-                <span class="text-xs font-bold text-[#E8642A]">{{ $pendingCaterers->count() }} pending</span>
+                <h3 class="text-base font-black text-[#1C1A17]">Approved Caterers</h3>
+                <a href="{{ route('admin.featured-caterers.index') }}" class="text-xs font-bold text-[#E8642A] hover:text-[#F07C42] transition-colors">View All</a>
             </div>
-            @if($pendingCaterers->isEmpty())
-                <p class="text-sm text-[#8A7F72] text-center py-6">No pending approvals.</p>
+            @if($approvedCaterers->isEmpty())
+                <p class="text-sm text-[#8A7F72] text-center py-6">No approved caterers yet.</p>
             @else
                 <div class="flex flex-col gap-2.5">
-                    @foreach($pendingCaterers as $caterer)
+                    @foreach($approvedCaterers as $caterer)
                     <div class="flex items-center justify-between px-3.5 py-3 border border-[#EDE4D8] rounded-xl">
-                        <div>
-                            <div class="text-sm font-bold text-[#1C1A17]">{{ $caterer->business_name ?? $caterer->name }}</div>
-                            <div class="text-xs text-[#8A7F72]">📍 {{ $caterer->barangay }} · {{ $caterer->cuisine ?? 'No cuisine set' }}</div>
-                            <div class="text-xs text-[#8A7F72]">{{ $caterer->email }}</div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-[#8A6D3F] text-white text-xs font-bold flex items-center justify-center">
+                                {{ strtoupper(substr($caterer->business_name ?? $caterer->name, 0, 1)) }}
+                            </div>
+                            <div>
+                                <div class="text-sm font-bold text-[#1C1A17]">{{ $caterer->business_name ?? $caterer->name }}</div>
+                                <div class="text-xs text-[#8A7F72]">{{ $caterer->barangay }} · {{ $caterer->cuisine }}</div>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <form method="POST" action="{{ route('admin.caterer.approve', $caterer) }}">
-                                @csrf
-                                <button type="submit" class="px-3 py-1 rounded-lg bg-[#EAF5E9] text-[#2E7D32] text-xs font-bold hover:bg-green-200 transition-colors">Approve</button>
-                            </form>
-                            <form method="POST" action="{{ route('admin.caterer.reject', $caterer) }}">
-                                @csrf
-                                <button type="submit" class="px-3 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors">Reject</button>
-                            </form>
+                        <div class="text-right">
+                            <div class="flex items-center gap-1 text-xs font-bold text-[#F59E0B]">
+                                <svg class="size-3 fill-[#F59E0B]" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                {{ number_format($caterer->rating ?? 0, 1) }}
+                            </div>
+                            <div class="text-xs text-[#8A7F72] mt-1">{{ $caterer->created_at->format('M d, Y') }}</div>
                         </div>
                     </div>
                     @endforeach
                 </div>
             @endif
         </div>
+    </div>
+
+    {{-- Pending Caterer Approvals --}}
+    <div class="bg-white rounded-2xl p-[22px] border border-[#EDE4D8] mb-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-black text-[#1C1A17]">Pending Caterer Approvals</h3>
+            <span class="text-xs font-bold text-[#E8642A]">{{ $pendingCaterers->count() }} pending</span>
+        </div>
+        @if($pendingCaterers->isEmpty())
+            <p class="text-sm text-[#8A7F72] text-center py-6">No pending approvals.</p>
+        @else
+            <div class="flex flex-col gap-2.5">
+                @foreach($pendingCaterers as $caterer)
+                <div class="flex items-center justify-between px-3.5 py-3 border border-[#EDE4D8] rounded-xl">
+                    <div>
+                        <div class="text-sm font-bold text-[#1C1A17]">{{ $caterer->business_name ?? $caterer->name }}</div>
+                        <div class="text-xs text-[#8A7F72]">📍 {{ $caterer->barangay }} · {{ $caterer->cuisine ?? 'No cuisine set' }}</div>
+                        <div class="text-xs text-[#8A7F72]">{{ $caterer->email }}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <form method="POST" action="{{ route('admin.caterer.approve', $caterer) }}">
+                            @csrf
+                            <button type="submit" class="px-3 py-1 rounded-lg bg-[#EAF5E9] text-[#2E7D32] text-xs font-bold hover:bg-green-200 transition-colors">Approve</button>
+                        </form>
+                        <form method="POST" action="{{ route('admin.caterer.reject', $caterer) }}">
+                            @csrf
+                            <button type="submit" class="px-3 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors">Reject</button>
+                        </form>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 
     {{-- Pending Menu & Pricing --}}

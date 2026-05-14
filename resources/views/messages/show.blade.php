@@ -85,7 +85,7 @@
 
     <div x-data="messageDeleteHandler()" @open-delete-modal.window="openDeleteModal($event.detail.messageId)">
 
-    <div class="bg-white rounded-2xl border border-[#EDE4D8] overflow-hidden flex flex-col h-120">
+    <div class="bg-white rounded-2xl border border-[#EDE4D8] overflow-hidden flex flex-col h-200">
         <div class="p-6 border-b border-[#EDE4D8] flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center">

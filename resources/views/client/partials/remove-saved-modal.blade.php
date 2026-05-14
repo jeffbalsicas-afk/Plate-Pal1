@@ -11,11 +11,11 @@
                 @include('client.partials.sidebar-icon', ['name' => 'heart', 'class' => 'size-5 stroke-[#E8642A]'])
             </div>
             <div class="min-w-0">
-                <h2 class="text-xl font-black text-[#1C1A17]">Remove saved caterer?</h2>
+                <h2 class="text-xl font-black text-[#1C1A17]" x-text="removeTarget.action === 'save' ? 'Save caterer?' : 'Remove saved caterer?'">Remove saved caterer?</h2>
                 <p class="mt-2 text-sm leading-6 text-[#8A7F72]">
-                    This will remove
+                    <span x-text="removeTarget.action === 'save' ? 'This will add' : 'This will remove'">This will remove</span>
                     <span class="font-bold text-[#1C1A17]" x-text="removeTarget.name"></span>
-                    from your saved list.
+                    <span x-text="removeTarget.action === 'save' ? 'to your saved list.' : 'from your saved list.'">from your saved list.</span>
                 </p>
             </div>
         </div>
@@ -33,6 +33,7 @@
                 :form="removeTarget.formId"
                 :disabled="!removeTarget.formId"
                 class="w-full px-4 py-3 rounded-xl bg-[#E8642A] text-sm font-bold text-white hover:bg-[#F07C42] disabled:cursor-not-allowed disabled:bg-[#E9A17D] transition-colors"
+                x-text="removeTarget.action === 'save' ? 'Save' : 'Remove'"
             >
                 Remove
             </button>

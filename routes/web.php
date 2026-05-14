@@ -35,6 +35,7 @@ Route::middleware('guest')->group(function () {
 
 // Public routes (accessible to guests)
 Route::get('/browse-caterers', [ClientDashboardController::class, 'browsePubic'])->name('browse.caterers');
+Route::get('/caterer/{id}', [CatererController::class, 'show'])->name('caterer.detail');
 Route::get('/how-it-works', [LandingPageController::class, 'howItWorks'])->name('how.it.works');
 Route::get('/for-caterers', [LandingPageController::class, 'forCaterers'])->name('for.caterers');
 
@@ -99,7 +100,6 @@ Route::middleware(['auth', 'role:client'])->group(function () {
     Route::get('/client/reviews', [ClientDashboardController::class, 'myReviews'])->name('client.reviews');
     Route::get('/client/profile', [ClientDashboardController::class, 'editProfile'])->name('client.profile');
     Route::post('/client/profile', [ClientDashboardController::class, 'updateProfile'])->name('client.profile.update');
-    Route::get('/caterer/{id}', [CatererController::class, 'show'])->name('caterer.detail');
 });
 
 // Shared client/caterer messaging routes

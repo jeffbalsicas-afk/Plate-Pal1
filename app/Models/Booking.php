@@ -52,10 +52,17 @@ class Booking extends Model
 
     public function getEstimatedTotalAttribute(): ?float
     {
-        if ($this->package_price === null) {
-            return null;
+        // If package_price is set, use it
+        if ($this->package_price !== null) {
+            return (float) $this->package_price;
         }
 
-        return (float) $this->package_price;
+        // Otherwise calculate: guests × caterer's average price
+        if ($this->guests && $this->caterer) {
+            $avgPrice = ($this->caterer->price_min + $this->caterer->price_max) / 2;
+            return (float) $this->guests * $avgPrice;
+        }
+
+        return null;
     }
 }

@@ -23,26 +23,39 @@
                 @csrf
                 <button 
                     type="button"
-                    @click.prevent="@if($isSaved) $dispatch('open-remove-modal', { formId: '{{ $toggleFormId }}', name: '{{ addslashes($displayName) }}' }) @else $el.closest('form').submit() @endif"
-                    class="w-8 h-8 rounded-full bg-white/95 flex items-center justify-center shadow-lg backdrop-blur-sm transition-all hover:scale-110 {{ $isSaved ? 'text-[#BE3455]' : 'text-gray-400' }} hover:text-[#BE3455]" 
-                    aria-label="{{ $isSaved ? 'Unsave' : 'Save' }} caterer">
-                    @if($isSaved)
-                        <svg class="size-4" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                    @else
-                        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                    @endif
+                    @click.prevent="$dispatch('open-saved-caterer-modal', { formId: @js($toggleFormId), name: @js($displayName), action: @js($isSaved ? 'remove' : 'save') })"
+                    class="w-8 h-8 rounded-full bg-white/95 flex items-center justify-center shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:text-[#BE3455] {{ $isSaved ? 'text-[#BE3455]' : 'text-gray-400' }}" 
+                    aria-label="{{ $isSaved ? 'Remove' : 'Save' }} {{ $displayName }}">
+                    <svg class="size-4" fill="{{ $isSaved ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
                 </button>
             </form>
-        @else
-            <a href="{{ auth()->check() ? $detailsUrl : route('login', ['redirect' => url()->full()]) }}" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow hover:shadow-md transition" aria-label="Save caterer">
-                <svg class="size-4 stroke-brand-muted" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        @elseif(!auth()->check())
+            <a href="{{ route('login', ['redirect' => url()->full()]) }}" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 flex items-center justify-center shadow-lg backdrop-blur-sm transition-all hover:scale-110 text-gray-400 hover:text-[#BE3455]" aria-label="Login to save caterer">
+                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
             </a>
         @endif
 
-        @if($caterer->profile_image ?? false)
-            <img src="{{ $caterer->profile_image }}" alt="{{ $displayName }}" class="w-full h-full object-cover">
+        @php
+            $imageUrl = null;
+            if (!empty($caterer->profile_image)) {
+                if (str_starts_with($caterer->profile_image, 'http')) {
+                    $imageUrl = $caterer->profile_image;
+                } elseif (str_starts_with($caterer->profile_image, '/storage/')) {
+                    $imageUrl = $caterer->profile_image;
+                } elseif (str_starts_with($caterer->profile_image, '/assets/')) {
+                    $imageUrl = asset($caterer->profile_image);
+                } else {
+                    $imageUrl = asset('storage/' . $caterer->profile_image);
+                }
+            }
+        @endphp
+        @if($imageUrl)
+            <img src="{{ $imageUrl }}" alt="{{ $displayName }}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <svg class="size-16 text-brand-muted/30" style="display:none;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
         @else
-            <svg class="size-16 text-brand-muted/20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-1.804 9-4.025V9.25c0-2.221-4.03-4.025-9-4.025S3 7.029 3 9.25v6.7c0 2.221 4.03 4.025 9 4.025z"/></svg>
+            <svg class="size-16 text-brand-muted/30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
         @endif
     </div>
 

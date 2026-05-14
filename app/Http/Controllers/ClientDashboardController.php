@@ -495,13 +495,10 @@ class ClientDashboardController extends Controller
             404
         );
 
-        $minGuests = $caterer->min_guest ?? 1;
-        $maxGuests = $caterer->max_guest ?? 10000;
-
         $validated = $request->validate([
             'event_title' => ['required', 'string', 'max:255'],
             'event_date' => ['required', 'date', 'after_or_equal:today'],
-            'guests' => ['required', 'integer', 'min:' . $minGuests, 'max:' . $maxGuests],
+            'guests' => ['required', 'integer', 'min:1'],
             'package_id' => [
                 'nullable',
                 'integer',
@@ -519,12 +516,6 @@ class ClientDashboardController extends Controller
         $package = isset($validated['package_id'])
             ? Package::where('caterer_id', $caterer->id)->where('status', 'live')->find($validated['package_id'])
             : null;
-
-        if ($package && (int) $validated['guests'] < (int) $package->min_guests) {
-            return back()
-                ->withErrors(['guests' => "This package requires at least {$package->min_guests} guests."])
-                ->withInput();
-        }
 
         $booking = Booking::create([
             'user_id' => auth()->id(),

@@ -164,7 +164,7 @@
     <div class="grid xl:grid-cols-[minmax(0,1fr)_380px] gap-5 mb-5 drop-shadow-md">
         {{-- Upcoming Bookings --}}
         <div class="relative overflow-hidden bg-white rounded-2xl p-[22px] border border-[#EDE4D8]">
-            <div class="absolute inset-x-0 top-0 h-1 bg-[#E8642A]"></div>
+            
             <div class="flex items-center justify-between gap-4 mb-4">
                 <div>
                     <h3 class="text-base font-black text-[#1C1A17]">Upcoming Bookings</h3>
@@ -351,7 +351,7 @@
 
     {{-- Business Profile Snapshot --}}
     <div class="relative overflow-hidden bg-white rounded-2xl p-[22px] border border-[#EDE4D8] mb-5 drop-shadow-md">
-        <div class="absolute inset-x-0 top-0 h-1 bg-[#E8642A]"></div>
+       
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
                 <h3 class="text-base font-black text-[#1C1A17]">Business Profile</h3>

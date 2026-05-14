@@ -1,7 +1,7 @@
 <button
     type="button"
     @click="tab = @js($tabKey)"
-    class="group relative overflow-hidden rounded-2xl border bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+    class="group relative overflow-hidden rounded-2xl border bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none"
     :class="tab === @js($tabKey) ? 'border-[#E8642A] bg-[#FFF8F3]' : 'border-[#EDE4D8] hover:bg-[#FDF6EE]'"
 >
     <div class="absolute inset-x-0 top-0 h-1 {{ $menuType['accent'] }}"></div>

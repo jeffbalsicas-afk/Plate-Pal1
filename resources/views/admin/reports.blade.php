@@ -31,17 +31,38 @@
         </a>
     </x-slot:sidebar>
 
-    <x-slot:sidebarFooter>
-        <div class="border-t border-[#EDE4D8] pt-3 mt-3">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors text-sm font-medium">
-                    <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                    Logout
+    <div class="bg-white rounded-2xl p-6 border border-[#EDE4D8] mb-6">
+        <form method="GET" action="{{ route('admin.reports') }}" class="flex items-center gap-4">
+            <div class="flex-1">
+                <label class="block text-xs font-bold text-[#8A7F72] uppercase mb-2">Filter by Caterer</label>
+                <select name="caterer_id" class="w-full px-4 py-2.5 border border-[#EDE4D8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8642A] text-sm">
+                    <option value="">All Caterers (Platform-wide)</option>
+                    @foreach($allCaterers as $caterer)
+                        <option value="{{ $caterer->id }}" {{ request('caterer_id') == $caterer->id ? 'selected' : '' }}>
+                            {{ $caterer->business_name ?? $caterer->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="pt-6">
+                <button type="submit" class="px-6 py-2.5 bg-[#E8642A] text-white rounded-lg font-bold text-sm hover:bg-[#D55A24] transition-colors">
+                    Apply Filter
                 </button>
-            </form>
-        </div>
-    </x-slot:sidebarFooter>
+            </div>
+            @if(request('caterer_id'))
+                <div class="pt-6">
+                    <a href="{{ route('admin.reports') }}" class="px-6 py-2.5 bg-[#8A7F72] text-white rounded-lg font-bold text-sm hover:bg-[#6B5F54] transition-colors">
+                        Clear
+                    </a>
+                </div>
+            @endif
+        </form>
+        @if($selectedCaterer)
+            <div class="mt-4 p-3 bg-[#FDF6EE] rounded-lg">
+                <p class="text-sm text-[#8A7F72]">Showing stats for: <span class="font-bold text-[#E8642A]">{{ $selectedCaterer->business_name ?? $selectedCaterer->name }}</span></p>
+            </div>
+        @endif
+    </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-6">
         <div class="bg-white rounded-2xl p-6 border border-[#EDE4D8]">
@@ -121,27 +142,31 @@
 
         <div class="bg-white rounded-2xl p-6 border border-[#EDE4D8]">
             <h3 class="text-lg font-black text-[#1C1A17] mb-4">Top Caterers</h3>
-            <div class="space-y-3">
-                @forelse($topCaterers as $caterer)
-                <div class="flex items-center justify-between p-3 bg-[#FDF6EE] rounded-lg">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center">
-                            {{ strtoupper(substr($caterer->business_name ?? $caterer->name, 0, 1)) }}
+            @if($selectedCaterer)
+                <p class="text-sm text-[#8A7F72] text-center py-4">Top caterers only shown in platform-wide view</p>
+            @else
+                <div class="space-y-3">
+                    @forelse($topCaterers as $caterer)
+                    <div class="flex items-center justify-between p-3 bg-[#FDF6EE] rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center">
+                                {{ strtoupper(substr($caterer->business_name ?? $caterer->name, 0, 1)) }}
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-[#1C1A17]">{{ $caterer->business_name ?? $caterer->name }}</p>
+                                <p class="text-xs text-[#8A7F72]">{{ $caterer->bookings_count }} bookings</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-sm font-bold text-[#1C1A17]">{{ $caterer->business_name ?? $caterer->name }}</p>
-                            <p class="text-xs text-[#8A7F72]">{{ $caterer->bookings_count }} bookings</p>
+                        <div class="flex items-center gap-1">
+                            <svg class="size-4 fill-[#FBBF24]" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <span class="text-xs font-bold text-[#1C1A17]">{{ number_format($caterer->rating, 1) }}</span>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <svg class="size-4 fill-[#FBBF24]" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                        <span class="text-xs font-bold text-[#1C1A17]">{{ number_format($caterer->rating, 1) }}</span>
-                    </div>
+                    @empty
+                    <p class="text-sm text-[#8A7F72] text-center py-4">No caterers yet.</p>
+                    @endforelse
                 </div>
-                @empty
-                <p class="text-sm text-[#8A7F72] text-center py-4">No caterers yet.</p>
-                @endforelse
-            </div>
+            @endif
         </div>
     </div>
 

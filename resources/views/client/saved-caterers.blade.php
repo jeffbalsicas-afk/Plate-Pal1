@@ -18,15 +18,16 @@
             showRemoveSavedModal: false,
             removeTarget: {
                 formId: '',
-                name: ''
+                name: '',
+                action: 'remove'
             },
             openRemoveSavedModal(formId, name) {
-                this.removeTarget = { formId, name };
+                this.removeTarget = { formId, name, action: 'remove' };
                 this.showRemoveSavedModal = true;
             },
             closeRemoveSavedModal() {
                 this.showRemoveSavedModal = false;
-                this.removeTarget = { formId: '', name: '' };
+                this.removeTarget = { formId: '', name: '', action: 'remove' };
             }
         }"
     >

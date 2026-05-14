@@ -4,7 +4,7 @@
             <button
                 type="button"
                 @click="tab = @js($tabKey)"
-                class="text-center rounded-xl px-3 py-3 text-sm font-bold transition-colors"
+                class="text-center rounded-xl px-3 py-3 text-sm font-bold transition-colors focus:outline-none"
                 :class="tab === @js($tabKey) ? 'bg-[#E8642A] text-white shadow-sm' : 'text-[#8A6D3F] hover:bg-[#FDF6EE]'"
             >
                 {{ $menuType['label'] }}

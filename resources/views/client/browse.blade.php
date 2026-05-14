@@ -30,18 +30,21 @@
         </div>
     @endif
 
-    <div x-data="{
-        showRemoveSavedModal: false,
-        removeTarget: { formId: '', name: '' },
-        openRemoveSavedModal(formId, name) {
-            this.removeTarget = { formId, name };
-            this.showRemoveSavedModal = true;
-        },
-        closeRemoveSavedModal() {
-            this.showRemoveSavedModal = false;
-            this.removeTarget = { formId: '', name: '' };
-        }
-    }" @open-remove-modal.window="openRemoveSavedModal($event.detail.formId, $event.detail.name)">
+    <div
+        x-data="{
+            showRemoveSavedModal: false,
+            removeTarget: { formId: '', name: '', action: 'remove' },
+            openSavedCatererModal(formId, name, action = 'remove') {
+                this.removeTarget = { formId, name, action };
+                this.showRemoveSavedModal = true;
+            },
+            closeRemoveSavedModal() {
+                this.showRemoveSavedModal = false;
+                this.removeTarget = { formId: '', name: '', action: 'remove' };
+            }
+        }"
+        @open-saved-caterer-modal.window="openSavedCatererModal($event.detail.formId, $event.detail.name, $event.detail.action)"
+    >
         {{-- Search & Title --}}
         <div class="mb-6">
             <h2 class="text-2xl font-black text-[#1C1A17] mb-1">Browse Caterers in Tagum City</h2>
@@ -185,8 +188,7 @@
         @endif
             </div>
         </div>
-        
+
         @include('client.partials.remove-saved-modal')
     </div>
-
 </x-dashboard-layout>

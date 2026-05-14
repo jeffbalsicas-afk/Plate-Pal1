@@ -37,56 +37,136 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
-<body class="bg-white font-body antialiased">
+<body
+    class="bg-white font-body antialiased"
+    x-data="{
+        showRemoveSavedModal: false,
+        removeTarget: { formId: '', name: '', action: 'remove' },
+        openSavedCatererModal(formId, name, action = 'remove') {
+            this.removeTarget = { formId, name, action };
+            this.showRemoveSavedModal = true;
+        },
+        closeRemoveSavedModal() {
+            this.showRemoveSavedModal = false;
+            this.removeTarget = { formId: '', name: '', action: 'remove' };
+        }
+    }"
+>
     <div class="flex flex-col min-h-screen">
         {{-- NAVBAR --}}
-        <nav class="sticky top-0 z-40 bg-white border-b border-white shadow-sm">
-            <div class="px-6 lg:px-8 py-4 flex items-center justify-between">
+        <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-brand-cream-dark shadow-sm">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-16">
+
                 {{-- Logo --}}
-                <a href="{{ route('client.browse') }}" class="flex items-center gap-2">
+                <a href="{{ route('home') }}" class="flex items-center gap-2 shrink-0">
                     <img src="/assets/PlatePal_logo.jpg" alt="PlatePal" class="size-8 rounded-lg object-cover">
-                    <div class="flex flex-col">
-                        <span class="text-lg font-display tracking-tight text-gray-900 leading-none">PLATE<span class="text-[#f44e08]">PAL</span></span>
-                    </div>
+                    <span class="text-xl font-display font-black tracking-tight">
+                        <span class="text-brand-dark text-display">PLATE</span><span class="text-brand-orange">PAL</span>
+                    </span>
                 </a>
 
-                {{-- Right side --}}
-                <div class="flex items-center gap-6">
+                {{-- Desktop links --}}
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="{{ route('browse.caterers') }}" class="relative text-sm font-medium text-brand-dark transition-colors after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-full after:bg-brand-orange after:transition-all after:duration-500">Browse caterers</a>
+                    <a href="{{ route('how.it.works') }}" class="relative text-sm font-medium text-brand-muted hover:text-brand-dark transition-colors after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 hover:after:w-full after:bg-brand-orange after:transition-all after:duration-500">How it works</a>
+                    <a href="{{ route('for.caterers') }}" class="relative text-sm font-medium text-brand-muted hover:text-brand-dark transition-colors after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 hover:after:w-full after:bg-brand-orange after:transition-all after:duration-500">For caterers</a>
                     @if($user)
-                    <div class="relative" x-data="{ open: false }">
-                        <button type="button" @click="open = !open" class="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-[#EDE4D8] bg-white hover:bg-[#FDF6EE] transition-colors">
-                            <div class="w-[34px] h-[34px] rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center shrink-0">{{ $initials }}</div>
-                            <svg class="size-3.5 text-[#8A7F72]" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                        </button>
-
-                        {{-- Dropdown Menu --}}
-                        <div x-show="open" @click.outside="open = false" x-transition
-                            class="absolute right-0 mt-2 w-48 bg-white border border-[#EDE4D8] rounded-2xl shadow-lg py-1.5 z-50">
-                            <a href="{{ route('client.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
-                                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                                Dashboard
-                            </a>
-                            <a href="{{ route('client.profile') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
-                                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                Profile Settings
-                            </a>
-                            <a href="{{ route('feedback.create') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
-                                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                Feedback
-                            </a>
-                            <div class="border-t border-[#EDE4D8] my-1"></div>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
-                                    <svg class="size-4 stroke-red-400" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                                    Sign Out
-                                </button>
-                            </form>
+                        @php
+                            $role = $user->role;
+                            $dashboardRoute = match ($role) {
+                                'caterer' => route('caterer.dashboard'),
+                                'admin' => route('admin.dashboard'),
+                                default => route('client.dashboard'),
+                            };
+                            $profileRoute = match ($role) {
+                                'caterer' => route('caterer.profile'),
+                                'client' => route('client.profile'),
+                                default => null,
+                            };
+                        @endphp
+                        <div class="relative" x-data="{ open: false }">
+                            <button type="button" @click="open = !open" class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-cream-dark hover:bg-brand-cream transition-colors">
+                                <div class="w-7 h-7 rounded-full bg-brand-orange text-white text-xs font-bold flex items-center justify-center">{{ $initials }}</div>
+                                <span class="text-sm font-bold text-brand-dark">{{ $user->name }}</span>
+                                <svg class="size-3.5 text-brand-muted transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" @click.outside="open = false" x-transition
+                                class="absolute right-0 mt-2 w-48 bg-white border border-brand-cream-dark rounded-2xl shadow-lg py-1.5 z-50">
+                                <a href="{{ $dashboardRoute }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-brand-dark hover:bg-brand-cream transition-colors">
+                                    <svg class="size-4 stroke-brand-muted" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                                    Dashboard
+                                </a>
+                                @if($profileRoute)
+                                    <a href="{{ $profileRoute }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-brand-dark hover:bg-brand-cream transition-colors">
+                                        <svg class="size-4 stroke-brand-muted" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                        Profile Settings
+                                    </a>
+                                @endif
+                                <a href="{{ route('feedback.create') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-brand-dark hover:bg-brand-cream transition-colors">
+                                    <svg class="size-4 stroke-brand-muted" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                    Website Feedback
+                                </a>
+                                <div class="border-t border-brand-cream-dark my-1"></div>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                                        <svg class="size-4 stroke-red-400" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                        Sign Out
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                    </div>
+                    @else
+                        <a href="{{ route('login') }}" class="px-4 py-1.5 rounded-l-lg rounded-r-lg bg-brand-orange text-white text-sm font-bold hover:bg-brand-orange-light transition-colors shadow-sm">
+                            Sign In
+                        </a>
                     @endif
                 </div>
+
+                {{-- Mobile toggle --}}
+                <button
+                    type="button"
+                    class="md:hidden p-2 rounded-lg hover:bg-brand-cream transition-colors"
+                    onclick="const m=document.getElementById('mobile-menu');m.classList.toggle('hidden');m.classList.toggle('flex');"
+                    aria-label="Toggle menu"
+                >
+                    <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+
+            </div>
+
+            {{-- Mobile menu --}}
+            <div id="mobile-menu" class="hidden border-t border-brand-cream-dark px-6 py-4 flex-col gap-4 bg-white">
+                <a href="{{ route('browse.caterers') }}" class="text-sm font-medium text-brand-dark font-bold">Browse caterers</a>
+                <a href="{{ route('how.it.works') }}" class="text-sm font-medium text-brand-muted">How it works</a>
+                <a href="{{ route('for.caterers') }}" class="text-sm font-medium text-brand-muted">For caterers</a>
+                @if($user)
+                    @php
+                        $dashboardRoute = match ($user->role) {
+                            'caterer' => route('caterer.dashboard'),
+                            'admin' => route('admin.dashboard'),
+                            default => route('client.dashboard'),
+                        };
+                        $profileRoute = match ($user->role) {
+                            'caterer' => route('caterer.profile'),
+                            'client' => route('client.profile'),
+                            default => null,
+                        };
+                    @endphp
+                    <a href="{{ $dashboardRoute }}" class="w-fit px-5 py-2 rounded-full bg-brand-orange text-white text-sm font-bold">Dashboard</a>
+                    @if($profileRoute)
+                        <a href="{{ $profileRoute }}" class="text-sm font-medium text-brand-muted">Profile Settings</a>
+                    @endif
+                    <a href="{{ route('feedback.create') }}" class="text-sm font-medium text-brand-muted">Website Feedback</a>
+                @else
+                    <a href="{{ route('login') }}" class="w-fit px-5 py-2 rounded-full bg-brand-orange text-white text-sm font-bold">Sign In</a>
+                @endif
             </div>
         </nav>
 
@@ -108,7 +188,7 @@
                 @endif
 
                 {{-- Back Link --}}
-                <a href="{{ route('client.browse') }}" class="text-sm font-medium text-[#E8642A] hover:text-[#F07C42] transition-colors inline-flex items-center gap-1 mb-6">
+                <a href="{{ route('browse.caterers') }}" class="text-sm font-medium text-[#E8642A] hover:text-[#F07C42] transition-colors inline-flex items-center gap-1 mb-6">
                     <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                     Back to Browse
                 </a>
@@ -118,9 +198,15 @@
                     {{-- Image --}}
                     <div class="rounded-2xl overflow-hidden h-80 lg:h-96 bg-[#FDF6EE] flex items-center justify-center">
                         @if($caterer->profile_image)
-                            <img src="{{ $caterer->profile_image }}" alt="{{ $caterer->business_name }}" class="w-full h-full object-cover">
+                            @if(str_starts_with($caterer->profile_image, 'http'))
+                                <img src="{{ $caterer->profile_image }}" alt="{{ $caterer->business_name }}" class="w-full h-full object-cover">
+                            @elseif(str_starts_with($caterer->profile_image, '/storage/'))
+                                <img src="{{ $caterer->profile_image }}" alt="{{ $caterer->business_name }}" class="w-full h-full object-cover">
+                            @else
+                                <img src="{{ asset($caterer->profile_image) }}" alt="{{ $caterer->business_name }}" class="w-full h-full object-cover">
+                            @endif
                         @else
-                            <svg class="size-32 text-[#D3CCBE]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12c0-1.89.713-3.633 1.878-4.948M15.75 12A6.75 6.75 0 006.75 12m6 0a6.75 6.75 0 11-13.5 0m13.5 0h1.5m-1.5 6.75h.008v.008h-.008v-.008zM2.25 12c0 1.89.713 3.633 1.878 4.948M3.75 12H3m4.47-4.47a2.25 2.25 0 1 1 3.182 3.182m-3.182-3.182l-3.5 3.5a2.25 2.25 0 0 1 3.182-3.182m0 0l3.5-3.5m-3.5 3.5l3.5 3.5"/></svg>
+                            <svg class="size-32 text-[#D3CCBE]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
                         @endif
                     </div>
 
@@ -134,16 +220,31 @@
                                     {{ $caterer->barangay }}, Tagum City
                                 </p>
                             </div>
-                            <form method="POST" action="{{ route('client.saved-caterers.toggle', $caterer) }}">
+                            @if($user && $user->role === 'client')
+                            @php
+                                $isSaved = isset($savedCatererIds) && in_array($caterer->id, $savedCatererIds);
+                                $toggleFormId = 'toggle-detail-caterer-' . $caterer->id;
+                            @endphp
+                            <form id="{{ $toggleFormId }}" method="POST" action="{{ route('client.saved-caterers.toggle', $caterer) }}">
                                 @csrf
-                                <button type="submit" class="p-3 rounded-full border border-[#EDE4D8] transition-all hover:scale-110 {{ isset($savedCatererIds) && in_array($caterer->id, $savedCatererIds) ? 'text-[#BE3455] bg-[#FCECEF]' : 'text-gray-400 bg-white hover:text-[#BE3455] hover:bg-[#FCECEF]' }}" aria-label="{{ isset($savedCatererIds) && in_array($caterer->id, $savedCatererIds) ? 'Unsave' : 'Save' }} caterer">
-                                    @if(isset($savedCatererIds) && in_array($caterer->id, $savedCatererIds))
+                                <button
+                                    type="button"
+                                    @click.prevent="openSavedCatererModal(@js($toggleFormId), @js($caterer->business_name ?? $caterer->name), @js($isSaved ? 'remove' : 'save'))"
+                                    class="p-3 rounded-full border border-[#EDE4D8] transition-all hover:scale-110 {{ $isSaved ? 'text-[#BE3455] bg-[#FCECEF]' : 'text-gray-400 bg-white hover:text-[#BE3455] hover:bg-[#FCECEF]' }}"
+                                    aria-label="{{ $isSaved ? 'Unsave' : 'Save' }} caterer"
+                                >
+                                    @if($isSaved)
                                         <svg class="size-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                                     @else
                                         <svg class="size-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                                     @endif
                                 </button>
                             </form>
+                            @elseif(!$user)
+                            <a href="{{ route('login') }}" onclick="sessionStorage.setItem('return_to', window.location.href); return true;" class="p-3 rounded-full border border-[#EDE4D8] text-gray-400 bg-white hover:text-[#BE3455] hover:bg-[#FCECEF] transition-all hover:scale-110" aria-label="Login to save caterer">
+                                <svg class="size-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                            </a>
+                            @endif
                         </div>
 
                         {{-- Rating & Reviews --}}
@@ -182,16 +283,7 @@
                         </div>
 
                         {{-- Action Buttons --}}
-                        @if($caterer->id === auth()->id() && $caterer->approval_status === 'pending')
-                            <div class="grid grid-cols-2 gap-3">
-                                <a href="{{ route('caterer.profile') }}" class="text-center px-6 py-3 rounded-xl bg-[#E8642A] text-white font-bold hover:bg-[#F07C42] transition-colors">
-                                    Edit Profile
-                                </a>
-                                <a href="{{ route('caterer.profile') }}" class="text-center px-6 py-3 rounded-xl border border-[#E8642A] text-[#E8642A] font-bold hover:bg-[#FDF6EE] transition-colors">
-                                    View Status
-                                </a>
-                            </div>
-                        @else
+                        @if($user && $user->role === 'client')
                             <div class="grid grid-cols-2 gap-3">
                                 <a href="#booking-request" class="text-center px-6 py-3 rounded-xl bg-[#E8642A] text-white font-bold hover:bg-[#F07C42] transition-colors">
                                     Book Now
@@ -199,6 +291,19 @@
                                 <a href="{{ route('messages.show', $caterer) }}" class="text-center px-6 py-3 rounded-xl border border-[#E8642A] text-[#E8642A] font-bold hover:bg-[#FDF6EE] transition-colors">
                                     Send Message
                                 </a>
+                            </div>
+                        @elseif($caterer->id === auth()->id())
+                            <div class="grid grid-cols-2 gap-3">
+                                <a href="{{ route('caterer.profile') }}" class="text-center px-6 py-3 rounded-xl bg-[#E8642A] text-white font-bold hover:bg-[#F07C42] transition-colors">
+                                    Edit Profile
+                                </a>
+                                <a href="{{ route('caterer.dashboard') }}" class="text-center px-6 py-3 rounded-xl border border-[#E8642A] text-[#E8642A] font-bold hover:bg-[#FDF6EE] transition-colors">
+                                    Dashboard
+                                </a>
+                            </div>
+                        @else
+                            <div class="text-center py-3 px-6 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-[#8A7F72] text-sm">
+                                Please <a href="{{ route('login') }}" onclick="sessionStorage.setItem('return_to', window.location.href); return true;" class="text-[#E8642A] font-bold hover:underline">login</a> to book or message this caterer
                             </div>
                         @endif
                     </div>
@@ -283,7 +388,15 @@
                             <div class="grid grid-cols-2 gap-3">
                                 @foreach($galleryImages as $galleryImage)
                                     <div class="overflow-hidden rounded-3xl h-40 bg-[#FDF6EE]">
-                                        <img src="{{ str_starts_with($galleryImage, 'assets/') ? asset($galleryImage) : $galleryImage }}" alt="Gallery image" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+                                        @if(str_starts_with($galleryImage, 'http'))
+                                            <img src="{{ $galleryImage }}" alt="Gallery image" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+                                        @elseif(str_starts_with($galleryImage, '/storage/'))
+                                            <img src="{{ $galleryImage }}" alt="Gallery image" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+                                        @elseif(str_starts_with($galleryImage, 'assets/'))
+                                            <img src="{{ asset($galleryImage) }}" alt="Gallery image" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+                                        @else
+                                            <img src="{{ asset($galleryImage) }}" alt="Gallery image" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>
@@ -348,13 +461,23 @@
                         </span>
                     </div>
 
-                    @if($errors->any())
-                        <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                            {{ $errors->first() }}
+                    @if(!$user || $user->role !== 'client')
+                        <div class="text-center py-12 px-6 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8]">
+                            <svg class="size-16 text-[#D3CCBE] mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <p class="text-lg font-bold text-[#1C1A17] mb-2">Login Required</p>
+                            <p class="text-sm text-[#8A7F72] mb-6">Please login as a client to send booking requests</p>
+                            <a href="{{ route('login') }}" onclick="sessionStorage.setItem('return_to', window.location.href); return true;" class="inline-block px-6 py-3 rounded-xl bg-[#E8642A] text-white font-bold hover:bg-[#F07C42] transition-colors">
+                                Login to Book
+                            </a>
                         </div>
-                    @endif
+                    @else
+                        @if($errors->any())
+                            <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                                {{ $errors->first() }}
+                            </div>
+                        @endif
 
-                    <form method="POST" action="{{ route('client.bookings.store', $caterer) }}" class="space-y-5">
+                        <form method="POST" action="{{ route('client.bookings.store', $caterer) }}" class="space-y-5">
                         @csrf
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
@@ -428,6 +551,7 @@
                             Send Booking Request
                         </button>
                     </form>
+                    @endif
                 </div>
 
                 <div class="mb-8">
@@ -542,8 +666,8 @@
 
                     {{-- Menu Item Modal --}}
                     @foreach($menuItems as $item)
-                    <div x-show="selectedItem === {{ $item->id }}" x-cloak @click.self="selectedItem = null" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div x-show="selectedItem === {{ $item->id }}" x-cloak @click.self="selectedItem = null" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+                        <div @click.stop x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                             <div class="p-6">
                                 <div class="flex items-start justify-between mb-4">
                                     <h3 class="text-2xl font-black text-[#1C1A17]">{{ $item->name }}</h3>
@@ -596,8 +720,8 @@
 
                     {{-- Add-on Modal --}}
                     @foreach($addOns as $addon)
-                    <div x-show="selectedAddon === {{ $addon->id }}" x-cloak @click.self="selectedAddon = null" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div x-show="selectedAddon === {{ $addon->id }}" x-cloak @click.self="selectedAddon = null" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+                        <div @click.stop x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                             <div class="p-6">
                                 <div class="flex items-start justify-between mb-4">
                                     <h3 class="text-2xl font-black text-[#1C1A17]">{{ $addon->name }}</h3>
@@ -627,6 +751,8 @@
         </main>
     </div>
 
+    @include('client.partials.remove-saved-modal')
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         function requestItem(type, id) {
@@ -639,3 +765,4 @@
     </script>
 </body>
 </html>
+

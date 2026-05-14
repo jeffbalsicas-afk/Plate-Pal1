@@ -31,17 +31,7 @@
         </a>
     </x-slot:sidebar>
 
-    <x-slot:sidebarFooter>
-        <div class="border-t border-[#EDE4D8] pt-3 mt-3">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors text-sm font-medium">
-                    <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                    Logout
-                </button>
-            </form>
-        </div>
-    </x-slot:sidebarFooter>
+    
 
     <div class="bg-white rounded-2xl border border-[#EDE4D8] overflow-hidden">
         <div class="p-6 border-b border-[#EDE4D8]">
@@ -53,6 +43,7 @@
                     <tr class="border-b border-[#EDE4D8] bg-[#FDF6EE]">
                         <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Name</th>
                         <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Email</th>
+                        <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Role</th>
                         <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Joined</th>
                     </tr>
                 </thead>
@@ -62,17 +53,27 @@
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center">
-                                    {{ strtoupper(substr($u->name, 0, 1)) }}
+                                    {{ strtoupper(substr($u->role === 'caterer' ? ($u->business_name ?? $u->name) : $u->name, 0, 1)) }}
                                 </div>
-                                <span class="font-bold text-[#1C1A17]">{{ $u->name }}</span>
+                                <div>
+                                    <div class="font-bold text-[#1C1A17]">{{ $u->role === 'caterer' ? ($u->business_name ?? $u->name) : $u->name }}</div>
+                                    @if($u->role === 'caterer' && $u->business_name)
+                                        <div class="text-xs text-[#8A7F72]">{{ $u->name }}</div>
+                                    @endif
+                                </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-[#8A7F72]">{{ $u->email }}</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $u->role === 'caterer' ? 'bg-[#E8642A] text-white' : 'bg-[#FDF6EE] text-[#8A7F72]' }}">
+                                {{ ucfirst($u->role) }}
+                            </span>
+                        </td>
                         <td class="px-6 py-4 text-[#8A7F72]">{{ $u->created_at->format('M d, Y') }}</td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="3" class="px-6 py-12 text-center text-[#8A7F72]">No users found.</td>
+                        <td colspan="4" class="px-6 py-12 text-center text-[#8A7F72]">No users found.</td>
                     </tr>
                     @endforelse
                 </tbody>

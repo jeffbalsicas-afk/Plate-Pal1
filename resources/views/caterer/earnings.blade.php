@@ -106,7 +106,8 @@
                         <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Date</th>
                         <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Package</th>
                         <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Guests</th>
-                        <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Earnings</th>
+                        <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Price</th>
+                        <th class="text-left text-xs font-bold text-[#8A7F72] uppercase px-6 py-4">Total Earnings</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EDE4D8]">
@@ -115,11 +116,18 @@
                         <td class="px-6 py-4 font-medium text-[#1C1A17]">{{ $booking->user->name }}</td>
                         <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->event_title }}</td>
                         <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->event_date->format('M d, Y') }}</td>
-                        <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->selected_package_name ?? 'Custom booking' }}</td>
+                        <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->package_name ?? 'Custom booking' }}</td>
                         <td class="px-6 py-4 text-[#8A7F72]">{{ number_format($booking->guests) }}</td>
+                        <td class="px-6 py-4 text-[#8A7F72]">
+                            @if($booking->package_price)
+                                Bundle
+                            @else
+                                ₱{{ number_format(($booking->caterer->price_min + $booking->caterer->price_max) / 2, 2) }}
+                            @endif
+                        </td>
                         <td class="px-6 py-4 font-bold text-[#E8642A]">
                             @if($booking->estimated_total)
-                                ₱{{ number_format($booking->estimated_total, 0) }}
+                                ₱{{ number_format($booking->estimated_total, 2) }}
                             @else
                                 Unpriced
                             @endif

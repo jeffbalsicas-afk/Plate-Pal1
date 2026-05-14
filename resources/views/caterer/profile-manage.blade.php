@@ -81,14 +81,20 @@
                     <div class="flex items-center gap-4">
                         <div class="size-20 rounded-full overflow-hidden bg-[#FDF6EE] border-2 border-[#EDE4D8]">
                             @if($user->profile_image)
-                                <img src="{{ $user->profile_image }}?v={{ $user->updated_at->timestamp }}" alt="Profile" class="w-full h-full object-cover">
+                                @if(str_starts_with($user->profile_image, 'http'))
+                                    <img src="{{ $user->profile_image }}" alt="Profile" class="w-full h-full object-cover">
+                                @elseif(str_starts_with($user->profile_image, '/storage/'))
+                                    <img src="{{ $user->profile_image }}" alt="Profile" class="w-full h-full object-cover">
+                                @else
+                                    <img src="{{ asset($user->profile_image) }}" alt="Profile" class="w-full h-full object-cover">
+                                @endif
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-2xl font-black text-[#E8642A]">{{ $initials }}</div>
                             @endif
                         </div>
-                        <div class="flex flex-col hover:bg-[#FDF6EE] rounded-sm transition-colors ">
-                            <input type="file" name="profile_image" accept="image/*" class="text-sm cursor-pointer">
-                            <p class="text-xs text-[#8A7F72] mt-1 cursor-pointer">JPG, PNG up to 2MB</p>
+                        <div class="flex-1">
+                            <input type="file" name="profile_image" accept="image/*" class="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-[#E8642A] file:text-white hover:file:bg-[#F07C42] file:cursor-pointer">
+                            <p class="text-xs text-[#8A7F72] mt-1">JPG, PNG up to 2MB</p>
                         </div>
                     </div>
                 </div>
@@ -332,10 +338,17 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         @foreach($galleryImages as $index => $image)
                             <div class="relative group">
-                                <img src="{{ $image }}" alt="Gallery" class="w-full h-40 object-cover rounded-xl">
-                                <form method="POST" action="{{ route('caterer.profile.gallery.delete', $index) }}" class="absolute top-2 right-2">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Delete this image?')" class="bg-red-500 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                @if(str_starts_with($image, 'http'))
+                                    <img src="{{ $image }}" alt="Gallery" class="w-full h-40 object-cover rounded-xl">
+                                @elseif(str_starts_with($image, '/storage/'))
+                                    <img src="{{ $image }}" alt="Gallery" class="w-full h-40 object-cover rounded-xl">
+                                @else
+                                    <img src="{{ asset($image) }}" alt="Gallery" class="w-full h-40 object-cover rounded-xl">
+                                @endif
+                                <form method="POST" action="{{ route('caterer.profile.gallery.delete', $index) }}" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors" onclick="return confirm('Delete this photo?')">
                                         <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                     </button>
                                 </form>

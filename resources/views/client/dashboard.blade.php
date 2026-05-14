@@ -175,14 +175,17 @@
 
         <section class="rounded-3xl border border-[#DDE8E2] bg-gradient-to-br from-white via-[#FFF7E8]/30 to-white p-6 shadow-sm" x-data="{
             showRemoveSavedModal: false,
-            removeTarget: { formId: '', name: '' },
-            openRemoveSavedModal(formId, name) {
-                this.removeTarget = { formId, name };
+            removeTarget: { formId: '', name: '', action: 'remove' },
+            openSavedCatererModal(formId, name, action = 'remove') {
+                this.removeTarget = { formId, name, action };
                 this.showRemoveSavedModal = true;
+            },
+            openRemoveSavedModal(formId, name) {
+                this.openSavedCatererModal(formId, name, 'remove');
             },
             closeRemoveSavedModal() {
                 this.showRemoveSavedModal = false;
-                this.removeTarget = { formId: '', name: '' };
+                this.removeTarget = { formId: '', name: '', action: 'remove' };
             }
         }" @open-remove-modal.window="openRemoveSavedModal($event.detail.formId, $event.detail.name)">
             <div class="mb-5 flex items-center justify-between gap-4">
@@ -210,7 +213,7 @@
                                 @csrf
                                 <button 
                                     type="button"
-                                    @click.prevent="{{ $caterer['is_saved'] ? '$dispatch(\"open-remove-modal\", { formId: \"' . $toggleFormId . '\", name: \"' . addslashes($caterer['name']) . '\" })' : '$el.closest(\"form\").submit()' }}"
+                                    @click.prevent="openSavedCatererModal(@js($toggleFormId), @js($caterer['name']), @js($caterer['is_saved'] ? 'remove' : 'save'))"
                                     class="flex size-9 items-center justify-center rounded-full bg-white/95 shadow-lg backdrop-blur-sm transition-all hover:scale-110 {{ $caterer['is_saved'] ? 'text-[#BE3455]' : 'text-gray-400' }} hover:text-[#BE3455] hover:bg-[#FCECEF]" 
                                     aria-label="{{ $caterer['is_saved'] ? 'Unsave' : 'Save' }} {{ $caterer['name'] }}">
                                     @if($caterer['is_saved'])
