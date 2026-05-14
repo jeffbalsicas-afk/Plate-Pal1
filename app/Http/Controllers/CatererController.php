@@ -9,6 +9,8 @@ use App\Models\Package;
 use App\Models\MenuItem;
 use App\Models\Review;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class CatererController extends Controller
 {
@@ -25,6 +27,7 @@ class CatererController extends Controller
         $upcomingBookings = Booking::with('user')
             ->where('caterer_id', $user->id)
             ->whereIn('status', ['pending', 'confirmed'])
+            ->whereDate('event_date', '>=', now())
             ->orderBy('event_date')
             ->take(3)
             ->get();
@@ -58,22 +61,33 @@ class CatererController extends Controller
         $previousWeekly = $this->weeklyBookings($user->id, $prevMonth, $prevYear);
 
         $packages = Package::forCaterer($user->id)->get();
-        $topPackages = $packages->map(function ($pkg) use ($user) {
-            $bookingCount = Booking::where('caterer_id', $user->id)
+        $topPackages = $packages->map(function ($pkg) use ($user, $currentMonth, $currentYear) {
+            $packageBookings = Booking::where('caterer_id', $user->id)
                 ->where('status', 'completed')
-                ->count();
+                ->whereMonth('event_date', $currentMonth)
+                ->whereYear('event_date', $currentYear)
+                ->where(function ($query) use ($pkg) {
+                    $query->where('package_id', $pkg->id)
+                        ->orWhere('package_name', $pkg->name);
+                })
+                ->get();
+
+            $bookingCount = $packageBookings->count();
+            $revenue = $packageBookings->sum(fn ($booking) => $booking->estimated_total ?? 0);
+
             return [
                 'name' => $pkg->name,
                 'bookings' => $bookingCount,
-                'revenue' => '₱0',
-                'satisfaction' => '0%',
+                'revenue' => 'PHP ' . number_format($revenue, 0),
+                'satisfaction' => number_format($user->rating ?? 0, 1),
                 'rank' => match(true) {
-                    $bookingCount >= 10 => '🥇 Best Seller',
-                    $bookingCount >= 5 => '🥈 Runner Up',
-                    default => '🥉 Top 3'
+                    $bookingCount >= 10 => 'Best Seller',
+                    $bookingCount >= 5 => 'Runner Up',
+                    $bookingCount > 0 => 'Top Pick',
+                    default => 'New'
                 }
             ];
-        })->take(3);
+        })->sortByDesc('bookings')->values()->take(3);
 
         return response()
             ->view('caterer.dashboard', compact(
@@ -107,7 +121,7 @@ class CatererController extends Controller
             $selectedStatus = 'all';
         }
 
-        $baseQuery = Booking::with('user')->where('caterer_id', $catererId);
+        $baseQuery = Booking::with(['user', 'package'])->where('caterer_id', $catererId);
 
         $statusCounts = [
             'all' => (clone $baseQuery)->count(),
@@ -196,6 +210,18 @@ class CatererController extends Controller
             }, fn ($q) => $q->orderByDesc('created_at'))
             ->paginate($perPage, ['*'], 'addons_page');
 
+        $menuSummary = [
+            'packages' => Package::forCaterer($catererId)->count(),
+            'items' => MenuItem::forCaterer($catererId)->menuItems()->count(),
+            'addons' => MenuItem::forCaterer($catererId)->addOns()->count(),
+            'live' => Package::forCaterer($catererId)->where('status', 'live')->count()
+                + MenuItem::forCaterer($catererId)->where('status', 'live')->count(),
+            'pending' => Package::forCaterer($catererId)->where('status', 'pending')->count()
+                + MenuItem::forCaterer($catererId)->where('status', 'pending')->count(),
+            'draft' => Package::forCaterer($catererId)->where('status', 'draft')->count()
+                + MenuItem::forCaterer($catererId)->where('status', 'draft')->count(),
+        ];
+
         $pendingBookings = Booking::where('caterer_id', $catererId)
             ->where('status', 'pending')
             ->count();
@@ -213,6 +239,7 @@ class CatererController extends Controller
                 'packages',
                 'menuItems',
                 'addOns',
+                'menuSummary',
                 'pendingBookings',
                 'unreadMessages'
             ))
@@ -222,41 +249,124 @@ class CatererController extends Controller
     // Profile edit
     public function editProfile()
     {
-        return view('caterer.profile', ['user' => auth()->user()]);
+        $user = auth()->user();
+        $pendingBookings = Booking::where('caterer_id', $user->id)->where('status', 'pending')->count();
+        $unreadMessages = Message::where('caterer_id', $user->id)->where('is_read', false)->where('sender', 'client')->count();
+
+        return view('caterer.profile-manage', compact('user', 'pendingBookings', 'unreadMessages'));
     }
 
     // Profile update
     public function updateProfile(Request $request)
     {
         $user = auth()->user();
+        $formType = $request->input('form_type', 'basic');
 
-        $request->validate([
-            'business_name' => ['required', 'string', 'max:255'],
-            'barangay'      => ['required', 'string'],
-            'phone'         => ['required', 'string'],
-            'description'   => ['nullable', 'string'],
-            'cuisine'       => ['required', 'string'],
-            'price_min'     => ['required', 'string'],
-            'price_max'     => ['required', 'string'],
-            'min_guest'     => ['required', 'string'],
-            'max_guest'     => ['required', 'string'],
-            'profile_image' => ['nullable', 'image', 'max:2048'],
-        ]);
+        if ($formType === 'basic') {
+            $request->merge([
+                'phone' => $this->normalizePhone($request->input('phone')),
+            ]);
 
-        $data = $request->only(['business_name', 'barangay', 'phone', 'cuisine', 'description', 'price_min', 'price_max', 'min_guest', 'max_guest']);
+            $request->validate([
+                'business_name' => ['required', 'string', 'max:255'],
+                'barangay'      => ['required', 'string'],
+                'phone'         => [
+                    'required',
+                    'string',
+                    'regex:/^\+?\d{11,20}$/',
+                    Rule::unique('users', 'phone')->ignore($user->id),
+                ],
+                'description'   => ['nullable', 'string', 'max:2000'],
+                'cuisine'       => ['required', 'string', 'max:255'],
+                'price_min'     => ['required', 'numeric', 'min:0'],
+                'price_max'     => ['required', 'numeric', 'gte:price_min'],
+                'min_guest'     => ['required', 'integer', 'min:1'],
+                'max_guest'     => ['required', 'integer', 'gte:min_guest'],
+                'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048'],
+            ]);
 
-        if ($request->hasFile('profile_image')) {
-            $path = $request->file('profile_image')->store('caterers', 'public');
-            $data['profile_image'] = '/storage/' . $path;
+            $data = $this->pendingReviewData($request->only([
+                'business_name',
+                'barangay',
+                'phone',
+                'cuisine',
+                'description',
+                'price_min',
+                'price_max',
+                'min_guest',
+                'max_guest',
+            ]));
+
+            if ($request->hasFile('profile_image')) {
+                if ($user->profile_image && str_starts_with($user->profile_image, '/storage/')) {
+                    Storage::disk('public')->delete(str_replace('/storage/', '', $user->profile_image));
+                }
+                $path = $request->file('profile_image')->store('caterers', 'public');
+                $data['profile_image'] = '/storage/' . $path;
+            }
+
+            $user->update($data);
+            return redirect()->route('caterer.profile')->with('success', 'Basic information submitted for admin approval.');
         }
 
-        $data['approval_status'] = 'pending';
-        $data['is_verified'] = false;
-        $data['rejection_reason'] = null;
+        if ($formType === 'about') {
+            $request->validate([
+                'our_story' => ['nullable', 'string', 'max:5000'],
+                'what_makes_special' => ['nullable', 'string', 'max:5000'],
+                'services_offered' => ['nullable', 'array'],
+                'services_offered.*' => ['string', 'max:255'],
+            ]);
 
-        $user->update($data);
+            $user->update($this->pendingReviewData([
+                'our_story' => $request->filled('our_story') ? $request->input('our_story') : null,
+                'what_makes_special' => $request->filled('what_makes_special') ? $request->input('what_makes_special') : null,
+                'services_offered' => $this->arrayValue($request->input('services_offered', [])),
+            ]));
 
-        return redirect()->route('caterer.profile')->with('success', 'Profile submitted! Your details are pending admin approval.');
+            return redirect()->to(route('caterer.profile') . '#about')->with('success', 'About section submitted for admin approval.');
+        }
+
+        if ($formType === 'gallery') {
+            $request->validate([
+                'gallery_images' => ['nullable', 'array'],
+                'gallery_images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            ]);
+
+            $existingImages = $this->arrayValue($user->gallery_images);
+
+            if ($request->hasFile('gallery_images')) {
+                foreach ($request->file('gallery_images') as $image) {
+                    $path = $image->store('gallery', 'public');
+                    $existingImages[] = '/storage/' . $path;
+                }
+            }
+
+            $user->update($this->pendingReviewData(['gallery_images' => array_values($existingImages)]));
+            return redirect()->to(route('caterer.profile') . '#gallery')->with('success', 'Gallery changes submitted for admin approval.');
+        }
+
+        return redirect()->route('caterer.profile');
+    }
+
+    public function deleteGalleryImage($index)
+    {
+        $user = auth()->user();
+        $galleryImages = $this->arrayValue($user->gallery_images);
+
+        if (! isset($galleryImages[$index])) {
+            return redirect()->to(route('caterer.profile') . '#gallery')->with('success', 'Image was already removed.');
+        }
+
+        $imagePath = $galleryImages[$index];
+        if (str_starts_with($imagePath, '/storage/')) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $imagePath));
+        }
+
+        unset($galleryImages[$index]);
+
+        $user->update($this->pendingReviewData(['gallery_images' => array_values($galleryImages)]));
+
+        return redirect()->to(route('caterer.profile') . '#gallery')->with('success', 'Gallery changes submitted for admin approval.');
     }
 
     public function show($id)
@@ -295,9 +405,20 @@ class CatererController extends Controller
         $averageRating = Review::forCaterer($caterer->id)->public()->avg('rating') ?? ($caterer->rating ?? 0);
         $user = auth()->user();
         $initials = $user?->initials;
+        
+        $savedCatererIds = [];
+        $activeBookings = 0;
+        $unreadMessages = 0;
+        $statusCounts = ['all' => 0];
+        if ($user && $user->role === 'client') {
+            $savedCatererIds = \App\Models\SavedCaterer::where('user_id', $user->id)->pluck('caterer_id')->toArray();
+            $activeBookings = Booking::where('user_id', $user->id)->whereIn('status', ['pending', 'confirmed'])->count();
+            $unreadMessages = Message::where('user_id', $user->id)->where('is_read', false)->where('sender', 'caterer')->count();
+            $statusCounts = ['all' => Booking::where('user_id', $user->id)->count()];
+        }
 
         return response()
-            ->view('caterer.detail', compact('caterer', 'packages', 'menuItems', 'addOns', 'publicReviews', 'reviewsCount', 'averageRating', 'user', 'initials'))
+            ->view('caterer.detail', compact('caterer', 'packages', 'menuItems', 'addOns', 'publicReviews', 'reviewsCount', 'averageRating', 'user', 'initials', 'savedCatererIds', 'activeBookings', 'unreadMessages', 'statusCounts'))
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
@@ -318,6 +439,15 @@ class CatererController extends Controller
         return $weeks;
     }
 
+    private function pendingReviewData(array $data = []): array
+    {
+        return array_merge($data, [
+            'approval_status' => 'pending',
+            'is_verified' => false,
+            'rejection_reason' => null,
+        ]);
+    }
+
     public function earnings()
     {
         $user = auth()->user();
@@ -326,13 +456,13 @@ class CatererController extends Controller
 
         $totalEarnings = Booking::where('caterer_id', $user->id)
             ->where('status', 'completed')
-            ->sum('guests') * 400;
+            ->sum('package_price');
 
         $monthlyEarnings = Booking::where('caterer_id', $user->id)
             ->where('status', 'completed')
             ->whereMonth('event_date', now()->month)
             ->whereYear('event_date', now()->year)
-            ->sum('guests') * 400;
+            ->sum('package_price');
 
         $completedBookings = Booking::where('caterer_id', $user->id)
             ->where('status', 'completed')
@@ -347,9 +477,9 @@ class CatererController extends Controller
             ->where('sender', 'client')
             ->count();
 
-        $earningsHistory = Booking::where('caterer_id', $user->id)
+        $earningsHistory = Booking::with(['user', 'package'])
+            ->where('caterer_id', $user->id)
             ->where('status', 'completed')
-            ->with('user')
             ->latest()
             ->paginate(15);
 
@@ -366,5 +496,39 @@ class CatererController extends Controller
                 'earningsHistory'
             ))
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+    }
+
+    private function normalizePhone(?string $phone): string
+    {
+        $phone = preg_replace('/[^\d+]/', '', (string) $phone);
+
+        if (str_starts_with($phone, '+')) {
+            return '+'.preg_replace('/\D/', '', substr($phone, 1));
+        }
+
+        return preg_replace('/\D/', '', $phone);
+    }
+
+    private function arrayValue(mixed $value): array
+    {
+        for ($i = 0; $i < 2; $i++) {
+            if (is_array($value)) {
+                return array_values(array_filter($value, fn ($item) => $item !== null && $item !== ''));
+            }
+
+            if (! is_string($value) || $value === '') {
+                return [];
+            }
+
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return [];
+            }
+
+            $value = $decoded;
+        }
+
+        return is_array($value) ? array_values($value) : [];
     }
 }

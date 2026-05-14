@@ -77,13 +77,6 @@ class ReviewController extends Controller
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
-    public function requestFeedback()
-    {
-        $this->catererUser();
-
-        return back()->with('success', 'Feedback request prepared. Connect this to email or SMS when messaging is ready.');
-    }
-
     public function updateAutoFeature(Request $request)
     {
         $user = $this->catererUser();

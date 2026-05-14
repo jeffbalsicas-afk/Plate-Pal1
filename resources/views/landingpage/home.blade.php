@@ -4,7 +4,7 @@
 
     <x-home.hero />
 
-    <x-home.grid />
+    <x-home.grid :caterers="$featuredCaterers" />
 
     <x-home.how-it-works-preview />
 

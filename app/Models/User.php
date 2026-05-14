@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'phone', 'business_name', 'barangay', 'cuisine', 'price_range', 'profile_image', 'rating', 'reviews_count', 'auto_feature_reviews', 'is_verified', 'is_active', 'approval_status', 'rejection_reason', 'description', 'price_min', 'price_max', 'min_guest', 'max_guest', 'is_featured'])]
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'business_name', 'barangay', 'cuisine', 'price_range', 'profile_image', 'rating', 'reviews_count', 'auto_feature_reviews', 'is_verified', 'is_active', 'approval_status', 'rejection_reason', 'description', 'price_min', 'price_max', 'min_guest', 'max_guest', 'is_featured', 'our_story', 'what_makes_special', 'services_offered', 'gallery_images'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -31,6 +31,8 @@ class User extends Authenticatable
             'is_verified' => 'boolean',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+            'services_offered' => 'array',
+            'gallery_images' => 'array',
         ];
     }
 

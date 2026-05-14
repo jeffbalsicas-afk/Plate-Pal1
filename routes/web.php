@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\SystemFeedbackController;
 
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
 
@@ -19,12 +20,18 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::get('/caterer/login', [AuthController::class, 'showCatererLogin'])->name('caterer.login');
     Route::get('/caterer/register', [AuthController::class, 'showCatererRegister'])->name('caterer.register');
-});
+    Route::get('/admin/login', [AuthController::class, 'showAdminLogin'])->name('admin.login');
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/caterer/login', [AuthController::class, 'Catererlogin']);
-Route::post('/caterer/register', [AuthController::class, 'Catererregister']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/caterer/login', [AuthController::class, 'Catererlogin']);
+    Route::post('/caterer/register', [AuthController::class, 'Catererregister']);
+    Route::post('/admin/login', [AuthController::class, 'adminLogin']);
+});
 
 // Public routes (accessible to guests)
 Route::get('/browse-caterers', [ClientDashboardController::class, 'browsePubic'])->name('browse.caterers');
@@ -34,26 +41,18 @@ Route::get('/for-caterers', [LandingPageController::class, 'forCaterers'])->name
 // Protected routes (require auth)
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('client.dashboard');
-    Route::get('/client/browse-caterers', [ClientDashboardController::class, 'browse'])->name('client.browse');
-    Route::get('/client/bookings', [ClientDashboardController::class, 'bookings'])->name('client.bookings');
-    Route::post('/client/bookings/{caterer}', [ClientDashboardController::class, 'storeBooking'])->name('client.bookings.store');
-    Route::get('/client/bookings/{booking}', [ClientDashboardController::class, 'bookingDetails'])->name('client.bookings.show');
-    Route::get('/client/bookings/{booking}/edit', [BookingController::class, 'edit'])->name('client.bookings.edit');
-    Route::put('/client/bookings/{booking}', [BookingController::class, 'update'])->name('client.bookings.update');
-    Route::post('/client/bookings/{booking}/review', [ClientDashboardController::class, 'storeReview'])->name('client.bookings.review');
-    Route::get('/client/saved-caterers', [ClientDashboardController::class, 'savedCaterers'])->name('client.saved-caterers');
-    Route::post('/client/saved-caterers/{caterer}', [ClientDashboardController::class, 'toggleSavedCaterer'])->name('client.saved-caterers.toggle');
-    Route::get('/client/reviews', [ClientDashboardController::class, 'myReviews'])->name('client.reviews');
-    Route::get('/client/profile', [ClientDashboardController::class, 'editProfile'])->name('client.profile');
-    Route::post('/client/profile', [ClientDashboardController::class, 'updateProfile'])->name('client.profile.update');
+    Route::get('/feedback', [SystemFeedbackController::class, 'create'])->name('feedback.create');
+    Route::post('/feedback', [SystemFeedbackController::class, 'store'])->name('feedback.store');
+});
+
+// Caterer routes (require caterer role)
+Route::middleware(['auth', 'role:caterer'])->group(function () {
     Route::get('/caterer/dashboard', [CatererController::class, 'dashboard'])->name('caterer.dashboard');
     Route::get('/caterer/bookings', [CatererController::class, 'bookings'])->name('caterer.bookings');
     Route::get('/caterer/menu-pricing', [CatererController::class, 'menuAndPricing'])->name('caterer.menu-pricing');
     Route::get('/caterer/messages', [MessageController::class, 'index'])->name('caterer.messages');
     Route::get('/caterer/earnings', [CatererController::class, 'earnings'])->name('caterer.earnings');
     Route::get('/caterer/reviews', [ReviewController::class, 'index'])->name('caterer.reviews');
-    Route::post('/caterer/reviews/request-feedback', [ReviewController::class, 'requestFeedback'])->name('caterer.reviews.request-feedback');
     Route::patch('/caterer/reviews/auto-feature', [ReviewController::class, 'updateAutoFeature'])->name('caterer.reviews.auto-feature');
     Route::patch('/caterer/reviews/{review}/visibility', [ReviewController::class, 'updateVisibility'])->name('caterer.reviews.visibility');
     Route::patch('/caterer/reviews/{review}/featured', [ReviewController::class, 'updateFeatured'])->name('caterer.reviews.featured');
@@ -61,7 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/caterer/reviews/{review}/report', [ReviewController::class, 'report'])->name('caterer.reviews.report');
     Route::get('/caterer/profile', [CatererController::class, 'editProfile'])->name('caterer.profile');
     Route::post('/caterer/profile', [CatererController::class, 'updateProfile'])->name('caterer.profile.update');
-    Route::get('/caterer/{id}', [CatererController::class, 'show'])->name('caterer.detail');
+    Route::delete('/caterer/profile/gallery/{index}', [CatererController::class, 'deleteGalleryImage'])->name('caterer.profile.gallery.delete');
 
     // Menu management routes
     Route::post('/menu/items', [MenuController::class, 'storeMenuItem'])->name('menu.items.store');
@@ -83,19 +82,47 @@ Route::middleware('auth')->group(function () {
     Route::post('/bookings/{booking}/accept', [BookingController::class, 'accept'])->name('bookings.accept');
     Route::post('/bookings/{booking}/decline', [BookingController::class, 'decline'])->name('bookings.decline');
     Route::post('/bookings/{booking}/complete', [BookingController::class, 'complete'])->name('bookings.complete');
+});
 
+// Client routes (require client role)
+Route::middleware(['auth', 'role:client'])->group(function () {
+    Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('client.dashboard');
+    Route::get('/client/browse-caterers', [ClientDashboardController::class, 'browse'])->name('client.browse');
+    Route::get('/client/bookings', [ClientDashboardController::class, 'bookings'])->name('client.bookings');
+    Route::post('/client/bookings/{caterer}', [ClientDashboardController::class, 'storeBooking'])->name('client.bookings.store');
+    Route::get('/client/bookings/{booking}', [ClientDashboardController::class, 'bookingDetails'])->name('client.bookings.show');
+    Route::get('/client/bookings/{booking}/edit', [BookingController::class, 'edit'])->name('client.bookings.edit');
+    Route::put('/client/bookings/{booking}', [BookingController::class, 'update'])->name('client.bookings.update');
+    Route::post('/client/bookings/{booking}/review', [ClientDashboardController::class, 'storeReview'])->name('client.bookings.review');
+    Route::get('/client/saved-caterers', [ClientDashboardController::class, 'savedCaterers'])->name('client.saved-caterers');
+    Route::post('/client/saved-caterers/{caterer}', [ClientDashboardController::class, 'toggleSavedCaterer'])->name('client.saved-caterers.toggle');
+    Route::get('/client/reviews', [ClientDashboardController::class, 'myReviews'])->name('client.reviews');
+    Route::get('/client/profile', [ClientDashboardController::class, 'editProfile'])->name('client.profile');
+    Route::post('/client/profile', [ClientDashboardController::class, 'updateProfile'])->name('client.profile.update');
+    Route::get('/caterer/{id}', [CatererController::class, 'show'])->name('caterer.detail');
+});
+
+// Shared client/caterer messaging routes
+Route::middleware(['auth', 'role:client,caterer'])->group(function () {
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/attachments/{message}', [MessageController::class, 'attachment'])->name('messages.attachment');
     Route::get('/messages/{recipient}', [MessageController::class, 'show'])->name('messages.show');
     Route::post('/messages/{recipient}', [MessageController::class, 'store'])->name('messages.store');
+    Route::get('/messages/{recipient}/latest', [MessageController::class, 'latest'])->name('messages.latest');
+    Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
 });
 
 // Admin routes (require auth + admin role)
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/users', [AdminDashboardController::class, 'users'])->name('admin.users');
     Route::get('/admin/bookings', [AdminDashboardController::class, 'bookings'])->name('admin.bookings');
     Route::post('/admin/caterers/{user}/approve', [AdminDashboardController::class, 'approve'])->name('admin.caterer.approve');
     Route::post('/admin/caterers/{user}/reject', [AdminDashboardController::class, 'reject'])->name('admin.caterer.reject');
+    Route::post('/admin/packages/{package}/approve', [AdminDashboardController::class, 'approvePackage'])->name('admin.packages.approve');
+    Route::post('/admin/packages/{package}/reject', [AdminDashboardController::class, 'rejectPackage'])->name('admin.packages.reject');
+    Route::post('/admin/menu-items/{menuItem}/approve', [AdminDashboardController::class, 'approveMenuItem'])->name('admin.menu-items.approve');
+    Route::post('/admin/menu-items/{menuItem}/reject', [AdminDashboardController::class, 'rejectMenuItem'])->name('admin.menu-items.reject');
     Route::get('/admin/featured-caterers', [AdminDashboardController::class, 'featuredCaterers'])->name('admin.featured-caterers.index');
     Route::post('/admin/featured-caterers/{caterer}/toggle', [AdminDashboardController::class, 'toggleFeatured'])->name('admin.featured-caterers.toggle');
     Route::get('/admin/reports', [AdminDashboardController::class, 'reports'])->name('admin.reports');

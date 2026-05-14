@@ -1,4 +1,4 @@
-<x-layout title="Create Account – PlatePal">
+<x-layout title="Create Account - PlatePal">
 <div class="flex min-h-screen font-sans flex-col lg:flex-row">
     {{-- Left side: Registration form --}}
     <div class="w-full lg:w-1/2 flex flex-col px-4 sm:px-8 lg:px-20 py-6 sm:py-10 bg-white overflow-y-auto">
@@ -23,28 +23,34 @@
             <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1 sm:mb-2">Create Your Account</h1>
             <p class="text-gray-500 text-sm sm:text-base md:text-lg mb-6 sm:mb-8">Join PlatePal to discover and book local caterers</p>
 
+            @if($errors->any())
+                <div class="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs sm:text-sm">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('register') }}" class="space-y-4 sm:space-y-5">
                 @csrf
 
                 {{-- Full Name --}}
                 <div>
                     <label class="block text-sm sm:text-base font-semibold text-gray-900 mb-1.5 sm:mb-2">Full Name</label>
-                    <input type="text" name="name" required placeholder="Juan Dela Cruz"
-                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#f44e08] transition-all">
+                    <input type="text" name="name" value="{{ old('name') }}" required placeholder="Juan Dela Cruz"
+                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gray-50 border {{ $errors->has('name') ? 'border-red-400' : 'border-gray-200' }} text-gray-900 placeholder:text-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#f44e08] transition-all">
                 </div>
 
                 {{-- Email Address --}}
                 <div>
                     <label class="block text-sm sm:text-base font-semibold text-gray-900 mb-1.5 sm:mb-2">Email Address</label>
-                    <input type="email" name="email" required placeholder="you@example.com"
-                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#f44e08] transition-all">
+                    <input type="email" name="email" value="{{ old('email') }}" required placeholder="you@example.com"
+                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gray-50 border {{ $errors->has('email') ? 'border-red-400' : 'border-gray-200' }} text-gray-900 placeholder:text-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#f44e08] transition-all">
                 </div>
 
                 {{-- Phone Number --}}
                 <div>
                     <label class="block text-sm sm:text-base font-semibold text-gray-900 mb-1.5 sm:mb-2">Phone Number</label>
-                    <input type="tel" name="phone" required placeholder="0912 345 6789"
-                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#f44e08] transition-all">
+                    <input type="tel" name="phone" value="{{ old('phone') }}" required placeholder="0912 345 6789"
+                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gray-50 border {{ $errors->has('phone') ? 'border-red-400' : 'border-gray-200' }} text-gray-900 placeholder:text-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#f44e08] transition-all">
                 </div>
 
                 {{-- Password --}}
@@ -52,7 +58,7 @@
                     <label class="block text-sm sm:text-base font-semibold text-gray-900 mb-1.5 sm:mb-2">Password</label>
                     <div class="relative">
                         <input id="password" type="password" name="password" required placeholder="Create a strong password"
-                            class="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#f44e08] transition-all pr-10 sm:pr-12">
+                            class="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gray-50 border {{ $errors->has('password') ? 'border-red-400' : 'border-gray-200' }} text-gray-900 placeholder:text-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#f44e08] transition-all pr-10 sm:pr-12">
                         <button type="button" onclick="togglePassword('password', 'eye-pass')"
                             class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                             <svg id="eye-pass" class="size-4 sm:size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

@@ -1,5 +1,28 @@
 @php
     $initials = strtoupper(substr($user?->name ?? 'U', 0, 1) . (str_contains($user?->name ?? 'U', ' ') ? substr($user?->name ?? 'U', strpos($user?->name ?? 'U', ' ') + 1, 1) : ''));
+    $toArray = function ($value) {
+        for ($i = 0; $i < 2; $i++) {
+            if (is_array($value)) {
+                return array_values(array_filter($value, fn ($item) => $item !== null && $item !== ''));
+            }
+
+            if (! is_string($value) || $value === '') {
+                return [];
+            }
+
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return [];
+            }
+
+            $value = $decoded;
+        }
+
+        return is_array($value) ? array_values($value) : [];
+    };
+    $servicesOffered = $toArray($caterer->services_offered ?? []);
+    $galleryImages = $toArray($caterer->gallery_images ?? []);
 @endphp
 
 <!DOCTYPE html>
@@ -24,7 +47,7 @@
                 <a href="{{ route('client.browse') }}" class="flex items-center gap-2">
                     <img src="/assets/PlatePal_logo.jpg" alt="PlatePal" class="size-8 rounded-lg object-cover">
                     <div class="flex flex-col">
-                        <span class="text-sm font-display tracking-tight text-gray-900 leading-none">PLATE<span class="text-[#f44e08]">PAL</span></span>
+                        <span class="text-lg font-display tracking-tight text-gray-900 leading-none">PLATE<span class="text-[#f44e08]">PAL</span></span>
                     </div>
                 </a>
 
@@ -32,7 +55,7 @@
                 <div class="flex items-center gap-6">
                     @if($user)
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-[#EDE4D8] bg-white hover:bg-[#FDF6EE] transition-colors">
+                        <button type="button" @click="open = !open" class="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-[#EDE4D8] bg-white hover:bg-[#FDF6EE] transition-colors">
                             <div class="w-[34px] h-[34px] rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center shrink-0">{{ $initials }}</div>
                             <svg class="size-3.5 text-[#8A7F72]" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
@@ -41,11 +64,22 @@
                         <div x-show="open" @click.outside="open = false" x-transition
                             class="absolute right-0 mt-2 w-48 bg-white border border-[#EDE4D8] rounded-2xl shadow-lg py-1.5 z-50">
                             <a href="{{ route('client.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
+                                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                                 Dashboard
                             </a>
+                            <a href="{{ route('client.profile') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
+                                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                Profile Settings
+                            </a>
+                            <a href="{{ route('feedback.create') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
+                                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                Feedback
+                            </a>
+                            <div class="border-t border-[#EDE4D8] my-1"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                                    <svg class="size-4 stroke-red-400" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                                     Sign Out
                                 </button>
                             </form>
@@ -100,9 +134,16 @@
                                     {{ $caterer->barangay }}, Tagum City
                                 </p>
                             </div>
-                            <button class="p-3 rounded-full border border-[#EDE4D8] text-[#E8642A] hover:bg-[#FDF6EE] transition-colors">
-                                <svg class="size-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                            </button>
+                            <form method="POST" action="{{ route('client.saved-caterers.toggle', $caterer) }}">
+                                @csrf
+                                <button type="submit" class="p-3 rounded-full border border-[#EDE4D8] transition-all hover:scale-110 {{ isset($savedCatererIds) && in_array($caterer->id, $savedCatererIds) ? 'text-[#BE3455] bg-[#FCECEF]' : 'text-gray-400 bg-white hover:text-[#BE3455] hover:bg-[#FCECEF]' }}" aria-label="{{ isset($savedCatererIds) && in_array($caterer->id, $savedCatererIds) ? 'Unsave' : 'Save' }} caterer">
+                                    @if(isset($savedCatererIds) && in_array($caterer->id, $savedCatererIds))
+                                        <svg class="size-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                                    @else
+                                        <svg class="size-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                                    @endif
+                                </button>
+                            </form>
                         </div>
 
                         {{-- Rating & Reviews --}}
@@ -146,18 +187,18 @@
                                 <a href="{{ route('caterer.profile') }}" class="text-center px-6 py-3 rounded-xl bg-[#E8642A] text-white font-bold hover:bg-[#F07C42] transition-colors">
                                     Edit Profile
                                 </a>
-                                <button class="px-6 py-3 rounded-xl border border-[#E8642A] text-[#E8642A] font-bold hover:bg-[#FDF6EE] transition-colors">
+                                <a href="{{ route('caterer.profile') }}" class="text-center px-6 py-3 rounded-xl border border-[#E8642A] text-[#E8642A] font-bold hover:bg-[#FDF6EE] transition-colors">
                                     View Status
-                                </button>
+                                </a>
                             </div>
                         @else
                             <div class="grid grid-cols-2 gap-3">
                                 <a href="#booking-request" class="text-center px-6 py-3 rounded-xl bg-[#E8642A] text-white font-bold hover:bg-[#F07C42] transition-colors">
                                     Book Now
                                 </a>
-                                <button class="px-6 py-3 rounded-xl border border-[#E8642A] text-[#E8642A] font-bold hover:bg-[#FDF6EE] transition-colors">
+                                <a href="{{ route('messages.show', $caterer) }}" class="text-center px-6 py-3 rounded-xl border border-[#E8642A] text-[#E8642A] font-bold hover:bg-[#FDF6EE] transition-colors">
                                     Send Message
-                                </button>
+                                </a>
                             </div>
                         @endif
                     </div>
@@ -167,7 +208,44 @@
                 <div class="mb-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                     <div class="rounded-2xl border border-[#EDE4D8] bg-[#FDF6EE] p-6">
                         <h2 class="text-2xl font-black text-[#1C1A17] mb-4">About {{ $caterer->business_name }}</h2>
-                        <p class="text-sm text-[#1C1A17] leading-relaxed mb-6">{{ $caterer->description ?? 'No description is available yet. Please contact the caterer for more details about their service, menu, and event offerings.' }}</p>
+
+                        @if($caterer->our_story)
+                            <div class="mb-6">
+                                <h3 class="text-lg font-bold text-[#1C1A17] mb-2">Our Story</h3>
+                                <p class="text-sm text-[#1C1A17] leading-relaxed whitespace-pre-line">{{ $caterer->our_story }}</p>
+                            </div>
+                        @else
+                            <p class="text-sm text-[#1C1A17] leading-relaxed mb-6">{{ $caterer->description ?? 'No description is available yet. Please contact the caterer for more details about their service, menu, and event offerings.' }}</p>
+                        @endif
+
+                        @if($caterer->what_makes_special)
+                            <div class="mb-6">
+                                <h3 class="text-lg font-bold text-[#1C1A17] mb-3">What Makes Us Special</h3>
+                                <ul class="space-y-2">
+                                    @foreach(explode("\n", $caterer->what_makes_special) as $point)
+                                        @if(trim($point))
+                                            <li class="flex items-start gap-2 text-sm text-[#1C1A17]">
+                                                <svg class="size-5 text-[#E8642A] shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                <span>{{ trim($point) }}</span>
+                                            </li>
+                                        @endif
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        @if(!empty($servicesOffered))
+                            <div class="mb-6">
+                                <h3 class="text-lg font-bold text-[#1C1A17] mb-3">Services Offered</h3>
+                                <div class="grid grid-cols-2 gap-2">
+                                    @foreach($servicesOffered as $service)
+                                        <div class="bg-white rounded-lg px-3 py-2 text-sm text-[#1C1A17] border border-[#EDE4D8]">
+                                            {{ $service }}
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="grid grid-cols-2 gap-4 text-sm text-[#1C1A17]">
                             <div class="rounded-2xl bg-white p-4 border border-[#EDE4D8]">
@@ -192,20 +270,29 @@
                     <div class="rounded-2xl border border-[#EDE4D8] bg-white p-6">
                         <h2 class="text-2xl font-black text-[#1C1A17] mb-4">Gallery</h2>
                         @php
-                            $galleryImages = [
-                                'assets/Buds.png',
-                                'assets/Guisado.png',
-                                'assets/Kubo.png',
-                                'assets/Nena.png',
-                            ];
+                            if (empty($galleryImages)) {
+                                $galleryImages = [
+                                    'assets/Buds.png',
+                                    'assets/Guisado.png',
+                                    'assets/Kubo.png',
+                                    'assets/Nena.png',
+                                ];
+                            }
                         @endphp
-                        <div class="grid grid-cols-2 gap-3">
-                            @foreach($galleryImages as $galleryImage)
-                                <div class="overflow-hidden rounded-3xl h-40 bg-[#FDF6EE]">
-                                    <img src="{{ asset($galleryImage) }}" alt="Gallery image" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
-                                </div>
-                            @endforeach
-                        </div>
+                        @if(!empty($galleryImages))
+                            <div class="grid grid-cols-2 gap-3">
+                                @foreach($galleryImages as $galleryImage)
+                                    <div class="overflow-hidden rounded-3xl h-40 bg-[#FDF6EE]">
+                                        <img src="{{ str_starts_with($galleryImage, 'assets/') ? asset($galleryImage) : $galleryImage }}" alt="Gallery image" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="flex flex-col items-center justify-center h-40 text-center">
+                                <svg class="size-12 text-[#D3CCBE] mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                                <p class="text-sm text-[#8A7F72]">No gallery images yet</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -277,12 +364,12 @@
                             </div>
                             <div>
                                 <label for="event_date" class="text-xs font-bold text-[#1C1A17] mb-1.5 block">Event date</label>
-                                <input id="event_date" name="event_date" value="{{ old('event_date') }}" type="date" required
+                                <input id="event_date" name="event_date" value="{{ old('event_date') }}" type="date" min="{{ now()->toDateString() }}" required
                                     class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A]">
                             </div>
                             <div>
                                 <label for="guests" class="text-xs font-bold text-[#1C1A17] mb-1.5 block">Guests</label>
-                                <input id="guests" name="guests" value="{{ old('guests', $caterer->min_guest ?? 10) }}" type="number" required min="{{ $caterer->min_guest ?? 1 }}" max="{{ $caterer->max_guest ?? 10000 }}"
+                                <input id="guests" name="guests" value="{{ old('guests', 50) }}" type="number" required min="1"
                                     class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A]">
                             </div>
                         </div>
@@ -294,12 +381,48 @@
                                 <option value="">-- Choose a package or customize later --</option>
                                 @foreach($packages as $package)
                                     <option value="{{ $package->id }}" @selected(old('package_id') == $package->id)>
-                                        {{ $package->name }} - ₱{{ number_format($package->price, 0) }}/head
+                                        {{ $package->name }} - ₱{{ number_format($package->price, 0) }} bundle
                                     </option>
                                 @endforeach
                             </select>
                         </div>
                         @endif
+
+                        @if($menuItems->isNotEmpty())
+                        <div>
+                            <label class="text-xs font-bold text-[#1C1A17] mb-2 block">Select Menu Items (Optional)</label>
+                            <div class="grid md:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8]">
+                                @foreach($menuItems as $item)
+                                <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-white cursor-pointer">
+                                    <input type="checkbox" name="menu_items[]" value="{{ $item->id }}" class="rounded border-[#EDE4D8] text-[#E8642A] focus:ring-[#E8642A]">
+                                    <span class="text-sm text-[#1C1A17] flex-1">{{ $item->name }}</span>
+                                    <span class="text-xs font-bold text-[#E8642A]">₱{{ number_format($item->price, 0) }}/{{ $item->unit }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($addOns->isNotEmpty())
+                        <div>
+                            <label class="text-xs font-bold text-[#1C1A17] mb-2 block">Select Add-ons (Optional)</label>
+                            <div class="grid md:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8]">
+                                @foreach($addOns as $addon)
+                                <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-white cursor-pointer">
+                                    <input type="checkbox" name="addons[]" value="{{ $addon->id }}" class="rounded border-[#EDE4D8] text-[#E8642A] focus:ring-[#E8642A]">
+                                    <span class="text-sm text-[#1C1A17] flex-1">{{ $addon->name }}</span>
+                                    <span class="text-xs font-bold text-[#E8642A]">₱{{ number_format($addon->price, 0) }}/{{ $addon->unit }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        <div>
+                            <label for="special_requests" class="text-xs font-bold text-[#1C1A17] mb-1.5 block">Event notes</label>
+                            <textarea id="special_requests" name="special_requests" rows="4" placeholder="Menu preferences, allergies, setup needs, venue details..."
+                                class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] placeholder:text-[#8A7F72] focus:outline-none focus:border-[#E8642A]">{{ old('special_requests') }}</textarea>
+                        </div>
 
                         <button type="submit" class="w-full px-6 py-3 rounded-xl bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors">
                             Send Booking Request
@@ -335,7 +458,7 @@
                                         @endif
                                     </div>
                                     <div class="text-right">
-                                        <p class="text-2xl font-black text-[#E8642A]">₱{{ number_format($package->price, 0) }}/head</p>
+                                        <p class="text-2xl font-black text-[#E8642A]">₱{{ number_format($package->price, 0) }} bundle</p>
                                         <p class="text-xs text-[#8A7F72]">Min: {{ $package->min_guests ?? $caterer->min_guest }} guests</p>
                                     </div>
                                 </div>
@@ -365,14 +488,19 @@
                                         </div>
                                         <div>
                                             <label for="event_date_{{ $package->id }}" class="text-xs font-bold text-[#1C1A17] mb-1 block">Event date</label>
-                                            <input id="event_date_{{ $package->id }}" name="event_date" type="date" required
+                                            <input id="event_date_{{ $package->id }}" name="event_date" type="date" min="{{ now()->toDateString() }}" required
                                                 class="w-full px-3 py-2 rounded-lg bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A]">
                                         </div>
                                         <div>
                                             <label for="guests_{{ $package->id }}" class="text-xs font-bold text-[#1C1A17] mb-1 block">Guests</label>
-                                            <input id="guests_{{ $package->id }}" name="guests" type="number" required min="{{ $package->min_guests ?? $caterer->min_guest ?? 1 }}" max="{{ $caterer->max_guest ?? 10000 }}" value="{{ $package->min_guests ?? $caterer->min_guest ?? 10 }}"
+                                            <input id="guests_{{ $package->id }}" name="guests" type="number" required min="1" value="50"
                                                 class="w-full px-3 py-2 rounded-lg bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A]">
                                         </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="special_requests_{{ $package->id }}" class="text-xs font-bold text-[#1C1A17] mb-1 block">Event notes</label>
+                                        <textarea id="special_requests_{{ $package->id }}" name="special_requests" rows="3" placeholder="Menu preferences, allergies, setup needs..."
+                                            class="w-full px-3 py-2 rounded-lg bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] placeholder:text-[#8A7F72] focus:outline-none focus:border-[#E8642A]"></textarea>
                                     </div>
                                     <button type="submit" class="w-full px-4 py-2.5 rounded-lg bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors">
                                         Book This Package
@@ -384,53 +512,15 @@
                     @endif
                 </div>
 
-                <div id="booking-request" class="mb-8 bg-white rounded-2xl p-6 border border-[#EDE4D8] shadow-sm scroll-mt-24">
-                    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
-                        <div>
-                            <h2 class="text-2xl font-black text-[#1C1A17] mb-1">Custom Booking Request</h2>
-                            <p class="text-sm text-[#8A7F72]">Don't see what you need? Send a custom request to {{ $caterer->business_name ?? $caterer->name }}.</p>
-                        </div>
-                        <span class="text-xs font-bold text-[#8A7F72] bg-[#FDF6EE] border border-[#EDE4D8] rounded-full px-3 py-1">
-                            Pending until confirmed
-                        </span>
-                    </div>
 
-                    @if($errors->any())
-                        <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                            {{ $errors->first() }}
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('client.bookings.store', $caterer) }}" class="grid md:grid-cols-3 gap-4">
-                        @csrf
-                        <div>
-                            <label for="event_title_custom" class="text-xs font-bold text-[#1C1A17] mb-1.5 block">Event name</label>
-                            <input id="event_title_custom" name="event_title" type="text" required placeholder="Birthday Party"
-                                class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] placeholder:text-[#8A7F72] focus:outline-none focus:border-[#E8642A]">
-                        </div>
-                        <div>
-                            <label for="event_date_custom" class="text-xs font-bold text-[#1C1A17] mb-1.5 block">Event date</label>
-                            <input id="event_date_custom" name="event_date" type="date" required
-                                class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A]">
-                        </div>
-                        <div>
-                            <label for="guests_custom" class="text-xs font-bold text-[#1C1A17] mb-1.5 block">Guests</label>
-                            <input id="guests_custom" name="guests" type="number" required min="{{ $caterer->min_guest ?? 1 }}" max="{{ $caterer->max_guest ?? 10000 }}" value="{{ $caterer->min_guest ?? 10 }}"
-                                class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A]">
-                        </div>
-                        <button type="submit" class="md:col-span-3 px-6 py-3 rounded-xl bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors">
-                            Send Custom Request
-                        </button>
-                    </form>
-                </div>
 
                 {{-- Menu Items Section --}}
                 @if($menuItems->isNotEmpty())
-                <div class="mb-8">
+                <div class="mb-8" x-data="{ selectedItem: null }">
                     <h2 class="text-2xl font-black text-[#1C1A17] mb-6">Menu Items</h2>
                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach($menuItems as $item)
-                        <div class="bg-white rounded-2xl p-5 border border-[#EDE4D8] hover:shadow-lg transition-shadow">
+                        <button @click="selectedItem = {{ $item->id }}" class="bg-white rounded-2xl p-5 border border-[#EDE4D8] hover:shadow-lg transition-shadow text-left w-full">
                             @if($item->image_path)
                                 <img src="{{ $item->image_path }}" alt="{{ $item->name }}" class="w-full h-40 object-cover rounded-xl mb-4">
                             @else
@@ -443,22 +533,51 @@
                                 <p class="text-xs text-[#8A7F72] mb-3 line-clamp-2">{{ $item->description }}</p>
                             @endif
                             <div class="flex items-center justify-between">
-                                <span class="text-lg font-black text-[#E8642A]">₱{{ number_format($item->price, 0) }}</span>
+                                <span class="text-lg font-black text-[#E8642A]">₱{{ number_format($item->price, 0) }}/{{ $item->unit }}</span>
                                 <span class="text-xs font-bold text-[#8A7F72] bg-[#FDF6EE] px-2 py-1 rounded">{{ ucfirst($item->category) }}</span>
                             </div>
-                        </div>
+                        </button>
                         @endforeach
                     </div>
+
+                    {{-- Menu Item Modal --}}
+                    @foreach($menuItems as $item)
+                    <div x-show="selectedItem === {{ $item->id }}" x-cloak @click.self="selectedItem = null" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                            <div class="p-6">
+                                <div class="flex items-start justify-between mb-4">
+                                    <h3 class="text-2xl font-black text-[#1C1A17]">{{ $item->name }}</h3>
+                                    <button @click="selectedItem = null" class="p-2 hover:bg-[#FDF6EE] rounded-lg transition-colors">
+                                        <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                                @if($item->image_path)
+                                    <img src="{{ $item->image_path }}" alt="{{ $item->name }}" class="w-full h-64 object-cover rounded-xl mb-4">
+                                @endif
+                                <div class="mb-4">
+                                    <span class="text-3xl font-black text-[#E8642A]">₱{{ number_format($item->price, 0) }}/{{ $item->unit }}</span>
+                                    <span class="ml-3 text-sm font-bold text-[#8A7F72] bg-[#FDF6EE] px-3 py-1 rounded-full">{{ ucfirst($item->category) }}</span>
+                                </div>
+                                @if($item->description)
+                                    <p class="text-sm text-[#1C1A17] leading-relaxed mb-6">{{ $item->description }}</p>
+                                @endif
+                                <button onclick="requestItem('menu', {{ $item->id }})" @click="selectedItem = null" class="block w-full text-center px-6 py-3 rounded-xl bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors">
+                                    Request This Item
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
                 @endif
 
                 {{-- Add-ons Section --}}
                 @if($addOns->isNotEmpty())
-                <div class="mb-8">
+                <div class="mb-8" x-data="{ selectedAddon: null }">
                     <h2 class="text-2xl font-black text-[#1C1A17] mb-6">Add-ons</h2>
                     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                         @foreach($addOns as $addon)
-                        <div class="bg-white rounded-2xl p-5 border border-[#EDE4D8] hover:shadow-lg transition-shadow">
+                        <button @click="selectedAddon = {{ $addon->id }}" class="bg-white rounded-2xl p-5 border border-[#EDE4D8] hover:shadow-lg transition-shadow text-left w-full">
                             @if($addon->image_path)
                                 <img src="{{ $addon->image_path }}" alt="{{ $addon->name }}" class="w-full h-32 object-cover rounded-xl mb-4">
                             @else
@@ -470,10 +589,38 @@
                             @if($addon->description)
                                 <p class="text-xs text-[#8A7F72] mb-3 line-clamp-2">{{ $addon->description }}</p>
                             @endif
-                            <p class="text-lg font-black text-[#E8642A]">₱{{ number_format($addon->price, 0) }}</p>
-                        </div>
+                            <p class="text-lg font-black text-[#E8642A]">₱{{ number_format($addon->price, 0) }}/{{ $addon->unit }}</p>
+                        </button>
                         @endforeach
                     </div>
+
+                    {{-- Add-on Modal --}}
+                    @foreach($addOns as $addon)
+                    <div x-show="selectedAddon === {{ $addon->id }}" x-cloak @click.self="selectedAddon = null" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                            <div class="p-6">
+                                <div class="flex items-start justify-between mb-4">
+                                    <h3 class="text-2xl font-black text-[#1C1A17]">{{ $addon->name }}</h3>
+                                    <button @click="selectedAddon = null" class="p-2 hover:bg-[#FDF6EE] rounded-lg transition-colors">
+                                        <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                                @if($addon->image_path)
+                                    <img src="{{ $addon->image_path }}" alt="{{ $addon->name }}" class="w-full h-64 object-cover rounded-xl mb-4">
+                                @endif
+                                <div class="mb-4">
+                                    <span class="text-3xl font-black text-[#E8642A]">₱{{ number_format($addon->price, 0) }}/{{ $addon->unit }}</span>
+                                </div>
+                                @if($addon->description)
+                                    <p class="text-sm text-[#1C1A17] leading-relaxed mb-6">{{ $addon->description }}</p>
+                                @endif
+                                <button onclick="requestItem('addon', {{ $addon->id }})" @click="selectedAddon = null" class="block w-full text-center px-6 py-3 rounded-xl bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors">
+                                    Request This Add-on
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
                 @endif
             </div>
@@ -481,5 +628,14 @@
     </div>
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        function requestItem(type, id) {
+            const checkbox = document.querySelector(`input[name="${type === 'menu' ? 'menu_items' : 'addons'}[]"][value="${id}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+                checkbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    </script>
 </body>
 </html>

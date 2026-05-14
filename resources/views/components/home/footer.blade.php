@@ -18,13 +18,15 @@
             <div>
                 <p class="text-[0.65rem] sm:text-xs font-bold uppercase tracking-widest text-white/80 mb-3 sm:mb-4">For Clients</p>
                 <ul class="flex flex-col gap-2">
-                    @foreach(['Browse Caterers', 'How It Works', 'Client Reviews'] as $link)
-                        <li>
-                            <a href="#" class="text-xs sm:text-sm text-white/45 hover:text-white transition-colors">
-                                {{ $link }}
-                            </a>
-                        </li>
-                    @endforeach
+                    <li>
+                        <a href="{{ route('browse.caterers') }}" class="text-xs sm:text-sm text-white/45 hover:text-white transition-colors">Browse Caterers</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('how.it.works') }}" class="text-xs sm:text-sm text-white/45 hover:text-white transition-colors">How It Works</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('register') }}" class="text-xs sm:text-sm text-white/45 hover:text-white transition-colors">Create Account</a>
+                    </li>
                 </ul>
             </div>
 
@@ -32,13 +34,15 @@
             <div>
                 <p class="text-[0.65rem] sm:text-xs font-bold uppercase tracking-widest text-white/80 mb-3 sm:mb-4">For Caterers</p>
                 <ul class="flex flex-col gap-2">
-                    @foreach(['Join as Caterer', 'Pricing', 'Success Stories'] as $link)
-                        <li>
-                            <a href="#" class="text-xs sm:text-sm text-white/45 hover:text-white transition-colors">
-                                {{ $link }}
-                            </a>
-                        </li>
-                    @endforeach
+                    <li>
+                        <a href="{{ route('caterer.register') }}" class="text-xs sm:text-sm text-white/45 hover:text-white transition-colors">Join as Caterer</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('for.caterers') }}" class="text-xs sm:text-sm text-white/45 hover:text-white transition-colors">Caterer Benefits</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('caterer.login') }}" class="text-xs sm:text-sm text-white/45 hover:text-white transition-colors">Caterer Sign In</a>
+                    </li>
                 </ul>
             </div>
 

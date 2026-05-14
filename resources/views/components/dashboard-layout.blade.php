@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'PlatePal – Tagum City\'s Home Kitchen Marketplace' }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,14 +36,11 @@
                 @endisset
 
                 {{-- Right side --}}
-                <div class="flex items-center gap-6">
-                    <a href="#" class="text-sm font-medium text-[#8A7F72] hover:text-[#1C1A17] transition-colors flex items-center gap-1.5">
-                        Help
-                    </a>
+                <div>
                     @isset($username)
                     {{-- User Dropdown --}}
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-[#EDE4D8] bg-white hover:bg-[#FDF6EE] transition-colors">
+                        <button type="button" @click="open = !open" class="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-[#EDE4D8] bg-white hover:bg-[#FDF6EE] transition-colors">
                             <div class="w-[34px] h-[34px] rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center shrink-0">{{ $initials ?? 'U' }}</div>
                             <div class="hidden sm:flex flex-col items-start">
                                 <span class="text-[12.5px] font-bold text-[#1C1A17] leading-tight">{{ $username }}</span>
@@ -54,23 +49,32 @@
                             <svg class="size-3.5 text-[#8A7F72] transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
 
+                        @php
+                            $role = auth()->user()->role;
+                            $settingsRoute = match ($role) {
+                                'caterer' => route('caterer.profile'),
+                                'admin' => route('admin.dashboard'),
+                                default => route('client.profile'),
+                            };
+                            $settingsLabel = $role === 'admin' ? 'Dashboard' : 'Profile Settings';
+                            $feedbackRoute = route('feedback.create');
+                        @endphp
+
                         {{-- Dropdown Menu --}}
                         <div x-show="open" @click.outside="open = false" x-transition
                             class="absolute right-0 mt-2 w-48 bg-white border border-[#EDE4D8] rounded-2xl shadow-lg py-1.5 z-50">
-                            <a href="{{ route('home') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
-                                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10"/></svg>
-                                Welcome Page
-                            </a>
-                            <a href="{{ auth()->user()->role === 'caterer' ? route('caterer.profile') : route('client.profile') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
-                                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                Profile
-                            </a>
-                            <a href="#" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
+                            @if(auth()->user()->role === 'client')
+                                <a href="{{ route('home') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
+                                    <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10"/></svg>
+                                    Welcome Page
+                                </a>
+                            @endif
+                            <a href="{{ $settingsRoute }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
                                 <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                Settings
+                                {{ $settingsLabel }}
                             </a>
-                            <a href="#" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
-                                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                            <a href="{{ $feedbackRoute }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1C1A17] hover:bg-[#FDF6EE] transition-colors">
+                                <svg class="size-4 stroke-[#8A7F72]" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                                 Feedback
                             </a>
                             <div class="border-t border-[#EDE4D8] my-1"></div>
@@ -106,7 +110,7 @@
             <main class="bg-[#FAFAFA] flex-1 p-6 lg:p-8">
                 {{-- Mobile Sidebar Toggle --}}
                 @isset($sidebar)
-                <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden mb-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-[#EDE4D8] text-[#1C1A17] font-medium text-sm hover:bg-[#FDF6EE] transition-colors">
+                <button type="button" @click="sidebarOpen = !sidebarOpen" class="lg:hidden mb-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-[#EDE4D8] text-[#1C1A17] font-medium text-sm hover:bg-[#FDF6EE] transition-colors">
                     <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     Menu
                 </button>
@@ -121,10 +125,5 @@
         </div>
     </div>
     {{ $scripts ?? '' }}
-    <script>
-        window.addEventListener('pageshow', function(e) {
-            if (e.persisted) window.location.reload();
-        });
-    </script>
 </body>
 </html>
