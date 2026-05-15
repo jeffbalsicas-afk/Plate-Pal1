@@ -13,14 +13,13 @@ class PreventBackHistory
      *
      * @param  Closure(Request): (Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
-    {
-        $response = $next($request);
-        
-        return $response->withHeaders([
-            'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate',
-            'Pragma' => 'no-cache',
-            'Expires' => 'Fri, 01 Jan 1990 00:00:00 GMT',
-        ]);
-    }
+    public function handle($request, Closure $next)
+{
+    $response = $next($request);
+
+    // This tells the browser: "Do not store this page in your cache"
+    return $response->header('Cache-Control','no-cache, no-store, max-age=0, must-revalidate')
+                    ->header('Pragma','no-cache')
+                    ->header('Expires','Fri, 01 Jan 1990 00:00:00 GMT');
+}
 }
