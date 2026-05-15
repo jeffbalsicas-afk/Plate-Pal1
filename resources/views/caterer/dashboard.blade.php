@@ -381,45 +381,53 @@
 
     <x-slot:scripts>
     <script>
-    const ctx = document.getElementById('trendsChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-            datasets: [
-                {
-                    label: 'Previous Month',
-                    data: {{ json_encode($previousWeekly) }},
-                    borderColor: '#B0B0B0',
-                    borderDash: [5, 5],
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    tension: 0.4,
-                    fill: false
-                },
-                {
-                    label: 'Current Month',
-                    data: {{ json_encode($currentWeekly) }},
-                    borderColor: '#E8642A',
-                    borderWidth: 2.5,
-                    pointBackgroundColor: '#E8642A',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    tension: 0.4,
-                    fill: false
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
-            scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#8A7F72' } },
-                y: { min: 0, ticks: { stepSize: 1, font: { size: 11 }, color: '#8A7F72' }, grid: { color: '#EDE4D8' } }
-            }
+    (function () {
+        const chartElement = document.getElementById('trendsChart');
+
+        if (! chartElement || ! window.Chart) {
+            return;
         }
-    });
+
+        const ctx = chartElement.getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [
+                    {
+                        label: 'Previous Month',
+                        data: {{ json_encode($previousWeekly) }},
+                        borderColor: '#B0B0B0',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: false
+                    },
+                    {
+                        label: 'Current Month',
+                        data: {{ json_encode($currentWeekly) }},
+                        borderColor: '#E8642A',
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#E8642A',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.4,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#8A7F72' } },
+                    y: { min: 0, ticks: { stepSize: 1, font: { size: 11 }, color: '#8A7F72' }, grid: { color: '#EDE4D8' } }
+                }
+            }
+        });
+    })();
     </script>
     </x-slot:scripts>
 

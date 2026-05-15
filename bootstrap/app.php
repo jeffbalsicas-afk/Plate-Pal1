@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'prevent.back' => \App\Http\Middleware\PreventBackHistory::class,
         ]);
 
         $middleware->redirectGuestsTo(function (Request $request): string {

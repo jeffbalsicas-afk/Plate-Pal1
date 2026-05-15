@@ -1,4 +1,4 @@
-<nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-brand-cream-dark shadow-sm">
+<nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-brand-cream-dark shadow-sm" x-data="{ mobileOpen: false }" @keydown.escape.window="mobileOpen = false">
     <div class="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-16">
 
         {{-- Logo --}}
@@ -73,18 +73,23 @@
         <button
             type="button"
             class="md:hidden p-2 rounded-lg hover:bg-brand-cream transition-colors"
-            onclick="const m=document.getElementById('mobile-menu');m.classList.toggle('hidden');m.classList.toggle('flex');"
+            @click="mobileOpen = !mobileOpen"
+            :aria-expanded="mobileOpen.toString()"
+            aria-controls="mobile-menu"
             aria-label="Toggle menu"
         >
-            <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg x-show="!mobileOpen" class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            <svg x-show="mobileOpen" x-cloak class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
             </svg>
         </button>
 
     </div>
 
     {{-- Mobile menu --}}
-    <div id="mobile-menu" class="hidden border-t border-brand-cream-dark px-6 py-4 flex-col gap-4 bg-white">
+    <div id="mobile-menu" x-show="mobileOpen" x-cloak x-transition class="border-t border-brand-cream-dark px-6 py-4 flex flex-col gap-4 bg-white md:hidden" @click="if ($event.target.closest('a')) mobileOpen = false">
         <a href="{{ route('browse.caterers') }}" class="text-sm font-medium text-brand-muted">Browse caterers</a>
         <a href="{{ route('how.it.works') }}" class="text-sm font-medium text-brand-muted">How it works</a>
         <a href="{{ route('for.caterers') }}" class="text-sm font-medium text-brand-muted">For caterers</a>

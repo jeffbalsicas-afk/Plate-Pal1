@@ -12,7 +12,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SystemFeedbackController;
 
-Route::get('/', [LandingPageController::class, 'index'])->name('home');
+Route::get('/', [LandingPageController::class, 'index'])->name('home')->middleware('prevent.back');
 
 // Auth routes
 Route::middleware('guest')->group(function () {
@@ -34,20 +34,20 @@ Route::middleware('guest')->group(function () {
 });
 
 // Public routes (accessible to guests)
-Route::get('/browse-caterers', [ClientDashboardController::class, 'browsePubic'])->name('browse.caterers');
-Route::get('/caterer/{id}', [CatererController::class, 'show'])->name('caterer.detail');
-Route::get('/how-it-works', [LandingPageController::class, 'howItWorks'])->name('how.it.works');
-Route::get('/for-caterers', [LandingPageController::class, 'forCaterers'])->name('for.caterers');
+Route::get('/browse-caterers', [ClientDashboardController::class, 'browsePubic'])->name('browse.caterers')->middleware('prevent.back');
+Route::get('/caterer/{id}', [CatererController::class, 'show'])->whereNumber('id')->name('caterer.detail')->middleware('prevent.back');
+Route::get('/how-it-works', [LandingPageController::class, 'howItWorks'])->name('how.it.works')->middleware('prevent.back');
+Route::get('/for-caterers', [LandingPageController::class, 'forCaterers'])->name('for.caterers')->middleware('prevent.back');
 
 // Protected routes (require auth)
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'prevent.back'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/feedback', [SystemFeedbackController::class, 'create'])->name('feedback.create');
     Route::post('/feedback', [SystemFeedbackController::class, 'store'])->name('feedback.store');
 });
 
 // Caterer routes (require caterer role)
-Route::middleware(['auth', 'role:caterer'])->group(function () {
+Route::middleware(['auth', 'role:caterer', 'prevent.back'])->group(function () {
     Route::get('/caterer/dashboard', [CatererController::class, 'dashboard'])->name('caterer.dashboard');
     Route::get('/caterer/bookings', [CatererController::class, 'bookings'])->name('caterer.bookings');
     Route::get('/caterer/menu-pricing', [CatererController::class, 'menuAndPricing'])->name('caterer.menu-pricing');
@@ -86,7 +86,7 @@ Route::middleware(['auth', 'role:caterer'])->group(function () {
 });
 
 // Client routes (require client role)
-Route::middleware(['auth', 'role:client'])->group(function () {
+Route::middleware(['auth', 'role:client', 'prevent.back'])->group(function () {
     Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('client.dashboard');
     Route::get('/client/browse-caterers', [ClientDashboardController::class, 'browse'])->name('client.browse');
     Route::get('/client/bookings', [ClientDashboardController::class, 'bookings'])->name('client.bookings');
@@ -103,7 +103,7 @@ Route::middleware(['auth', 'role:client'])->group(function () {
 });
 
 // Shared client/caterer messaging routes
-Route::middleware(['auth', 'role:client,caterer'])->group(function () {
+Route::middleware(['auth', 'role:client,caterer', 'prevent.back'])->group(function () {
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/attachments/{message}', [MessageController::class, 'attachment'])->name('messages.attachment');
     Route::get('/messages/{recipient}', [MessageController::class, 'show'])->name('messages.show');
@@ -113,7 +113,7 @@ Route::middleware(['auth', 'role:client,caterer'])->group(function () {
 });
 
 // Admin routes (require auth + admin role)
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin', 'prevent.back'])->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/users', [AdminDashboardController::class, 'users'])->name('admin.users');
     Route::get('/admin/bookings', [AdminDashboardController::class, 'bookings'])->name('admin.bookings');

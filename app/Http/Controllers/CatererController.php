@@ -291,7 +291,7 @@ class CatererController extends Controller
                 'phone'         => [
                     'required',
                     'string',
-                    'regex:/^\+?\d{11,20}$/',
+                    'regex:/^\+639\d{9}$/',
                     Rule::unique('users', 'phone')->ignore($user->id),
                 ],
                 'description'   => ['nullable', 'string', 'max:2000'],
@@ -301,6 +301,8 @@ class CatererController extends Controller
                 'min_guest'     => ['required', 'integer', 'min:1'],
                 'max_guest'     => ['required', 'integer', 'gte:min_guest'],
                 'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048'],
+            ], [
+                'phone.regex' => 'Phone number must be in format +639XXXXXXXXX (10 digits starting with 9)',
             ]);
 
             $data = $this->pendingReviewData($request->only([
@@ -435,8 +437,11 @@ class CatererController extends Controller
             $statusCounts = ['all' => Booking::where('user_id', $user->id)->count()];
         }
 
+        // Use different view for guests vs authenticated users
+        $view = auth()->guest() ? 'caterer.detail-guest' : 'caterer.detail';
+
         return response()
-            ->view('caterer.detail', compact('caterer', 'packages', 'menuItems', 'addOns', 'publicReviews', 'reviewsCount', 'averageRating', 'user', 'initials', 'savedCatererIds', 'activeBookings', 'unreadMessages', 'statusCounts'))
+            ->view($view, compact('caterer', 'packages', 'menuItems', 'addOns', 'publicReviews', 'reviewsCount', 'averageRating', 'user', 'initials', 'savedCatererIds', 'activeBookings', 'unreadMessages', 'statusCounts'))
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
@@ -526,13 +531,26 @@ class CatererController extends Controller
 
     private function normalizePhone(?string $phone): string
     {
+        // Remove all non-digit characters except +
         $phone = preg_replace('/[^\d+]/', '', (string) $phone);
 
-        if (str_starts_with($phone, '+')) {
-            return '+'.preg_replace('/\D/', '', substr($phone, 1));
+        // If it starts with 0, replace with +63
+        if (str_starts_with($phone, '0')) {
+            return '+63' . substr($phone, 1);
         }
 
-        return preg_replace('/\D/', '', $phone);
+        // If it starts with 63, add +
+        if (str_starts_with($phone, '63')) {
+            return '+' . $phone;
+        }
+
+        // If it already starts with +63, return as is
+        if (str_starts_with($phone, '+63')) {
+            return $phone;
+        }
+
+        // Otherwise, assume it's a local number and add +63
+        return '+63' . preg_replace('/\D/', '', $phone);
     }
 
     private function arrayValue(mixed $value): array

@@ -17,7 +17,7 @@ class AuthController extends Controller
 
     public function showLogin()
     {
-        return view('auth.client-login');
+        return $this->withNoCacheHeaders(response()->view('auth.client-login'));
     }
 
     public function login(Request $request)
@@ -43,8 +43,10 @@ class AuthController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['required', 'string', 'regex:/^\+?\d{11,20}$/', 'unique:users,phone'],
+            'phone' => ['required', 'string', 'regex:/^\+639\d{9}$/', 'unique:users,phone'],
             'password' => ['required', 'confirmed', PasswordRule::defaults()],
+        ], [
+            'phone.regex' => 'Phone number must be in format +639XXXXXXXXX (10 digits starting with 9)',
         ]);
 
         $user = User::create([
@@ -64,7 +66,7 @@ class AuthController extends Controller
 
     public function showCatererLogin()
     {
-        return view('auth.caterer-login');
+        return $this->withNoCacheHeaders(response()->view('auth.caterer-login'));
     }
 
     public function Catererlogin(Request $request)
@@ -90,9 +92,11 @@ class AuthController extends Controller
             'business_name' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['required', 'string', 'regex:/^\+?\d{11,20}$/', 'unique:users,phone'],
+            'phone' => ['required', 'string', 'regex:/^\+639\d{9}$/', 'unique:users,phone'],
             'barangay' => ['required'],
             'password' => ['required', 'confirmed', PasswordRule::defaults()],
+        ], [
+            'phone.regex' => 'Phone number must be in format +639XXXXXXXXX (10 digits starting with 9)',
         ]);
 
         $user = User::create([
@@ -114,7 +118,7 @@ class AuthController extends Controller
 
     public function showAdminLogin()
     {
-        return view('auth.admin-login');
+        return $this->withNoCacheHeaders(response()->view('auth.admin-login'));
     }
 
     public function adminLogin(Request $request)
@@ -211,8 +215,22 @@ class AuthController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        
+        // Clear Livewire cache
+        if (file_exists(storage_path('framework/cache/livewire-tmp'))) {
+            array_map('unlink', glob(storage_path('framework/cache/livewire-tmp/*')));
+        }
 
-        return redirect('/');
+        return $this->withNoCacheHeaders(redirect()->route('home'));
+    }
+
+    private function withNoCacheHeaders($response)
+    {
+        return $response->withHeaders([
+            'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => 'Fri, 01 Jan 1990 00:00:00 GMT',
+        ]);
     }
 
     private function normalizeAuthInput(Request $request): void
@@ -237,13 +255,26 @@ class AuthController extends Controller
 
     private function normalizePhone(?string $phone): string
     {
+        // Remove all non-digit characters except +
         $phone = preg_replace('/[^\d+]/', '', (string) $phone);
 
-        if (str_starts_with($phone, '+')) {
-            return '+'.preg_replace('/\D/', '', substr($phone, 1));
+        // If it starts with 0, replace with +63
+        if (str_starts_with($phone, '0')) {
+            return '+63' . substr($phone, 1);
         }
 
-        return preg_replace('/\D/', '', $phone);
+        // If it starts with 63, add +
+        if (str_starts_with($phone, '63')) {
+            return '+' . $phone;
+        }
+
+        // If it already starts with +63, return as is
+        if (str_starts_with($phone, '+63')) {
+            return $phone;
+        }
+
+        // Otherwise, assume it's a local number and add +63
+        return '+63' . preg_replace('/\D/', '', $phone);
     }
 
     private function attemptRoleLogin(

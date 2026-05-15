@@ -49,7 +49,7 @@
         <div class="mb-6">
             <h2 class="text-2xl font-black text-[#1C1A17] mb-1">Browse Caterers in Tagum City</h2>
             <p class="text-sm text-[#8A7F72] mb-4">Discover trusted local caterers for your special events</p>
-            <form id="filterForm" action="{{ route('client.browse') }}" method="GET" class="flex gap-3">
+            <form id="filterForm" action="{{ route('client.browse') }}" method="GET" class="flex flex-col gap-3 sm:flex-row">
                 @foreach(['barangay', 'price_range', 'cuisine', 'rating', 'sort'] as $param)
                     @if(request($param))
                         <input type="hidden" name="{{ $param }}" value="{{ request($param) }}">
@@ -67,7 +67,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {{-- Filter Sidebar --}}
             <div class="lg:col-span-1">
-                <form action="{{ route('client.browse') }}" method="GET" class="bg-white rounded-2xl p-6 border border-[#EDE4D8] h-fit sticky top-20">
+                <form action="{{ route('client.browse') }}" method="GET" class="bg-white rounded-2xl p-4 sm:p-6 border border-[#EDE4D8] h-fit lg:sticky lg:top-20">
                     <input type="hidden" name="search" value="{{ request('search') }}">
                     <input type="hidden" name="sort" value="{{ request('sort') }}">
                     <h3 class="text-lg font-black text-[#1C1A17] mb-4">Filter Results</h3>
@@ -157,9 +157,9 @@
             </div>
         @else
             <div class="space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <p class="text-sm text-[#8A7F72]">Showing {{ $caterers->count() }} of {{ $caterers->total() }} caterers</p>
-                    <form action="{{ route('client.browse') }}" method="GET" class="flex items-center gap-2">
+                    <form action="{{ route('client.browse') }}" method="GET" class="flex flex-wrap items-center gap-2">
                         <input type="hidden" name="search" value="{{ request('search') }}">
                         <input type="hidden" name="barangay" value="{{ request('barangay') }}">
                         <input type="hidden" name="price_range" value="{{ request('price_range') }}">

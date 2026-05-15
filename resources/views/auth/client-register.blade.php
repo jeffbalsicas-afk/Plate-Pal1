@@ -29,7 +29,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('register') }}" class="space-y-4 sm:space-y-5">
+            <form method="POST" action="{{ route('register') }}" class="space-y-4 sm:space-y-5" onsubmit="return handlePhoneSubmit()">
                 @csrf
 
                 {{-- Full Name --}}
@@ -49,8 +49,13 @@
                 {{-- Phone Number --}}
                 <div>
                     <label class="block text-sm sm:text-base font-semibold text-gray-900 mb-1.5 sm:mb-2">Phone Number</label>
-                    <input type="tel" name="phone" value="{{ old('phone') }}" required placeholder="0912 345 6789"
-                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gray-50 border {{ $errors->has('phone') ? 'border-red-400' : 'border-gray-200' }} text-gray-900 placeholder:text-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#f44e08] transition-all">
+                    <div class="relative">
+                        <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-900 text-sm sm:text-base font-medium">+63</span>
+                        <input type="tel" id="phone" name="phone" value="{{ old('phone') ? ltrim(str_replace('+63', '', old('phone'))) : '' }}" required placeholder="9123456789" maxlength="10" pattern="9[0-9]{9}"
+                            class="w-full pl-14 sm:pl-16 pr-3 sm:pr-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gray-50 border {{ $errors->has('phone') ? 'border-red-400' : 'border-gray-200' }} text-gray-900 placeholder:text-gray-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#f44e08] transition-all"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10); if(this.value.length > 0 && this.value[0] !== '9') this.value = '';">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Must start with 9 (e.g., 9123456789)</p>
                 </div>
 
                 {{-- Password --}}
@@ -140,5 +145,13 @@ function togglePassword(inputId, iconId) {
     icon.innerHTML = isPassword
         ? '<path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>'
         : '<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+}
+
+function handlePhoneSubmit() {
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput && phoneInput.value) {
+        phoneInput.value = '+63' + phoneInput.value;
+    }
+    return true;
 }
 </script>

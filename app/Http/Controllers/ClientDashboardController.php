@@ -517,6 +517,12 @@ class ClientDashboardController extends Controller
             ? Package::where('caterer_id', $caterer->id)->where('status', 'live')->find($validated['package_id'])
             : null;
 
+        if ($package && $validated['guests'] < $package->min_guests) {
+            return back()
+                ->withErrors(['guests' => "This package requires at least {$package->min_guests} guests."])
+                ->withInput();
+        }
+
         $booking = Booking::create([
             'user_id' => auth()->id(),
             'caterer_id' => $caterer->id,
@@ -671,7 +677,9 @@ class ClientDashboardController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'regex:/^\+?\d{11,20}$/', Rule::unique('users', 'phone')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'regex:/^\+639\d{9}$/', Rule::unique('users', 'phone')->ignore($user->id)],
+        ], [
+            'phone.regex' => 'Phone number must be in format +639XXXXXXXXX (10 digits starting with 9)',
         ]);
 
         $user->update($validated);
@@ -685,12 +693,25 @@ class ClientDashboardController extends Controller
             return null;
         }
 
+        // Remove all non-digit characters except +
         $phone = preg_replace('/[^\d+]/', '', (string) $phone);
 
-        if (str_starts_with($phone, '+')) {
-            return '+'.preg_replace('/\D/', '', substr($phone, 1));
+        // If it starts with 0, replace with +63
+        if (str_starts_with($phone, '0')) {
+            return '+63' . substr($phone, 1);
         }
 
-        return preg_replace('/\D/', '', $phone);
+        // If it starts with 63, add +
+        if (str_starts_with($phone, '63')) {
+            return '+' . $phone;
+        }
+
+        // If it already starts with +63, return as is
+        if (str_starts_with($phone, '+63')) {
+            return $phone;
+        }
+
+        // Otherwise, assume it's a local number and add +63
+        return '+63' . preg_replace('/\D/', '', $phone);
     }
 }

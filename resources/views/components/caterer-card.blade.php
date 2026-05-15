@@ -60,12 +60,12 @@
     </div>
 
     <div class="p-4">
-        <div class="flex items-start justify-between mb-2">
-            <div>
-                <h3 class="text-sm font-bold text-brand-dark">{{ $displayName }}</h3>
-                <p class="text-xs text-brand-muted">{{ $caterer->barangay ?? $caterer->location ?? 'Tagum City' }}</p>
+        <div class="flex items-start justify-between gap-3 mb-2">
+            <div class="min-w-0">
+                <h3 class="truncate text-sm font-bold text-brand-dark">{{ $displayName }}</h3>
+                <p class="truncate text-xs text-brand-muted">{{ $caterer->barangay ?? $caterer->location ?? 'Tagum City' }}</p>
             </div>
-            <div class="flex items-center gap-1">
+            <div class="flex shrink-0 items-center gap-1">
                 <svg class="size-4 fill-brand-orange" viewBox="0 0 24 24"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                 <span class="text-xs font-bold text-brand-dark">{{ number_format($caterer->rating ?? 4.8, 1) }}</span>
             </div>
@@ -73,7 +73,7 @@
 
         <p class="text-xs text-brand-orange font-medium mb-2">{{ $caterer->cuisine ?? $caterer->cuisine_type ?? $caterer->specialties ?? 'Catering Services' }}</p>
 
-        <div class="flex items-center justify-between text-xs text-brand-muted mb-3 pb-3 border-b border-brand-cream-dark/50">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-brand-muted mb-3 pb-3 border-b border-brand-cream-dark/50">
             <span>PHP {{ $caterer->price_min ?? '200' }}-{{ $caterer->price_max ?? '600' }}/head</span>
             <span>{{ $caterer->min_guest ?? '10' }}-{{ $caterer->max_guest ?? '100' }} guests</span>
         </div>

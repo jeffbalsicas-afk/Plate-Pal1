@@ -85,30 +85,30 @@
 
     <div x-data="messageDeleteHandler()" @open-delete-modal.window="openDeleteModal($event.detail.messageId)">
 
-    <div class="bg-white rounded-2xl border border-[#EDE4D8] overflow-hidden flex flex-col h-200">
-        <div class="p-6 border-b border-[#EDE4D8] flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center">
+    <div class="bg-white rounded-2xl border border-[#EDE4D8] overflow-hidden flex flex-col h-[calc(100svh-9rem)] min-h-[32rem] lg:h-[50rem]">
+        <div class="p-4 sm:p-6 border-b border-[#EDE4D8] flex items-center justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center shrink-0">
                     {{ strtoupper(substr($recipient->name, 0, 1)) }}
                 </div>
-                <div>
-                    <h2 class="font-bold text-[#1C1A17]">{{ $recipient->business_name ?? $recipient->name }}</h2>
-                    <p class="text-xs text-[#8A7F72]">{{ $recipient->email }}</p>
+                <div class="min-w-0">
+                    <h2 class="truncate font-bold text-[#1C1A17]">{{ $recipient->business_name ?? $recipient->name }}</h2>
+                    <p class="truncate text-xs text-[#8A7F72]">{{ $recipient->email }}</p>
                 </div>
             </div>
-            <a href="{{ route('messages.index') }}" class="text-[#8A7F72] hover:text-[#1C1A17]">
+            <a href="{{ route('messages.index') }}" class="shrink-0 text-[#8A7F72] hover:text-[#1C1A17]">
                 <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </a>
         </div>
 
-        <div id="messages-thread" data-current-role="{{ auth()->user()->role }}" class="flex-1 overflow-y-auto p-6 space-y-4">
+        <div id="messages-thread" data-current-role="{{ auth()->user()->role }}" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
             @forelse($messages as $message)
                 @php
                     $isMine = $message->sender === auth()->user()->role;
                     $hasBody = filled($message->body);
                 @endphp
                 <div data-message-id="{{ $message->id }}" class="flex {{ $isMine ? 'justify-end' : 'justify-start' }} group">
-                    <div class="max-w-xs sm:max-w-sm {{ $isMine ? 'bg-[#E8642A] text-white' : 'bg-[#FDF6EE] text-[#1C1A17]' }} rounded-lg px-4 py-2 relative">
+                    <div class="max-w-[82%] sm:max-w-sm {{ $isMine ? 'bg-[#E8642A] text-white' : 'bg-[#FDF6EE] text-[#1C1A17]' }} rounded-lg px-4 py-2 relative">
                         @if($isMine)
                             <button type="button" @click="$dispatch('open-delete-modal', { messageId: {{ $message->id }} })" class="absolute -left-8 top-1 opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center" title="Delete message">
                                 <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -154,7 +154,7 @@
             @endforelse
         </div>
 
-        <div class="border-t border-[#EDE4D8] p-6">
+        <div class="border-t border-[#EDE4D8] p-4 sm:p-6">
             <form id="message-form" action="{{ route('messages.store', $recipient) }}" method="POST" enctype="multipart/form-data" data-channel="messages.{{ $clientId }}.{{ $catererId }}" class="space-y-3" autocomplete="off">
                 @csrf
                 <div id="attachment-selection" class="hidden items-center justify-between gap-3 rounded-lg border border-[#EDE4D8] bg-[#FDF6EE] px-3 py-2 text-sm text-[#1C1A17]">
@@ -174,14 +174,14 @@
                     <p class="text-xs font-medium text-red-600">{{ $message }}</p>
                 @enderror
 
-                <div class="flex gap-3">
+                <div class="flex flex-wrap gap-2 sm:flex-nowrap sm:gap-3">
                     <input id="message-attachment" type="file" name="attachment" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv" class="sr-only">
-                    <label for="message-attachment" class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-[#EDE4D8] bg-white px-3 py-2 text-[#8A7F72] transition-colors hover:border-[#E8642A] hover:text-[#E8642A]" title="Attach file" aria-label="Attach file">
+                    <label for="message-attachment" class="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg border border-[#EDE4D8] bg-white px-3 py-2 text-[#8A7F72] transition-colors hover:border-[#E8642A] hover:text-[#E8642A]" title="Attach file" aria-label="Attach file">
                         <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.586-6.586a4 4 0 00-5.657-5.657l-6.586 6.586a6 6 0 108.485 8.485l6.586-6.586"/></svg>
                     </label>
                     <input type="text" name="body" placeholder="Type a message..." autocomplete="off"
-                        class="flex-1 px-4 py-2 rounded-lg bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] placeholder:text-[#8A7F72] focus:outline-none focus:border-[#E8642A]">
-                    <button type="submit" class="px-6 py-2 rounded-lg bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors disabled:cursor-not-allowed disabled:opacity-70">
+                        class="min-w-0 flex-1 px-4 py-2 rounded-lg bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] placeholder:text-[#8A7F72] focus:outline-none focus:border-[#E8642A]">
+                    <button type="submit" class="h-10 flex-1 rounded-lg bg-[#E8642A] px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-[#F07C42] disabled:cursor-not-allowed disabled:opacity-70 sm:flex-none">
                         Send
                     </button>
                 </div>
@@ -247,7 +247,9 @@
                 };
             }
 
-            document.addEventListener('DOMContentLoaded', () => {
+            window.__platePalMessageCleanup?.();
+
+            (function () {
                 const thread = document.getElementById('messages-thread');
                 const form = document.getElementById('message-form');
 
@@ -349,7 +351,7 @@
                     row.className = `flex ${isMine ? 'justify-end' : 'justify-start'} group`;
 
                     const bubble = document.createElement('div');
-                    bubble.className = `max-w-xs sm:max-w-sm rounded-lg px-4 py-2 relative ${isMine ? 'bg-[#E8642A] text-white' : 'bg-[#FDF6EE] text-[#1C1A17]'}`;
+                    bubble.className = `max-w-[82%] sm:max-w-sm rounded-lg px-4 py-2 relative ${isMine ? 'bg-[#E8642A] text-white' : 'bg-[#FDF6EE] text-[#1C1A17]'}`;
 
                     if (isMine) {
                         const deleteBtn = document.createElement('button');
@@ -409,10 +411,15 @@
                 // Poll every 3 seconds
                 const pollInterval = setInterval(pollMessages, 1000);
 
-                // Cleanup on page unload
-                window.addEventListener('beforeunload', () => {
+                const cleanup = () => {
                     clearInterval(pollInterval);
-                });
+                    window.removeEventListener('livewire:navigate', cleanup);
+                    window.removeEventListener('beforeunload', cleanup);
+                };
+
+                window.__platePalMessageCleanup = cleanup;
+                window.addEventListener('livewire:navigate', cleanup);
+                window.addEventListener('beforeunload', cleanup);
 
                 attachmentInput.addEventListener('change', updateAttachmentSelection);
                 attachmentClear.addEventListener('click', () => {
@@ -473,7 +480,7 @@
                 });
 
                 scrollToBottom();
-            });
+            })();
         </script>
     </x-slot:scripts>
 </x-dashboard-layout>

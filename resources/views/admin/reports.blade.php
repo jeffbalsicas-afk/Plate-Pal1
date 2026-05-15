@@ -32,7 +32,7 @@
     </x-slot:sidebar>
 
     <div class="bg-white rounded-2xl p-6 border border-[#EDE4D8] mb-6">
-        <form method="GET" action="{{ route('admin.reports') }}" class="flex items-center gap-4">
+        <form method="GET" action="{{ route('admin.reports') }}" class="flex flex-col gap-4 md:flex-row md:items-end">
             <div class="flex-1">
                 <label class="block text-xs font-bold text-[#8A7F72] uppercase mb-2">Filter by Caterer</label>
                 <select name="caterer_id" class="w-full px-4 py-2.5 border border-[#EDE4D8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8642A] text-sm">
@@ -44,14 +44,14 @@
                     @endforeach
                 </select>
             </div>
-            <div class="pt-6">
-                <button type="submit" class="px-6 py-2.5 bg-[#E8642A] text-white rounded-lg font-bold text-sm hover:bg-[#D55A24] transition-colors">
+            <div>
+                <button type="submit" class="w-full px-6 py-2.5 bg-[#E8642A] text-white rounded-lg font-bold text-sm hover:bg-[#D55A24] transition-colors md:w-auto">
                     Apply Filter
                 </button>
             </div>
             @if(request('caterer_id'))
-                <div class="pt-6">
-                    <a href="{{ route('admin.reports') }}" class="px-6 py-2.5 bg-[#8A7F72] text-white rounded-lg font-bold text-sm hover:bg-[#6B5F54] transition-colors">
+                <div>
+                    <a href="{{ route('admin.reports') }}" class="block w-full px-6 py-2.5 text-center bg-[#8A7F72] text-white rounded-lg font-bold text-sm hover:bg-[#6B5F54] transition-colors md:w-auto">
                         Clear
                     </a>
                 </div>
@@ -147,13 +147,13 @@
             @else
                 <div class="space-y-3">
                     @forelse($topCaterers as $caterer)
-                    <div class="flex items-center justify-between p-3 bg-[#FDF6EE] rounded-lg">
-                        <div class="flex items-center gap-2">
+                    <div class="flex flex-col gap-3 p-3 bg-[#FDF6EE] rounded-lg sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex min-w-0 items-center gap-2">
                             <div class="w-8 h-8 rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center">
                                 {{ strtoupper(substr($caterer->business_name ?? $caterer->name, 0, 1)) }}
                             </div>
-                            <div>
-                                <p class="text-sm font-bold text-[#1C1A17]">{{ $caterer->business_name ?? $caterer->name }}</p>
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-bold text-[#1C1A17]">{{ $caterer->business_name ?? $caterer->name }}</p>
                                 <p class="text-xs text-[#8A7F72]">{{ $caterer->bookings_count }} bookings</p>
                             </div>
                         </div>
