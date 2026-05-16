@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MenuItem;
 use App\Models\Package;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
@@ -25,9 +26,15 @@ class MenuController extends Controller
             'unit' => 'required|string|in:head,tray,whole,bottle,box',
             'category' => 'required|string|in:main,side,dessert,beverage',
             'status' => self::CATERER_STATUS_RULE,
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $validated['status'] = $this->statusForCaterer($validated['status']);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('menu-items', 'public');
+            $validated['image_path'] = '/storage/' . $path;
+        }
 
         MenuItem::create([
             'caterer_id' => auth()->id(),
@@ -51,9 +58,18 @@ class MenuController extends Controller
             'unit' => 'required|string|in:head,tray,whole,bottle,box',
             'category' => 'required|string|in:main,side,dessert,beverage',
             'status' => self::CATERER_STATUS_RULE,
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $validated['status'] = $this->statusForCaterer($validated['status']);
+
+        if ($request->hasFile('image')) {
+            if ($menuItem->image_path && str_starts_with($menuItem->image_path, '/storage/')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $menuItem->image_path));
+            }
+            $path = $request->file('image')->store('menu-items', 'public');
+            $validated['image_path'] = '/storage/' . $path;
+        }
 
         $menuItem->update($validated);
 
@@ -84,9 +100,15 @@ class MenuController extends Controller
             'price' => 'required|numeric|min:0',
             'unit' => 'required|string|in:head,tray,bottle,box',
             'status' => self::CATERER_STATUS_RULE,
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $validated['status'] = $this->statusForCaterer($validated['status']);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('addons', 'public');
+            $validated['image_path'] = '/storage/' . $path;
+        }
 
         MenuItem::create([
             'caterer_id' => auth()->id(),
@@ -110,9 +132,18 @@ class MenuController extends Controller
             'price' => 'required|numeric|min:0',
             'unit' => 'required|string|in:head,tray,bottle,box',
             'status' => self::CATERER_STATUS_RULE,
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $validated['status'] = $this->statusForCaterer($validated['status']);
+
+        if ($request->hasFile('image')) {
+            if ($menuItem->image_path && str_starts_with($menuItem->image_path, '/storage/')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $menuItem->image_path));
+            }
+            $path = $request->file('image')->store('addons', 'public');
+            $validated['image_path'] = '/storage/' . $path;
+        }
 
         $menuItem->update($validated);
 
@@ -138,9 +169,15 @@ class MenuController extends Controller
             'min_guests' => 'required|integer|min:1',
             'includes' => 'nullable|array',
             'status' => self::CATERER_STATUS_RULE,
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $validated['status'] = $this->statusForCaterer($validated['status']);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('packages', 'public');
+            $validated['image'] = $path;
+        }
 
         Package::create([
             'caterer_id' => auth()->id(),
@@ -164,9 +201,18 @@ class MenuController extends Controller
             'min_guests' => 'required|integer|min:1',
             'includes' => 'nullable|array',
             'status' => self::CATERER_STATUS_RULE,
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $validated['status'] = $this->statusForCaterer($validated['status']);
+
+        if ($request->hasFile('image')) {
+            if ($package->image && Storage::disk('public')->exists($package->image)) {
+                Storage::disk('public')->delete($package->image);
+            }
+            $path = $request->file('image')->store('packages', 'public');
+            $validated['image'] = $path;
+        }
 
         $package->update($validated);
 

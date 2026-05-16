@@ -17,22 +17,55 @@ class AuthController extends Controller
 
     public function showLogin()
     {
+        if (Auth::check()) {
+            return $this->redirectAuthenticatedUser();
+        }
         return $this->withNoCacheHeaders(response()->view('auth.client-login'));
     }
 
     public function login(Request $request)
     {
-        return $this->attemptRoleLogin(
-            $request,
-            'client',
-            route('client.dashboard'),
-            'This account is not registered as a client.',
-            $request->input('redirect')
-        );
+        $this->normalizeEmail($request);
+
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            $user = Auth::user();
+            
+            // Redirect based on user role
+            $redirectUrl = match ($user->role) {
+                'admin' => route('admin.dashboard'),
+                'caterer' => route('caterer.dashboard'),
+                'client' => route('client.dashboard'),
+                default => route('home'),
+            };
+
+            // Handle redirect parameter for clients
+            if ($user->role === 'client') {
+                $redirect = $this->safeRedirectTarget($request->input('redirect'));
+                if ($redirect) {
+                    return redirect()->to($redirect);
+                }
+            }
+
+            return redirect()->intended($redirectUrl);
+        }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
     }
 
     public function showRegister()
     {
+        if (Auth::check()) {
+            return $this->redirectAuthenticatedUser();
+        }
         return view('auth.client-register');
     }
 
@@ -66,6 +99,9 @@ class AuthController extends Controller
 
     public function showCatererLogin()
     {
+        if (Auth::check()) {
+            return $this->redirectAuthenticatedUser();
+        }
         return $this->withNoCacheHeaders(response()->view('auth.caterer-login'));
     }
 
@@ -81,6 +117,9 @@ class AuthController extends Controller
 
     public function showCatererRegister()
     {
+        if (Auth::check()) {
+            return $this->redirectAuthenticatedUser();
+        }
         return view('auth.caterer-register');
     }
 
@@ -118,6 +157,9 @@ class AuthController extends Controller
 
     public function showAdminLogin()
     {
+        if (Auth::check()) {
+            return $this->redirectAuthenticatedUser();
+        }
         return $this->withNoCacheHeaders(response()->view('auth.admin-login'));
     }
 
@@ -341,7 +383,6 @@ class AuthController extends Controller
     private function loginRouteForRole(?string $role): string
     {
         return match ($role) {
-            'admin' => 'admin.login',
             'caterer' => 'caterer.login',
             default => 'login',
         };
@@ -352,5 +393,19 @@ class AuthController extends Controller
         return is_string($role) && in_array($role, ['admin', 'caterer', 'client'], true)
             ? $role
             : null;
+    }
+
+    private function redirectAuthenticatedUser()
+    {
+        $user = Auth::user();
+        
+        $redirectUrl = match ($user->role) {
+            'admin' => route('admin.dashboard'),
+            'caterer' => route('caterer.dashboard'),
+            'client' => route('client.dashboard'),
+            default => route('home'),
+        };
+
+        return $this->withNoCacheHeaders(redirect($redirectUrl));
     }
 }

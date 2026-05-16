@@ -15,6 +15,15 @@ class MessageController extends Controller
     public function index()
     {
         $user = auth()->user();
+        
+        // Mark all unviewed bookings as viewed for clients when they access messages
+        if ($user->role === 'client') {
+            Booking::where('user_id', $user->id)
+                ->whereNull('client_viewed_at')
+                ->update(['client_viewed_at' => now()]);
+        }
+        
+        // Recalculate stats AFTER marking as viewed
         [
             'activeBookings' => $activeBookings,
             'unreadMessages' => $unreadMessages,
@@ -65,6 +74,13 @@ class MessageController extends Controller
         $user = auth()->user();
         [$clientId, $catererId] = $this->conversationPair($user, $recipient);
         
+        // Mark all unviewed bookings as viewed for clients when they access messages
+        if ($user->role === 'client') {
+            Booking::where('user_id', $user->id)
+                ->whereNull('client_viewed_at')
+                ->update(['client_viewed_at' => now()]);
+        }
+        
         $messages = Message::with(['user', 'caterer'])
         ->where('user_id', $clientId)
         ->where('caterer_id', $catererId)
@@ -77,6 +93,7 @@ class MessageController extends Controller
             ->where('sender', '!=', $user->role)
             ->update(['is_read' => true]);
 
+        // Recalculate stats AFTER marking as viewed
         [
             'activeBookings' => $activeBookings,
             'unreadMessages' => $unreadMessages,
@@ -189,7 +206,7 @@ class MessageController extends Controller
         if ($user->role === 'client') {
             return [
                 'activeBookings' => Booking::where('user_id', $user->id)
-                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->whereNull('client_viewed_at')
                     ->count(),
                 'unreadMessages' => Message::where('user_id', $user->id)
                     ->where('is_read', false)

@@ -3,7 +3,7 @@
     <div class="w-full max-w-md">
         <div class="flex items-center justify-between mb-10">
             <a href="{{ route('home') }}" class="flex items-center gap-2">
-                <img src="/assets/PlatePal_logo.jpg" alt="PlatePal" class="w-10 h-10 rounded-xl object-cover">
+                <img src="/assets/PlatePal_logo.png" alt="PlatePal" class="w-10 h-10 rounded-xl object-cover">
                 <span class="text-xl font-bold tracking-tight">
                     <span class="text-gray-900 font-display">PLATE</span><span class="text-[#f44e08] font-display">PAL</span>
                 </span>

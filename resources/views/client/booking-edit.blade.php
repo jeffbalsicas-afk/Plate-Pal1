@@ -75,12 +75,12 @@
                         type="number"
                         value="{{ old('guests', $booking->guests) }}"
                         required
-                        min="{{ $booking->caterer->min_guest ?? 1 }}"
-                        max="{{ $booking->caterer->max_guest ?? 10000 }}"
-                        placeholder="50"
+                        min="1"
+                        max="10000"
+                        placeholder="Caterer typically serves {{ $booking->caterer->min_guest ?? 20 }}-{{ $booking->caterer->max_guest ?? 100 }} guests"
                         class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A]"
                     >
-                    <p class="text-xs text-[#8A7F72] mt-1">Caterer capacity: {{ $booking->caterer->min_guest ?? 1 }}-{{ $booking->caterer->max_guest ?? 10000 }} guests</p>
+                    <p class="text-xs text-[#8A7F72] mt-1">Typical range: {{ $booking->caterer->min_guest ?? 20 }}-{{ $booking->caterer->max_guest ?? 100 }} guests (flexible)</p>
                     @error('guests')
                         <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                     @enderror

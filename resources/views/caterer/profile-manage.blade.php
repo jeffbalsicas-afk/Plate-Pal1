@@ -17,6 +17,7 @@
     $selectedServices = is_array($selectedServices) ? $selectedServices : [];
     $galleryImages = is_array($user->gallery_images) ? $user->gallery_images : json_decode($user->gallery_images ?? '[]', true);
     $galleryImages = is_array($galleryImages) ? $galleryImages : [];
+    $profileImageUrl = $user->profile_image_url;
 @endphp
 
 <x-dashboard-layout
@@ -80,14 +81,9 @@
                     <label class="block text-sm font-bold text-[#1C1A17] mb-2">Profile Photo</label>
                     <div class="flex items-center gap-4">
                         <div class="size-20 rounded-full overflow-hidden bg-[#FDF6EE] border-2 border-[#EDE4D8]">
-                            @if($user->profile_image)
-                                @if(str_starts_with($user->profile_image, 'http'))
-                                    <img src="{{ $user->profile_image }}" alt="Profile" class="w-full h-full object-cover">
-                                @elseif(str_starts_with($user->profile_image, '/storage/'))
-                                    <img src="{{ $user->profile_image }}" alt="Profile" class="w-full h-full object-cover">
-                                @else
-                                    <img src="{{ asset($user->profile_image) }}" alt="Profile" class="w-full h-full object-cover">
-                                @endif
+                            @if($profileImageUrl)
+                                <img src="{{ $profileImageUrl }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="hidden w-full h-full items-center justify-center text-2xl font-black text-[#E8642A]">{{ $initials }}</div>
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-2xl font-black text-[#E8642A]">{{ $initials }}</div>
                             @endif

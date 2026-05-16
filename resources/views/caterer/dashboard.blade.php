@@ -210,7 +210,7 @@
                                         {{ number_format($booking->guests) }} guests
                                     </span>
                                 </div>
-                                <a href="{{ route('caterer.bookings', ['status' => $bookingFilter]) }}" class="text-xs font-bold text-[#E8642A] hover:text-[#F07C42] transition-colors whitespace-nowrap">{{ $bookingAction }}</a>
+                                <a href="{{ route('caterer.bookings', ['status' => $bookingFilter]) }}" class="text-xs font-bold text-[#E8642A] hover:text-[#F07C42] transition-colors whitespace-nowrap underline">{{ $bookingAction }}</a>
                             </div>
                         </div>
                     @endforeach

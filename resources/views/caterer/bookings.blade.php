@@ -207,9 +207,17 @@
                                                 <div class="mt-0.5 truncate font-black text-[#1C1A17]">{{ $packageName ?? 'Custom request' }}</div>
                                             </div>
                                             <div class="rounded-xl bg-[#FDF6EE] px-3 py-2.5">
-                                                <div class="text-[11px] font-black uppercase text-[#8A7F72]">Bundle Price</div>
+                                                <div class="text-[11px] font-black uppercase text-[#8A7F72]">
+                                                    @if($booking->client_budget)
+                                                        Client Budget
+                                                    @else
+                                                        Bundle Price
+                                                    @endif
+                                                </div>
                                                 <div class="mt-0.5 font-black text-[#1C1A17]">
-                                                    @if($booking->package_price)
+                                                    @if($booking->client_budget)
+                                                        &#8369;{{ number_format($booking->client_budget, 0) }}
+                                                    @elseif($booking->package_price)
                                                         &#8369;{{ number_format($booking->package_price, 0) }}
                                                     @else
                                                         To quote
@@ -217,6 +225,100 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        @php
+                                            $menuItems = $booking->bookingItems->where('item_type', 'menu_item');
+                                            $addons = $booking->bookingItems->where('item_type', 'addon');
+                                            $totalItems = $menuItems->count() + $addons->count();
+                                        @endphp
+
+                                        @if($totalItems > 0)
+                                            <div class="mt-4" x-data="{ expanded: false }">
+                                                <button 
+                                                    type="button"
+                                                    @click="expanded = !expanded"
+                                                    class="w-full rounded-xl border border-[#EDE4D8] bg-white px-3.5 py-3 text-left transition-colors hover:bg-[#FDF6EE] focus:outline-none focus:ring-2 focus:ring-[#E8642A] focus:ring-offset-2"
+                                                >
+                                                    <div class="flex items-center justify-between gap-3">
+                                                        <div class="flex items-center gap-2 min-w-0 flex-1">
+                                                            <svg class="size-5 text-[#E8642A] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                                            </svg>
+                                                            <div class="min-w-0 flex-1">
+                                                                <div class="flex items-center gap-2 flex-wrap">
+                                                                    <span class="text-sm font-black text-[#1C1A17]">
+                                                                        @if($menuItems->count() > 0 && $addons->count() > 0)
+                                                                            {{ $menuItems->count() }} Menu Item{{ $menuItems->count() > 1 ? 's' : '' }} + {{ $addons->count() }} Add-on{{ $addons->count() > 1 ? 's' : '' }}
+                                                                        @elseif($menuItems->count() > 0)
+                                                                            {{ $menuItems->count() }} Menu Item{{ $menuItems->count() > 1 ? 's' : '' }} Selected
+                                                                        @else
+                                                                            {{ $addons->count() }} Add-on{{ $addons->count() > 1 ? 's' : '' }} Selected
+                                                                        @endif
+                                                                    </span>
+                                                                    @if($booking->client_budget)
+                                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF8E1] border border-[#F3D68B] text-xs font-bold text-[#B26A00]">
+                                                                            <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                                            </svg>
+                                                                            Budget: ₱{{ number_format($booking->client_budget, 0) }}
+                                                                        </span>
+                                                                    @endif
+                                                                </div>
+                                                                <span class="block text-xs text-[#8A7F72] mt-0.5" x-show="!expanded">Click to view details</span>
+                                                            </div>
+                                                        </div>
+                                                        <svg 
+                                                            class="size-5 text-[#8A7F72] transition-transform duration-200 flex-shrink-0" 
+                                                            :class="expanded ? 'rotate-180' : ''"
+                                                            fill="none" 
+                                                            stroke="currentColor" 
+                                                            stroke-width="2" 
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                                        </svg>
+                                                    </div>
+                                                </button>
+
+                                                <div 
+                                                    x-show="expanded" 
+                                                    x-collapse
+                                                    class="mt-2 space-y-2"
+                                                >
+                                                    @if($menuItems->isNotEmpty())
+                                                        <div class="rounded-xl border border-[#EDE4D8] bg-[#FDF6EE] px-3.5 py-3">
+                                                            <div class="text-xs font-black uppercase text-[#8A7F72] mb-2">Menu Items</div>
+                                                            <div class="space-y-1.5">
+                                                                @foreach($menuItems as $item)
+                                                                    <div class="flex items-center justify-between text-sm">
+                                                                        <span class="text-[#1C1A17]">{{ $item->item_name }}</span>
+                                                                        @if($item->item_price)
+                                                                            <span class="text-[#8A7F72] font-bold">₱{{ number_format($item->item_price, 2) }}</span>
+                                                                        @endif
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    @endif
+
+                                                    @if($addons->isNotEmpty())
+                                                        <div class="rounded-xl border border-[#EDE4D8] bg-[#FDF6EE] px-3.5 py-3">
+                                                            <div class="text-xs font-black uppercase text-[#8A7F72] mb-2">Add-ons</div>
+                                                            <div class="space-y-1.5">
+                                                                @foreach($addons as $addon)
+                                                                    <div class="flex items-center justify-between text-sm">
+                                                                        <span class="text-[#1C1A17]">{{ $addon->item_name }}</span>
+                                                                        @if($addon->item_price)
+                                                                            <span class="text-[#8A7F72] font-bold">₱{{ number_format($addon->item_price, 2) }}</span>
+                                                                        @endif
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endif
 
                                         @if($booking->special_requests || $booking->decline_reason)
                                             <div class="mt-4 space-y-2">
@@ -257,10 +359,52 @@
                                             </form>
                                             <button type="button" onclick="document.getElementById('declineModal{{ $booking->id }}').showModal()" class="w-full px-4 py-2.5 rounded-xl border border-[#EDE4D8] text-[#8A6D3F] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">Decline</button>
                                         @elseif($status === 'confirmed')
-                                            <form method="POST" action="{{ route('bookings.complete', $booking) }}" class="w-full">
-                                                @csrf
-                                                <button type="submit" class="w-full px-4 py-2.5 rounded-xl bg-[#1C1A17] text-white text-sm font-bold hover:bg-black transition-colors">Mark Complete</button>
-                                            </form>
+                                            @php
+                                                $itemsTotal = $booking->bookingItems->sum(function($item) {
+                                                    return ($item->item_price ?? 0) * ($item->quantity ?? 1);
+                                                });
+                                                // Add client budget to items total if provided
+                                                if ($booking->client_budget) {
+                                                    $itemsTotal += $booking->client_budget;
+                                                }
+                                                $hasPrice = $booking->final_price || $booking->package_price || $itemsTotal > 0;
+                                            @endphp
+                                            
+                                            @if($booking->final_price)
+                                                <div class="w-full px-4 py-3 rounded-xl bg-[#EAF5E9] border border-[#CDE8CC] text-center">
+                                                    <div class="text-[11px] font-black uppercase text-[#2E7D32]">Final Price Set</div>
+                                                    <div class="mt-1 text-xl font-black text-[#2E7D32]">₱{{ number_format($booking->final_price, 2) }}</div>
+                                                    <button type="button" onclick="document.getElementById('priceModal{{ $booking->id }}').showModal()" class="mt-2 text-xs font-bold text-[#2E7D32] underline hover:no-underline">Update</button>
+                                                </div>
+                                            @elseif($booking->package_price)
+                                                <div class="w-full px-4 py-3 rounded-xl bg-[#EAF5E9] border border-[#CDE8CC] text-center">
+                                                    <div class="text-[11px] font-black uppercase text-[#2E7D32]">Package Price</div>
+                                                    <div class="mt-1 text-xl font-black text-[#2E7D32]">₱{{ number_format($booking->package_price, 2) }}</div>
+                                                    <button type="button" onclick="document.getElementById('priceModal{{ $booking->id }}').showModal()" class="mt-2 text-xs font-bold text-[#2E7D32] underline hover:no-underline">Adjust if needed</button>
+                                                </div>
+                                            @elseif($itemsTotal > 0)
+                                                <div class="w-full px-4 py-3 rounded-xl bg-[#EAF5E9] border border-[#CDE8CC] text-center">
+                                                    <div class="text-[11px] font-black uppercase text-[#2E7D32]">Items Total</div>
+                                                    <div class="mt-1 text-xl font-black text-[#2E7D32]">₱{{ number_format($itemsTotal, 2) }}</div>
+                                                    <button type="button" onclick="document.getElementById('priceModal{{ $booking->id }}').showModal()" class="mt-2 text-xs font-bold text-[#2E7D32] underline hover:no-underline">Adjust if needed</button>
+                                                </div>
+                                            @else
+                                                <button type="button" onclick="document.getElementById('priceModal{{ $booking->id }}').showModal()" class="w-full px-4 py-2.5 rounded-xl bg-[#FFF8E1] border border-[#F3D68B] text-[#B26A00] text-sm font-bold hover:bg-[#FFF3CD] transition-colors">
+                                                    Set Final Price
+                                                </button>
+                                            @endif
+                                            @if($hasPrice)
+                                                <form method="POST" action="{{ route('bookings.complete', $booking) }}" class="w-full">
+                                                    @csrf
+                                                    <button type="submit" class="w-full px-4 py-2.5 rounded-xl bg-[#1C1A17] text-white text-sm font-bold hover:bg-black transition-colors">
+                                                        Mark Complete
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <button type="button" onclick="document.getElementById('errorModal{{ $booking->id }}').showModal()" class="w-full px-4 py-2.5 rounded-xl bg-gray-300 text-gray-500 text-sm font-bold cursor-not-allowed">
+                                                    Mark Complete
+                                                </button>
+                                            @endif
                                             <a href="{{ route('messages.show', $booking->user) }}" class="w-full text-center px-4 py-2.5 rounded-xl border border-[#EDE4D8] text-[#8A6D3F] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">Message</a>
                                         @else
                                             <a href="{{ route('messages.show', $booking->user) }}" class="w-full text-center px-4 py-2.5 rounded-xl border border-[#EDE4D8] text-[#8A6D3F] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">Message</a>
@@ -269,7 +413,7 @@
                                 </div>
 
                                 @if($status === 'pending')
-                                    <dialog id="declineModal{{ $booking->id }}" class="w-full max-w-md rounded-2xl backdrop:bg-black/50">
+                                    <dialog id="declineModal{{ $booking->id }}" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 max-w-md rounded-2xl p-0 backdrop:bg-black/50">
                                         <form method="POST" action="{{ route('bookings.decline', $booking) }}" class="p-6">
                                             @csrf
                                             <h2 class="text-xl font-black text-[#1C1A17] mb-4">Decline Booking</h2>
@@ -280,6 +424,62 @@
                                                 <button type="submit" class="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors">Decline</button>
                                             </div>
                                         </form>
+                                    </dialog>
+                                @endif
+
+                                @if($status === 'confirmed')
+                                    <dialog id="priceModal{{ $booking->id }}" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 max-w-md rounded-2xl p-0 backdrop:bg-black/50">
+                                        <form method="POST" action="{{ route('bookings.set-final-price', $booking) }}" class="p-6">
+                                            @csrf
+                                            <h2 class="text-xl font-black text-[#1C1A17] mb-2">Set Final Agreed Price</h2>
+                                            <p class="text-sm text-[#8A6D3F] mb-4">Enter the final price you and the client agreed on through messages.</p>
+                                            
+                                            <div class="mb-4">
+                                                <label for="final_price{{ $booking->id }}" class="block text-sm font-bold text-[#1C1A17] mb-2">Final Price (₱)</label>
+                                                <input 
+                                                    type="number" 
+                                                    id="final_price{{ $booking->id }}" 
+                                                    name="final_price" 
+                                                    value="{{ $booking->final_price }}"
+                                                    step="0.01" 
+                                                    min="0" 
+                                                    max="9999999.99"
+                                                    required
+                                                    placeholder="e.g., 15000.00"
+                                                    class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-lg font-bold text-[#1C1A17] focus:outline-none focus:border-[#E8642A]"
+                                                >
+                                            </div>
+
+                                            <div class="rounded-xl bg-[#FFF8E1] border border-[#F3D68B] px-4 py-3 mb-4">
+                                                <div class="flex items-start gap-2">
+                                                    <svg class="size-5 text-[#B26A00] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    <div class="text-xs text-[#B26A00]">
+                                                        <p class="font-bold">This is the final amount for earnings calculation.</p>
+                                                        <p class="mt-1">Make sure you've agreed on this price with the client before setting it.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex gap-3">
+                                                <button type="button" onclick="document.getElementById('priceModal{{ $booking->id }}').close()" class="flex-1 px-4 py-3 rounded-xl border border-[#EDE4D8] text-[#8A6D3F] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">Cancel</button>
+                                                <button type="submit" class="flex-1 px-4 py-3 rounded-xl bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors">Save Price</button>
+                                            </div>
+                                        </form>
+                                    </dialog>
+
+                                    <dialog id="errorModal{{ $booking->id }}" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 max-w-md rounded-2xl p-0 backdrop:bg-black/50">
+                                        <div class="p-6">
+                                            <div class="flex items-center justify-center mb-4">
+                                                <div class="size-16 rounded-full bg-red-100 flex items-center justify-center">
+                                                    <svg class="size-8 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <h2 class="text-xl font-black text-[#1C1A17] mb-2 text-center">Cannot Mark Complete</h2>
+                                            <p class="text-sm text-[#8A6D3F] mb-6 text-center">You must set the final agreed price before marking this booking as complete. This ensures accurate earnings tracking.</p>
+                                            <button type="button" onclick="document.getElementById('errorModal{{ $booking->id }}').close()" class="w-full px-4 py-3 rounded-xl bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors">Got It</button>
+                                        </div>
                                     </dialog>
                                 @endif
                             </article>

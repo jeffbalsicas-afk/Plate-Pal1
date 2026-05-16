@@ -15,12 +15,11 @@ use App\Http\Controllers\SystemFeedbackController;
 Route::get('/', [LandingPageController::class, 'index'])->name('home')->middleware('prevent.back');
 
 // Auth routes
-Route::middleware('guest')->group(function () {
+Route::middleware(['guest', 'prevent.back'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::get('/caterer/login', [AuthController::class, 'showCatererLogin'])->name('caterer.login');
     Route::get('/caterer/register', [AuthController::class, 'showCatererRegister'])->name('caterer.register');
-    Route::get('/admin/login', [AuthController::class, 'showAdminLogin'])->name('admin.login');
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
@@ -30,7 +29,6 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/caterer/login', [AuthController::class, 'Catererlogin']);
     Route::post('/caterer/register', [AuthController::class, 'Catererregister']);
-    Route::post('/admin/login', [AuthController::class, 'adminLogin']);
 });
 
 // Public routes (accessible to guests)
@@ -82,6 +80,7 @@ Route::middleware(['auth', 'role:caterer', 'prevent.back'])->group(function () {
     // Booking actions
     Route::post('/bookings/{booking}/accept', [BookingController::class, 'accept'])->name('bookings.accept');
     Route::post('/bookings/{booking}/decline', [BookingController::class, 'decline'])->name('bookings.decline');
+    Route::post('/bookings/{booking}/set-final-price', [BookingController::class, 'setFinalPrice'])->name('bookings.set-final-price');
     Route::post('/bookings/{booking}/complete', [BookingController::class, 'complete'])->name('bookings.complete');
 });
 

@@ -22,10 +22,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(function (Request $request): string {
             $routeName = $request->route()?->getName();
 
-            if (is_string($routeName) && str_starts_with($routeName, 'admin.')) {
-                return route('admin.login');
-            }
-
             if (is_string($routeName) && $routeName !== 'caterer.detail' && str_starts_with($routeName, 'caterer.')) {
                 return route('caterer.login');
             }
@@ -37,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return route('caterer.login');
             }
 
+            // Admin and client both use the regular login page
             return route('login');
         });
     })

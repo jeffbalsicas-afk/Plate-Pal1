@@ -69,8 +69,42 @@
     }"
 >
     <div class="flex flex-col min-h-screen">
-        {{-- NAVBAR - Always visible for guests --}}
-        <x-home.navbar />
+        {{-- Client navbar --}}
+        <nav class="sticky top-0 z-50 border-b border-[#EDE4D8] bg-white shadow-sm" x-data="{ userOpen: false }" @keydown.escape.window="userOpen = false">
+            <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+                <div class="flex min-w-0 items-center gap-3">
+                    <a href="{{ route('client.dashboard') }}" class="flex shrink-0 items-center gap-2">
+                        <img src="/assets/PlatePal_logo.png" alt="PlatePal" class="size-8 rounded-lg object-cover">
+                        <span class="text-xl font-display font-black tracking-tight">
+                            <span class="text-brand-dark">PLATE</span><span class="text-brand-orange">PAL</span>
+                        </span>
+                    </a>
+                </div>
+
+                <div class="flex shrink-0 items-center gap-2">
+                    <div class="relative">
+                        <button type="button" @click="userOpen = !userOpen" class="flex items-center gap-2 rounded-full border border-[#EDE4D8] bg-white px-3 py-1.5 transition-colors hover:bg-[#FDF6EE]">
+                            <div class="flex size-[34px] items-center justify-center rounded-full bg-[#E8642A] text-xs font-bold text-white">{{ $initials }}</div>
+                            <div class="hidden flex-col items-start md:flex">
+                                <span class="max-w-36 truncate text-[12.5px] font-bold leading-tight text-[#1C1A17]">{{ $user?->name }}</span>
+                                <span class="text-[10.5px] text-[#8A7F72]">Client</span>
+                            </div>
+                            <svg class="size-3.5 text-[#8A7F72] transition-transform" :class="userOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <div x-show="userOpen" x-cloak @click.outside="userOpen = false" x-transition class="absolute right-0 mt-2 w-48 rounded-2xl border border-[#EDE4D8] bg-white py-1.5 shadow-lg">
+                            <a href="{{ route('client.profile') }}" class="block px-4 py-2.5 text-sm text-[#1C1A17] transition-colors hover:bg-[#FDF6EE]">Profile Settings</a>
+                            <a href="{{ route('feedback.create') }}" class="block px-4 py-2.5 text-sm text-[#1C1A17] transition-colors hover:bg-[#FDF6EE]">Website Feedback</a>
+                            <div class="my-1 border-t border-[#EDE4D8]"></div>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="block w-full px-4 py-2.5 text-left text-sm text-red-500 transition-colors hover:bg-red-50">Sign Out</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
 
         {{-- MAIN CONTENT --}}
         <main class="flex-1 py-8">
@@ -90,7 +124,7 @@
                 @endif
 
                 {{-- Back Link --}}
-                <a href="{{ route('browse.caterers') }}" class="text-sm font-medium text-[#E8642A] hover:text-[#F07C42] transition-colors inline-flex items-center gap-1 mb-6">
+                <a href="{{ route('client.browse') }}" class="text-sm font-medium text-[#E8642A] hover:text-[#F07C42] transition-colors inline-flex items-center gap-1 mb-6">
                     <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                     Back to Browse
                 </a>
@@ -324,7 +358,7 @@
                                     x-show="galleryViewerOpen"
                                     x-cloak
                                     x-transition.opacity
-                                    x-effect="window.PlatePalModals?.toggle('guest-gallery-viewer', galleryViewerOpen)"
+                                    x-effect="window.PlatePalModals?.toggle('client-gallery-viewer', galleryViewerOpen)"
                                     @keydown.escape.window="closeGalleryViewer()"
                                     @click.self="closeGalleryViewer()"
                                     class="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 p-4"
@@ -741,7 +775,7 @@
                         </div>
                     @endif
                 </div>
-                @include('caterer.partials.detail-menu-catalog', ['modalPrefix' => 'guest'])
+                @include('caterer.partials.detail-menu-catalog', ['modalPrefix' => 'detail'])
             </div>
         </main>
     </div>

@@ -76,7 +76,7 @@
                     ['q' => 'Is there a membership fee?', 'a' => 'No! PlatePal is completely free. Zero registration fees, zero membership fees, zero platform commissions. You keep 100% of what you earn.'],
                     ['q' => 'How do I set my own prices?', 'a' => 'When setting up your profile, you can add menu items with individual prices. You can also negotiate pricing directly with customers through messages. You have full control.'],
                     ['q' => 'What if I\'m not available for a booking request?', 'a' => 'You can decline booking requests through the platform. There\'s no penalty or obligation. Accept only the bookings that work for you.'],
-                    ['q' => 'How do customers pay?', 'a' => 'You arrange payment directly with your customers. Common methods include bank transfers, cash on delivery, or GCash. Completely up to you.'],
+                    ['q' => 'How do customers pay?', 'a' => 'You arrange payment directly with your customers through PlatePal messaging. Common method is cash on delivery. Completely up to you.'],
                     ['q' => 'Can I upload food photos?', 'a' => 'Yes! You can add photos of your dishes to showcase your cuisine. High-quality photos help attract more customers.'],
                     ['q' => 'Is my business information private?', 'a' => 'We never share your personal information with third parties. Your customers only see what you choose to display on your profile.'],
                 ] as $faq)

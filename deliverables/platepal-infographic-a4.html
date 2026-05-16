@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlatePal A4 Infographic</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        :root {
+            --orange: #E05C2A;
+            --orange-light: #F47B4A;
+            --cream: #F1DEC5;
+            --cream-dark: #E3BC8C;
+            --paper: #FFF7EC;
+            --dark: #1A1208;
+            --muted: #6B5E4E;
+            --sage: #62785E;
+            --white: #FFFFFF;
+            --line: rgba(107, 94, 78, .20);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            background: #d7d1c6;
+            color: var(--dark);
+            font-family: "DM Sans", "Segoe UI", Arial, sans-serif;
+        }
+
+        body {
+            display: grid;
+            place-items: start center;
+            padding: 0;
+        }
+
+        .page {
+            position: relative;
+            width: 210mm;
+            height: 297mm;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 89% 12%, rgba(224, 92, 42, .20), transparent 28%),
+                linear-gradient(150deg, rgba(227, 188, 140, .70) 0%, var(--paper) 36%, #fffaf3 68%, #f6dfc7 100%);
+            box-shadow: 0 18px 50px rgba(26, 18, 8, .25);
+        }
+
+        .page::before {
+            content: "";
+            position: absolute;
+            inset: 8mm;
+            border: 1px solid rgba(26, 18, 8, .16);
+            pointer-events: none;
+        }
+
+        .food {
+            position: absolute;
+            z-index: 0;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .food-hero {
+            right: -15mm;
+            top: 15mm;
+            width: 82mm;
+            height: 82mm;
+            border-radius: 50%;
+            border: 4mm solid rgba(255, 255, 255, .72);
+            box-shadow: 0 8mm 18mm rgba(26, 18, 8, .18);
+        }
+
+        .food-soft {
+            left: -18mm;
+            bottom: 30mm;
+            width: 72mm;
+            height: 72mm;
+            border-radius: 20mm;
+            opacity: .16;
+            transform: rotate(8deg);
+        }
+
+        .inner {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            padding: 10mm;
+            display: grid;
+            grid-template-rows: 49mm 35mm 33mm 56mm 47mm 22mm;
+            gap: 3mm;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 7mm;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 3mm;
+            margin-bottom: 6mm;
+            margin-top: 1mm;
+        }
+
+        .brand img {
+            width: 12mm;
+            height: 12mm;
+            border-radius: 2mm;
+            object-fit: cover;
+        }
+
+        .brand-name {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 18pt;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .brand-name span {
+            color: var(--orange);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2.2mm 3.6mm;
+            border: 1px solid rgba(224, 92, 42, .38);
+            background: rgba(255, 255, 255, .68);
+            color: var(--orange);
+            font-size: 7pt;
+            font-weight: 900;
+            letter-spacing: .11em;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin: 0;
+        }
+
+        h1 {
+            width: 128mm;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 25pt;
+            font-weight: 900;
+            line-height: .98;
+        }
+
+        h1 span {
+            color: var(--orange);
+        }
+
+        .tagline {
+            width: 118mm;
+            margin-top: 2mm;
+            color: var(--muted);
+            font-size: 10pt;
+            font-weight: 800;
+            line-height: 1.32;
+        }
+
+        .system-label {
+            width: 44mm;
+            margin-top: 3mm;
+            padding: 3.2mm;
+            background: var(--dark);
+            color: var(--white);
+            font-size: 8.4pt;
+            font-weight: 800;
+            line-height: 1.3;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 2mm;
+            margin-bottom: 2.5mm;
+            font-size: 8pt;
+            font-weight: 900;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .section-title::before {
+            content: "";
+            width: 7mm;
+            height: 1.2mm;
+            background: var(--orange);
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4mm;
+        }
+
+        .panel {
+            border: 1px solid rgba(227, 188, 140, .76);
+            background: rgba(255, 252, 252, 0.616);
+            padding: 3.8mm;
+        }
+
+        .problem {
+            background: rgba(26, 18, 8, .92);
+            color: var(--white);
+        }
+
+        .problem .section-title,
+        .problem p {
+            color: rgba(255, 255, 255, .88);
+        }
+
+        .problem .section-title::before {
+            background: var(--cream-dark);
+        }
+
+        .solution {
+            background: rgba(255, 255, 255, .88);
+        }
+
+            .panel p {
+            color: var(--muted);
+            font-size: 8.5pt;
+            font-weight: 600;
+            line-height: 1.42;
+        }
+
+        .pathway {
+            padding: 3.8mm;
+            border-radius: 0px 10px;
+            background: rgba(255, 255, 255, .72);
+            border: 1px solid var(--line);
+        }
+
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2mm;
+            align-items: stretch;
+        }
+
+        .flow-item {
+            position: relative;
+            min-height: 18mm;
+            display: grid;
+            align-content: center;
+            padding: 2.2mm;
+            background: var(--orange);
+            color: var(--white);
+            text-align: center;
+            font-size: 7.6pt;
+            font-weight: 900;
+            line-height: 1.12;
+        }
+
+        .flow-item:nth-child(even) {
+            background: var(--dark);
+        }
+
+        .flow-item:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            right: -2.1mm;
+            top: 50%;
+            z-index: 2;
+            width: 0;
+            height: 0;
+            border-top: 2.5mm solid transparent;
+            border-bottom: 2.5mm solid transparent;
+            border-left: 2.5mm solid currentColor;
+            color: inherit;
+            transform: translateY(-50%);
+        }
+
+            .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5mm;
+        }
+
+        .feature {
+            min-height: 24mm;
+            padding: 2.8mm;
+            background: rgba(255, 255, 255, .80);
+            border: 1px solid rgba(227, 188, 140, .78);
+        }
+
+        .icon {
+            width: 9mm;
+            height: 9mm;
+            display: grid;
+            place-items: center;
+            margin-bottom: 1.7mm;
+            background: rgba(224, 92, 42, .12);
+            color: var(--orange);
+        }
+
+        .icon svg {
+            width: 5mm;
+            height: 5mm;
+        }
+
+        .feature h3,
+        .benefit h3 {
+            font-size: 9.5pt;
+            font-weight: 900;
+            line-height: 1.15;
+        }
+
+        .feature p {
+            margin-top: 1mm;
+            color: var(--muted);
+            font-size: 7.4pt;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .unique-benefits {
+            display: grid;
+            grid-template-columns: 1.04fr .96fr;
+            gap: 4mm;
+        }
+
+        .unique {
+            position: relative;
+            border-radius: 0px 9px;
+            margin-top: 17px;
+            display: grid;
+            grid-template-columns: 36mm 1fr;
+            gap: 3mm;
+            padding: 3.2mm;
+            background: var(--dark);
+            color: var(--white);
+        }
+
+        .unique img {
+            width: 36mm;
+            height: 40mm;
+            object-fit: cover;
+        }
+
+        .unique .section-title,
+        .unique p {
+            color: rgba(255, 255, 255, .84);
+        }
+
+        .unique .section-title::before {
+            background: var(--cream-dark);
+        }
+
+        .unique p {
+            font-size: 7.7pt;
+            font-weight: 600;
+            line-height: 1.38;
+        }
+
+        .benefits {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1mm;
+        }
+
+        .benefit {
+            display: grid;
+            grid-template-columns: 6mm 1fr;
+            align-items: center;
+            gap: 2mm;
+            min-height: 5.8mm;
+            padding: 1.2mm 2mm;
+            background: rgba(255, 255, 255, .84);
+            border: 1px solid rgba(227, 188, 140, .72);
+        }
+
+        .dot {
+            width: 6mm;
+            height: 6mm;
+            display: grid;
+            place-items: center;
+            background: var(--sage);
+            color: var(--white);
+            font-size: 6.4pt;
+            font-weight: 900;
+        }
+
+        .benefit h3 {
+            font-size: 7.4pt;
+        }
+
+        .summary {
+            display: flex;
+            margin-top: 12px;
+            align-items: center;
+            justify-content: flex-end;
+            color: var(--white);
+        }
+
+        .summary > div {
+            border-radius: 0px 7px;
+            width: 50%;
+            padding: 0.5mm 3mm;
+            background: var(--orange);
+        }
+
+        .summary h2 {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 12.7pt;
+            font-weight: 500;
+            line-height: 1.05;
+        }
+
+        .summary p {
+            margin-top: 1.5mm;
+            color: rgba(255, 255, 255, .88);
+            font-size: 9pt;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .mini-card {
+            padding: 2.8mm;
+            background: var(--white);
+            color: var(--dark);
+            text-align: center;
+        }
+
+        .mini-card strong {
+            display: block;
+            font-family: Georgia, "Times New Roman", serif;
+            color: var(--orange);
+            font-size: 19pt;
+            line-height: .95;
+        }
+
+        .mini-card span {
+            display: block;
+            margin-top: 1.5mm;
+            color: var(--muted);
+            font-size: 7pt;
+            font-weight: 900;
+            line-height: 1.15;
+            text-transform: uppercase;
+        }
+
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5mm;
+            padding-top: 1mm;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 8pt;
+            font-weight: 800;
+        }
+
+        .footer-mark {
+            color: var(--dark);
+        }
+
+        @media print {
+            html,
+            body {
+                width: 210mm;
+                height: 297mm;
+                padding: 0;
+                background: white;
+            }
+
+            .page {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page" aria-label="PlatePal Catering Reservation and Communication System infographic">
+        <img class="food food-hero" src="../public/assets/Food4.jpg" alt="">
+        <img class="food food-soft" src="../public/assets/Pancit.png" alt="">
+
+        <section class="inner">
+            <header class="topbar">
+                <div>
+                    <div class="brand">
+                        <img src="../public/assets/PlatePal_logo.jpg" alt="PlatePal logo">
+                        <div class="brand-name">PLATE<span>PAL</span></div>
+                    </div>
+                    <h1>Catering Reservation and <span>Communication</span> System</h1>
+                    <p class="tagline">Find caterers. Compare packages. Send messages. Plan easier.</p>
+                </div>
+                <aside>
+                    <div class="badge">Infographic</div>
+                </aside>
+            </header>
+
+            <section class="split" aria-label="Problem and solution">
+                <article class="panel problem">
+                    <div class="section-title">The Problem</div>
+                    <p>Planning an event can be difficult when customers need to search for caterers, compare packages, ask questions, and track conversations across different platforms.</p>
+                </article>
+                <article class="panel solution">
+                    <div class="section-title">The Solution</div>
+                    <p>PlatePal brings the catering process into one organized website where users can browse caterers, view service details, send inquiries, and manage communication.</p>
+                </article>
+            </section>
+
+            <section class="pathway" aria-label="How users navigate PlatePal">
+                <div class="section-title">How Users Navigate PlatePal</div>
+                <div class="flow">
+                    <div class="flow-item">Start from homepage</div>
+                    <div class="flow-item">Browse caterers</div>
+                    <div class="flow-item">Select caterer</div>
+                    <div class="flow-item">View details</div>
+                    <div class="flow-item">Send inquiry</div>
+                    <div class="flow-item">Open messages</div>
+                    <div class="flow-item">Finalize details</div>
+                </div>
+            </section>
+
+            <section aria-label="Key features">
+                <div class="section-title">Key Features</div>
+                <div class="features">
+                    <article class="feature">
+                        <div class="icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h11" stroke-linecap="round"/></svg></div>
+                        <h3>Browse Caterers</h3>
+                        <p>Explore a wide variety of options in one place.</p>
+                    </article>
+                    <article class="feature">
+                        <div class="icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        <h3>View Details</h3>
+                        <p>Get specific information on menus and availability.</p>
+                    </article>
+                    <article class="feature">
+                        <div class="icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 7h10M7 12h10M7 17h6" stroke-linecap="round"/><path d="M4 5h16v14H4z" stroke-linejoin="round"/></svg></div>
+                        <h3>Check Packages</h3>
+                        <p>Compare different service levels and pricing.</p>
+                    </article>
+                    <article class="feature">
+                        <div class="icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 5h14v10H8l-3 4V5z" stroke-linejoin="round"/></svg></div>
+                        <h3>Direct Messages</h3>
+                        <p>Chat directly with providers.</p>
+                    </article>
+                    <article class="feature">
+                        <div class="icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 8l8 5 8-5" stroke-linejoin="round"/></svg></div>
+                        <h3>Manage Conversations</h3>
+                        <p>Keep all your event threads in one inbox.</p>
+                    </article>
+                    <article class="feature">
+                        <div class="icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4h16v16H4z" stroke-linejoin="round"/></svg></div>
+                        <h3>Track Requests</h3>
+                        <p>Monitor the status of your inquiries.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="unique-benefits" aria-label="Unique value and benefits">
+                <article class="unique">
+                    <img src="../public/assets/Food1.jpg" alt="">
+                    <div>
+                        <div class="section-title">What Makes PlatePal Unique</div>
+                        <p>PlatePal is focused specifically on catering services. Unlike general food or event platforms, it helps customers connect directly with caterers and keeps all communication organized through a built-in messaging system.</p>
+                    </div>
+                </article>
+
+                <article>
+                    <div class="section-title" style="padding-top: 35px;">Benefits</div>
+                    <div class="benefits">
+                        <div class="benefit"><div class="dot">1</div><h3>Easier catering search</h3></div>
+                        <div class="benefit"><div class="dot">2</div><h3>Faster communication</h3></div>
+                        <div class="benefit"><div class="dot">3</div><h3>Organized inquiries</h3></div>
+                        <div class="benefit"><div class="dot">4</div><h3>Better caterer comparison</h3></div>
+                        <div class="benefit"><div class="dot">5</div><h3>More convenient booking experience</h3></div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="summary" aria-label="Summary">
+                <div>
+                    <h2><span style="color: black; font-weight: 600;">PlatePal</span><span style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 300; line-height: 20px; letter-spacing: 1px;"> finding and communicating with caterers easier, faster, and more organized.</span></h2>
+                </div>
+            </section>
+
+            <footer class="footer">
+                <div class="footer-mark">© 2026 PlatePal Catering.</div>
+            </footer>
+        </section>
+    </main>
+</body>
+</html>

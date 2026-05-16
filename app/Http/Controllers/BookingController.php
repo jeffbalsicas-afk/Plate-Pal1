@@ -16,7 +16,10 @@ class BookingController extends Controller
         abort_unless($booking->caterer_id === auth()->id(), 403);
         abort_unless($booking->status === 'pending', 422, 'Only pending bookings can be accepted.');
 
-        $booking->update(['status' => 'confirmed']);
+        $booking->update([
+            'status' => 'confirmed',
+            'client_viewed_at' => null, // Reset so client gets notified
+        ]);
 
         $booking->loadMissing(['user', 'caterer', 'package']);
         Mail::to($booking->user->email)->send(new BookingConfirmedNotification($booking));
@@ -36,6 +39,7 @@ class BookingController extends Controller
         $booking->update([
             'status' => 'cancelled',
             'decline_reason' => $validated['reason'] ?? null,
+            'client_viewed_at' => null, // Reset so client gets notified
         ]);
 
         return back()->with('success', 'Booking declined. The client has been notified.');
@@ -46,9 +50,51 @@ class BookingController extends Controller
         abort_unless($booking->caterer_id === auth()->id(), 403);
         abort_unless($booking->status === 'confirmed', 422, 'Only confirmed bookings can be marked as complete.');
 
-        $booking->update(['status' => 'completed']);
+        // If no final_price is set, try to calculate from package or items
+        if (!$booking->final_price) {
+            // First try package price
+            if ($booking->package_price) {
+                $booking->final_price = $booking->package_price;
+            }
+            // Otherwise calculate from booking items (menu items + add-ons)
+            elseif ($booking->bookingItems()->exists()) {
+                $itemsTotal = $booking->bookingItems->sum(function($item) {
+                    return ($item->item_price ?? 0) * ($item->quantity ?? 1);
+                });
+                if ($itemsTotal > 0) {
+                    $booking->final_price = $itemsTotal;
+                }
+            }
+        }
+
+        // Caterer must set final price before completing (or have package/items price)
+        if (!$booking->final_price) {
+            return back()->withErrors(['final_price' => 'Please set the final agreed price before marking as complete.']);
+        }
+
+        $booking->update([
+            'status' => 'completed',
+            'final_price' => $booking->final_price, // Save it if it was just calculated
+            'client_viewed_at' => null, // Reset so client gets notified
+        ]);
 
         return back()->with('success', 'Booking marked as complete! The client can now leave a review.');
+    }
+
+    public function setFinalPrice(Booking $booking, Request $request)
+    {
+        abort_unless($booking->caterer_id === auth()->id(), 403);
+        abort_unless($booking->status === 'confirmed', 422, 'Only confirmed bookings can have final price set.');
+
+        $validated = $request->validate([
+            'final_price' => ['required', 'numeric', 'min:0', 'max:9999999.99'],
+        ]);
+
+        $booking->update([
+            'final_price' => $validated['final_price'],
+        ]);
+
+        return back()->with('success', 'Final price set successfully!');
     }
 
     public function edit(Booking $booking)
@@ -66,7 +112,7 @@ class BookingController extends Controller
             ->get();
 
         $user = auth()->user();
-        $activeBookings = Booking::where('user_id', $user->id)->whereIn('status', ['pending', 'confirmed'])->count();
+        $activeBookings = Booking::where('user_id', $user->id)->whereNull('client_viewed_at')->count();
         $unreadMessages = \App\Models\Message::where('user_id', $user->id)->where('is_read', false)->where('sender', 'caterer')->count();
         $statusCounts = [
             'all' => Booking::where('user_id', $user->id)->count(),
@@ -80,13 +126,10 @@ class BookingController extends Controller
         abort_unless($booking->user_id === auth()->id(), 403);
         abort_unless(in_array($booking->status, ['pending', 'confirmed']), 422, 'Only pending or confirmed bookings can be edited.');
 
-        $minGuests = $booking->caterer->min_guest ?? 1;
-        $maxGuests = $booking->caterer->max_guest ?? 10000;
-
         $validated = $request->validate([
             'event_title' => ['required', 'string', 'max:255'],
             'event_date' => ['required', 'date', 'after_or_equal:today'],
-            'guests' => ['required', 'integer', 'min:' . $minGuests, 'max:' . $maxGuests],
+            'guests' => ['required', 'integer', 'min:1', 'max:10000'],
             'package_id' => [
                 'nullable',
                 'integer',
@@ -109,11 +152,7 @@ class BookingController extends Controller
                 ->find($validated['package_id'])
             : null;
 
-        if ($package && (int) $validated['guests'] < (int) $package->min_guests) {
-            return back()
-                ->withErrors(['guests' => "This package requires at least {$package->min_guests} guests."])
-                ->withInput();
-        }
+        // Package min_guests is now just a guideline - caterer can accept any booking
 
         $booking->update([
             'event_title' => $validated['event_title'],

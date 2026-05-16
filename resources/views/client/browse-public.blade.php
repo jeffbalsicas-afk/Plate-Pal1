@@ -7,7 +7,7 @@
             <div class="mb-6">
                 <h2 class="text-2xl font-black text-brand-dark mb-1">Browse Caterers in Tagum City</h2>
                 <p class="text-sm text-brand-muted mb-4">Discover trusted local caterers for your special events</p>
-                <form action="{{ route('browse.caterers') }}" method="GET" class="flex flex-col sm:flex-row gap-3">
+                <form action="{{ route('browse.caterers') }}" method="GET" class="flex gap-3">
                     @foreach(['barangay', 'price_range', 'cuisine', 'rating', 'sort'] as $param)
                         @if(request($param))
                             <input type="hidden" name="{{ $param }}" value="{{ request($param) }}">
@@ -15,10 +15,6 @@
                     @endforeach
                     <input type="text" name="search" placeholder="Search caterers or specialties..." value="{{ request('search') }}"
                         class="flex-1 px-[18px] py-3 rounded-xl bg-white border border-brand-cream-dark text-sm text-brand-dark placeholder:text-brand-muted focus:outline-none focus:border-brand-orange transition-colors">
-                    <a href="#filters" class="px-5 py-3 rounded-xl border bg-brand-white border-brand-cream-dark text-brand-dark text-sm font-medium hover:bg-brand-cream transition-colors flex items-center justify-center gap-2">
-                        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                        Filters
-                    </a>
                     <button type="submit" class="px-6 py-3 rounded-xl bg-brand-orange text-white text-sm font-bold hover:bg-brand-orange-light transition-colors">
                         Search
                     </button>
@@ -87,11 +83,8 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between gap-3">
-                            <button type="submit" class="px-4 py-2 rounded-lg bg-brand-orange text-white text-xs font-bold hover:bg-brand-orange-light transition-colors">
-                                Apply Filters
-                            </button>
-                            <a href="{{ route('browse.caterers') }}" class="text-xs font-bold text-brand-orange hover:text-brand-orange-light transition-colors">Clear All</a>
+                        <div class="flex items-center justify-end">
+                            <a href="{{ route('browse.caterers') }}" class="text-xs font-bold text-brand-orange hover:text-brand-orange-light transition-colors">Clear All Filters</a>
                         </div>
                     </form>
                 </div>

@@ -47,6 +47,25 @@ class User extends Authenticatable
         return $initials;
     }
 
+    public function getProfileImageUrlAttribute(): ?string
+    {
+        if (empty($this->profile_image)) {
+            return null;
+        }
+
+        if (str_starts_with($this->profile_image, 'http')) {
+            return $this->profile_image;
+        }
+
+        if (str_starts_with($this->profile_image, '/storage/') || str_starts_with($this->profile_image, '/assets/')) {
+            return $this->profile_image;
+        }
+
+        return asset(str_starts_with($this->profile_image, 'storage/')
+            ? $this->profile_image
+            : 'storage/' . ltrim($this->profile_image, '/'));
+    }
+
     public function bookings()
     {
         return $this->hasMany(Booking::class);

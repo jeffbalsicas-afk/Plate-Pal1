@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlatePal Complete System Pamphlet</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        :root {
+            --orange: #E05C2A;
+            --orange-light: #F47B4A;
+            --cream: #F1DEC5;
+            --cream-dark: #E3BC8C;
+            --paper: #FFF7EC;
+            --dark: #1A1208;
+            --muted: #6B5E4E;
+            --sage: #62785E;
+            --blue: #2563EB;
+            --green: #059669;
+            --white: #FFFFFF;
+            --line: rgba(107, 94, 78, .20);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            background: #d7d1c6;
+            color: var(--dark);
+            font-family: "DM Sans", "Segoe UI", Arial, sans-serif;
+        }
+
+        body {
+            display: grid;
+            place-items: start center;
+            padding: 0;
+        }
+
+        .page {
+            position: relative;
+            width: 210mm;
+            height: 297mm;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 89% 12%, rgba(224, 92, 42, .20), transparent 28%),
+                linear-gradient(150deg, rgba(227, 188, 140, .70) 0%, var(--paper) 36%, #fffaf3 68%, #f6dfc7 100%);
+            box-shadow: 0 18px 50px rgba(26, 18, 8, .25);
+        }
+
+        .page::before {
+            content: "";
+            position: absolute;
+            inset: 8mm;
+            border: 1px solid rgba(26, 18, 8, .16);
+            pointer-events: none;
+        }
+
+        .food {
+            position: absolute;
+            z-index: 0;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .food-hero {
+            right: -15mm;
+            top: 15mm;
+            width: 82mm;
+            height: 82mm;
+            border-radius: 50%;
+            border: 4mm solid rgba(255, 255, 255, .72);
+            box-shadow: 0 8mm 18mm rgba(26, 18, 8, .18);
+        }
+
+        .food-soft {
+            left: -18mm;
+            bottom: 30mm;
+            width: 72mm;
+            height: 72mm;
+            border-radius: 20mm;
+            opacity: .16;
+            transform: rotate(8deg);
+        }
+
+        .inner {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            padding: 10mm;
+            display: flex;
+            flex-direction: column;
+            gap: 3mm;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 7mm;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 3mm;
+            margin-bottom: 4mm;
+            margin-top: 1mm;
+        }
+
+        .brand img {
+            width: 12mm;
+            height: 12mm;
+            border-radius: 2mm;
+            object-fit: cover;
+        }
+
+        .brand-name {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 18pt;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .brand-name span {
+            color: var(--orange);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2.2mm 3.6mm;
+            border: 1px solid rgba(224, 92, 42, .38);
+            background: rgba(255, 255, 255, .68);
+            color: var(--orange);
+            font-size: 7pt;
+            font-weight: 900;
+            letter-spacing: .11em;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin: 0;
+        }
+
+        h1 {
+            width: 128mm;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 22pt;
+            font-weight: 900;
+            line-height: .98;
+        }
+
+        h1 span {
+            color: var(--orange);
+        }
+
+        .tagline {
+            width: 118mm;
+            margin-top: 2mm;
+            color: var(--muted);
+            font-size: 9pt;
+            font-weight: 800;
+            line-height: 1.32;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 2mm;
+            margin-bottom: 2.5mm;
+            font-size: 8pt;
+            font-weight: 900;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .section-title::before {
+            content: "";
+            width: 7mm;
+            height: 1.2mm;
+            background: var(--orange);
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3mm;
+        }
+
+        .panel {
+            border: 1px solid rgba(227, 188, 140, .76);
+            background: rgba(255, 252, 252, 0.616);
+            padding: 3mm;
+        }
+
+        .panel p {
+            color: var(--muted);
+            font-size: 7.5pt;
+            font-weight: 600;
+            line-height: 1.35;
+        }
+
+        .roles-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5mm;
+        }
+
+        .role-card {
+            padding: 3mm;
+            background: rgba(255, 255, 255, .85);
+            border: 1px solid rgba(227, 188, 140, .78);
+            border-radius: 2mm;
+        }
+
+        .role-header {
+            display: flex;
+            align-items: center;
+            gap: 2mm;
+            margin-bottom: 2mm;
+            padding-bottom: 2mm;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .role-icon {
+            width: 8mm;
+            height: 8mm;
+            display: grid;
+            place-items: center;
+            border-radius: 1.5mm;
+            color: var(--white);
+        }
+
+        .role-icon.client {
+            background: var(--blue);
+        }
+
+        .role-icon.caterer {
+            background: var(--orange);
+        }
+
+        .role-icon.admin {
+            background: var(--green);
+        }
+
+        .role-icon svg {
+            width: 4.5mm;
+            height: 4.5mm;
+        }
+
+        .role-title {
+            font-size: 9pt;
+            font-weight: 900;
+            line-height: 1.1;
+        }
+
+        .role-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .role-features li {
+            position: relative;
+            padding-left: 4mm;
+            margin-bottom: 1.5mm;
+            font-size: 6.8pt;
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--muted);
+        }
+
+        .role-features li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--orange);
+            font-weight: 900;
+        }
+
+        .workflow {
+            padding: 3mm;
+            background: rgba(255, 255, 255, .72);
+            border: 1px solid var(--line);
+            border-radius: 2mm;
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2mm;
+        }
+
+        .workflow-step {
+            padding: 2.5mm;
+            background: var(--white);
+            border: 1px solid rgba(227, 188, 140, .6);
+            border-radius: 1.5mm;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 5mm;
+            height: 5mm;
+            line-height: 5mm;
+            text-align: center;
+            background: var(--orange);
+            color: var(--white);
+            font-size: 7pt;
+            font-weight: 900;
+            border-radius: 50%;
+            margin-bottom: 1.5mm;
+        }
+
+        .step-title {
+            font-size: 7.5pt;
+            font-weight: 900;
+            margin-bottom: 1mm;
+        }
+
+        .step-desc {
+            font-size: 6.5pt;
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--muted);
+        }
+
+        .features-compact {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2mm;
+        }
+
+        .feature-mini {
+            padding: 2.5mm;
+            background: rgba(255, 255, 255, .80);
+            border: 1px solid rgba(227, 188, 140, .78);
+            border-radius: 1.5mm;
+            text-align: center;
+        }
+
+        .feature-mini-icon {
+            width: 7mm;
+            height: 7mm;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 1.5mm;
+            background: rgba(224, 92, 42, .12);
+            color: var(--orange);
+            border-radius: 1mm;
+        }
+
+        .feature-mini-icon svg {
+            width: 4mm;
+            height: 4mm;
+        }
+
+        .feature-mini h3 {
+            font-size: 7pt;
+            font-weight: 900;
+            line-height: 1.15;
+        }
+
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5mm;
+            padding-top: 2mm;
+            margin-top: auto;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 7pt;
+            font-weight: 800;
+        }
+
+        .footer-mark {
+            color: var(--dark);
+        }
+
+        @media print {
+            html,
+            body {
+                width: 210mm;
+                height: 297mm;
+                padding: 0;
+                background: white;
+            }
+
+            .page {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page" aria-label="PlatePal Complete System Pamphlet">
+        <img class="food food-hero" src="../public/assets/Food4.jpg" alt="">
+        <img class="food food-soft" src="../public/assets/Pancit.png" alt="">
+
+        <section class="inner">
+            <!-- Header -->
+            <header class="topbar">
+                <div>
+                    <div class="brand">
+                        <img src="../public/assets/PlatePal_logo.png" alt="PlatePal logo">
+                        <div class="brand-name">PLATE<span>PAL</span></div>
+                    </div>
+                    <h1>Complete Catering <span>Management</span> System</h1>
+                    <p class="tagline">Connecting clients, caterers, and administrators in one unified platform.</p>
+                </div>
+                <aside>
+                    <div class="badge">Guide</div>
+                </aside>
+            </header>
+
+            <!-- Problem & Solution -->
+            <section class="split">
+                <article class="panel">
+                    <div class="section-title">The Challenge</div>
+                    <p>Event planning involves scattered communication, manual booking processes, and difficulty managing multiple caterers and clients across different platforms.</p>
+                </article>
+                <article class="panel">
+                    <div class="section-title">Our Solution</div>
+                    <p>PlatePal unifies the entire catering ecosystem—clients find caterers, caterers manage bookings, and admins oversee the platform—all in one place.</p>
+                </article>
+            </section>
+
+            <!-- Three User Roles -->
+            <section>
+                <div class="section-title">Three User Roles, One Platform</div>
+                <div class="roles-section">
+                    <!-- Client Role -->
+                    <article class="role-card">
+                        <div class="role-header">
+                            <div class="role-icon client">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="role-title">Client</h3>
+                        </div>
+                        <ul class="role-features">
+                            <li>Browse and search caterers</li>
+                            <li>View menus, packages & pricing</li>
+                            <li>Send booking requests</li>
+                            <li>Message caterers directly</li>
+                            <li>Track booking status</li>
+                            <li>Save favorite caterers</li>
+                            <li>Leave reviews & ratings</li>
+                            <li>Manage event details</li>
+                        </ul>
+                    </article>
+
+                    <!-- Caterer Role -->
+                    <article class="role-card">
+                        <div class="role-header">
+                            <div class="role-icon caterer">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                    <circle cx="12" cy="12" r="10"/>
+                                </svg>
+                            </div>
+                            <h3 class="role-title">Caterer</h3>
+                        </div>
+                        <ul class="role-features">
+                            <li>Create business profile</li>
+                            <li>Manage menu items & add-ons</li>
+                            <li>Set up service packages</li>
+                            <li>Accept/decline bookings</li>
+                            <li>Set final pricing</li>
+                            <li>Respond to client messages</li>
+                            <li>Track earnings & revenue</li>
+                            <li>Reply to reviews</li>
+                        </ul>
+                    </article>
+
+                    <!-- Admin Role -->
+                    <article class="role-card">
+                        <div class="role-header">
+                            <div class="role-icon admin">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                            </div>
+                            <h3 class="role-title">Admin</h3>
+                        </div>
+                        <ul class="role-features">
+                            <li>Approve/reject caterers</li>
+                            <li>Manage user accounts</li>
+                            <li>Feature top caterers</li>
+                            <li>Monitor system activity</li>
+                            <li>View platform analytics</li>
+                            <li>Handle system feedback</li>
+                            <li>Oversee bookings & revenue</li>
+                            <li>Moderate reviews</li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Complete Workflow -->
+            <section class="workflow">
+                <div class="section-title">Complete System Workflow</div>
+                <div class="workflow-grid">
+                    <div class="workflow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-title">Caterer Registration</div>
+                        <div class="step-desc">Caterer signs up and submits profile for admin approval</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-title">Admin Approval</div>
+                        <div class="step-desc">Admin reviews and approves caterer profile</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-title">Profile Setup</div>
+                        <div class="step-desc">Caterer adds menus, packages, and pricing</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">4</div>
+                        <div class="step-title">Client Discovery</div>
+                        <div class="step-desc">Client browses and searches for caterers</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">5</div>
+                        <div class="step-title">Booking Request</div>
+                        <div class="step-desc">Client sends booking with event details</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">6</div>
+                        <div class="step-title">Negotiation</div>
+                        <div class="step-desc">Client and caterer discuss via messages</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">7</div>
+                        <div class="step-title">Confirmation</div>
+                        <div class="step-desc">Caterer accepts and sets final price</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">8</div>
+                        <div class="step-title">Event Completion</div>
+                        <div class="step-desc">Caterer marks booking as complete</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">9</div>
+                        <div class="step-title">Review & Feedback</div>
+                        <div class="step-desc">Client leaves rating and review</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Key Features -->
+            <section>
+                <div class="section-title">Platform Features</div>
+                <div class="features-compact">
+                    <article class="feature-mini">
+                        <div class="feature-mini-icon">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                        <h3>Smart Search</h3>
+                    </article>
+                    <article class="feature-mini">
+                        <div class="feature-mini-icon">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                            </svg>
+                        </div>
+                        <h3>Real-time Chat</h3>
+                    </article>
+                    <article class="feature-mini">
+                        <div class="feature-mini-icon">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                        <h3>Booking Mgmt</h3>
+                    </article>
+                    <article class="feature-mini">
+                        <div class="feature-mini-icon">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                            </svg>
+                        </div>
+                        <h3>Reviews</h3>
+                    </article>
+                    <article class="feature-mini">
+                        <div class="feature-mini-icon">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3>Pricing Tools</h3>
+                    </article>
+                    <article class="feature-mini">
+                        <div class="feature-mini-icon">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                        <h3>Analytics</h3>
+                    </article>
+                    <article class="feature-mini">
+                        <div class="feature-mini-icon">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                        </div>
+                        <h3>Notifications</h3>
+                    </article>
+                    <article class="feature-mini">
+                        <div class="feature-mini-icon">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                            </svg>
+                        </div>
+                        <h3>Favorites</h3>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="footer-mark">© 2026 PlatePal Catering System</div>
+                <div>Connecting Clients • Empowering Caterers • Streamlining Management</div>
+            </footer>
+        </section>
+    </main>
+</body>
+</html>

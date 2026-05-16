@@ -57,10 +57,11 @@
                 @php
                     $catererName = $saved->caterer->business_name ?? $saved->caterer->name;
                     $removeFormId = 'remove-saved-caterer-'.$saved->caterer->getKey();
+                    $profileImageUrl = $saved->caterer->profile_image_url ?? asset('/assets/Pusit.png');
                 @endphp
                 <div class="bg-white rounded-2xl overflow-hidden border border-[#EDE4D8] hover:shadow-lg transition-shadow">
                     <div class="relative h-40 overflow-hidden bg-gradient-to-br from-[#FDF6EE] to-[#F5EFEA]">
-                        <img src="{{ $saved->caterer->profile_image ?? '/assets/Pusit.png' }}" alt="{{ $catererName }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                        <img src="{{ $profileImageUrl }}" alt="{{ $catererName }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                         <button
                             type="button"
                             @click="openRemoveSavedModal(@js($removeFormId), @js($catererName))"

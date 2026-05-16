@@ -9,6 +9,7 @@ class Package extends Model
     protected $fillable = [
         'caterer_id',
         'name',
+        'image',
         'description',
         'price',
         'min_guests',

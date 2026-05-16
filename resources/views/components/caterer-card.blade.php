@@ -38,18 +38,7 @@
         @endif
 
         @php
-            $imageUrl = null;
-            if (!empty($caterer->profile_image)) {
-                if (str_starts_with($caterer->profile_image, 'http')) {
-                    $imageUrl = $caterer->profile_image;
-                } elseif (str_starts_with($caterer->profile_image, '/storage/')) {
-                    $imageUrl = $caterer->profile_image;
-                } elseif (str_starts_with($caterer->profile_image, '/assets/')) {
-                    $imageUrl = asset($caterer->profile_image);
-                } else {
-                    $imageUrl = asset('storage/' . $caterer->profile_image);
-                }
-            }
+            $imageUrl = $caterer->profile_image_url ?? null;
         @endphp
         @if($imageUrl)
             <img src="{{ $imageUrl }}" alt="{{ $displayName }}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -79,11 +68,8 @@
         </div>
 
         <div class="flex gap-2">
-            <a href="{{ $detailsUrl }}" class="flex-1 px-3 py-2 rounded-lg border border-brand-orange text-brand-orange text-xs font-bold hover:bg-brand-cream-light transition-colors text-center">
+            <a href="{{ $detailsUrl }}" class="flex-1 px-4 py-2.5 rounded-lg bg-brand-orange text-white text-xs font-bold hover:bg-brand-orange-light transition-colors text-center">
                 View Details
-            </a>
-            <a href="{{ $bookingUrl }}" class="flex-1 px-3 py-2 rounded-lg bg-brand-orange text-white text-xs font-bold hover:bg-brand-orange-light transition-colors text-center">
-                Book
             </a>
         </div>
     </div>

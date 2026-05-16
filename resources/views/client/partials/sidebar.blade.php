@@ -20,6 +20,7 @@
             'route' => 'client.bookings',
             'icon' => 'bookings',
             'active' => request()->routeIs('client.bookings*'),
+            'count' => $activeBookingsCount,
         ],
         [
             'label' => 'Saved Caterers',

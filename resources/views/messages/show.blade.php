@@ -190,25 +190,37 @@
     </div>
 
     {{-- Delete Message Modal --}}
-    <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="closeDeleteModal()">
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                    <svg class="size-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    <template x-teleport="body">
+        <div
+            x-show="showDeleteModal"
+            x-cloak
+            x-transition.opacity
+            x-effect="window.PlatePalModals?.toggle('message-delete', showDeleteModal)"
+            @keydown.escape.window="closeDeleteModal()"
+            @click.self="closeDeleteModal()"
+            class="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 p-4"
+            role="dialog"
+            aria-modal="true"
+        >
+            <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg class="size-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-[#1C1A17]">Delete Message</h3>
                 </div>
-                <h3 class="text-lg font-bold text-[#1C1A17]">Delete Message</h3>
-            </div>
-            <p class="text-sm text-[#8A7F72] mb-6">Are you sure you want to delete this message? This action cannot be undone.</p>
-            <div class="flex gap-3">
-                <button @click="closeDeleteModal()" class="flex-1 px-4 py-2 rounded-lg border border-[#EDE4D8] text-[#1C1A17] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">
-                    Cancel
-                </button>
-                <button @click="deleteMessage()" class="flex-1 px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition-colors">
-                    Delete
-                </button>
+                <p class="text-sm text-[#8A7F72] mb-6">Are you sure you want to delete this message? This action cannot be undone.</p>
+                <div class="flex gap-3">
+                    <button type="button" @click="closeDeleteModal()" class="flex-1 px-4 py-2 rounded-lg border border-[#EDE4D8] text-[#1C1A17] text-sm font-bold hover:bg-[#FDF6EE] transition-colors">
+                        Cancel
+                    </button>
+                    <button type="button" @click="deleteMessage()" class="flex-1 px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition-colors">
+                        Delete
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    </template>
     </div>
 
     <x-slot:scripts>

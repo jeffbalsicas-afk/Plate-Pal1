@@ -5,7 +5,7 @@
         {{-- Top bar: Logo + Back to Home --}}
         <div class="flex items-center justify-between mb-8 sm:mb-12">
             <a href="{{ route('home') }}" class="flex items-center gap-2">
-                <img src="/assets/PlatePal_logo.jpg" alt="PlatePal" class="w-8 sm:w-10 h-8 sm:h-10 rounded-lg sm:rounded-xl object-cover">
+                <img src="/assets/PlatePal_logo.png" alt="PlatePal" class="w-8 sm:w-10 h-8 sm:h-10 rounded-lg sm:rounded-xl object-cover">
                 <span class="text-lg sm:text-xl font-bold tracking-tight">
                     <span class="text-gray-900 font-display">PLATE</span><span class="text-[#f44e08] font-display">PAL</span>
                 </span>

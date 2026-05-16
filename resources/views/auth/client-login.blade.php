@@ -8,7 +8,7 @@
         {{-- Top bar --}}
         <div class="flex items-center justify-between mb-8 sm:mb-16">
             <a href="{{ route('home') }}" class="flex items-center gap-2">
-                <img src="/assets/PlatePal_logo.jpg" alt="PlatePal" class="w-8 sm:w-10 h-8 sm:h-10 rounded-lg sm:rounded-xl object-cover">
+                <img src="/assets/PlatePal_logo.png" alt="PlatePal" class="w-8 sm:w-10 h-8 sm:h-10 rounded-lg sm:rounded-xl object-cover">
                 <span class="text-lg sm:text-xl font-bold tracking-tight">
                     <span class="text-gray-900 font-display">PLATE</span><span class="text-[#f44e08] font-display">PAL</span>
                 </span>
@@ -23,8 +23,8 @@
 
         {{-- Form --}}
         <div class="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
-            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 text-center">Welcome Back, Client</h1>
-            <p class="text-gray-500 text-sm sm:text-base md:text-lg mb-6 sm:mb-10 text-center">Sign in to browse caterers and book your next event</p>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 text-center">Welcome Back</h1>
+            <p class="text-gray-500 text-sm sm:text-base md:text-lg mb-6 sm:mb-10 text-center">Sign in to access your account</p>
 
             @if(session('status'))
                 <div class="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs sm:text-sm">

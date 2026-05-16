@@ -62,10 +62,11 @@ class CatererController extends Controller
 
         $packages = Package::forCaterer($user->id)->get();
         
-        // Get all completed bookings in May
+        // Get all completed bookings in May with final_price set
         $mayBookings = Booking::with('caterer')
             ->where('caterer_id', $user->id)
             ->where('status', 'completed')
+            ->whereNotNull('final_price')
             ->whereMonth('event_date', 5)
             ->whereYear('event_date', now()->year)
             ->get();
@@ -75,9 +76,7 @@ class CatererController extends Controller
             $packageBookings = $mayBookings->where('package_id', $pkg->id);
             
             $bookingsCount = $packageBookings->count();
-            $revenue = $packageBookings->sum(function($booking) {
-                return $booking->estimated_total ?? 0;
-            });
+            $revenue = $packageBookings->sum('final_price');
             
             return [
                 'name' => $pkg->name,
@@ -91,9 +90,7 @@ class CatererController extends Controller
         // Add "Custom Bookings" for bookings without a package
         $customBookings = $mayBookings->whereNull('package_id');
         $customCount = $customBookings->count();
-        $customRevenue = $customBookings->sum(function($booking) {
-            return $booking->estimated_total ?? 0;
-        });
+        $customRevenue = $customBookings->sum('final_price');
         
         if ($customCount > 0) {
             $topPackages->push([
@@ -139,7 +136,7 @@ class CatererController extends Controller
             $selectedStatus = 'all';
         }
 
-        $baseQuery = Booking::with(['user', 'package'])->where('caterer_id', $catererId);
+        $baseQuery = Booking::with(['user', 'package', 'bookingItems'])->where('caterer_id', $catererId);
 
         $statusCounts = [
             'all' => (clone $baseQuery)->count(),
@@ -293,6 +290,16 @@ class CatererController extends Controller
                     'string',
                     'regex:/^\+639\d{9}$/',
                     Rule::unique('users', 'phone')->ignore($user->id),
+                    function ($attribute, $value, $fail) use ($user) {
+                        $phoneExists = User::whereKeyNot($user->id)
+                            ->whereNotNull('phone')
+                            ->pluck('phone')
+                            ->contains(fn ($phone) => $this->normalizePhone($phone) === $value);
+
+                        if ($phoneExists) {
+                            $fail('The phone has already been taken.');
+                        }
+                    },
                 ],
                 'description'   => ['nullable', 'string', 'max:2000'],
                 'cuisine'       => ['required', 'string', 'max:255'],
@@ -437,8 +444,11 @@ class CatererController extends Controller
             $statusCounts = ['all' => Booking::where('user_id', $user->id)->count()];
         }
 
-        // Use different view for guests vs authenticated users
-        $view = auth()->guest() ? 'caterer.detail-guest' : 'caterer.detail';
+        $view = match ($user?->role) {
+            null => 'caterer.detail-guest',
+            'client' => 'client.caterer-detail',
+            default => 'caterer.detail',
+        };
 
         return response()
             ->view($view, compact('caterer', 'packages', 'menuItems', 'addOns', 'publicReviews', 'reviewsCount', 'averageRating', 'user', 'initials', 'savedCatererIds', 'activeBookings', 'unreadMessages', 'statusCounts'))
@@ -477,25 +487,24 @@ class CatererController extends Controller
         $displayName = $user->business_name ?? $user->name;
         $initials = $user->initials;
 
+        // Only count completed bookings with final_price set
         $completedBookings = Booking::with('caterer')
             ->where('caterer_id', $user->id)
             ->where('status', 'completed')
+            ->whereNotNull('final_price')
             ->get();
 
-        $totalEarnings = $completedBookings->sum(function($booking) {
-            return $booking->estimated_total ?? 0;
-        });
+        $totalEarnings = $completedBookings->sum('final_price');
 
         $monthlyBookings = Booking::with('caterer')
             ->where('caterer_id', $user->id)
             ->where('status', 'completed')
+            ->whereNotNull('final_price')
             ->whereMonth('event_date', now()->month)
             ->whereYear('event_date', now()->year)
             ->get();
 
-        $monthlyEarnings = $monthlyBookings->sum(function($booking) {
-            return $booking->estimated_total ?? 0;
-        });
+        $monthlyEarnings = $monthlyBookings->sum('final_price');
 
         $completedBookings = $completedBookings->count();
 
@@ -508,9 +517,11 @@ class CatererController extends Controller
             ->where('sender', 'client')
             ->count();
 
+        // Only show completed bookings with final_price in history
         $earningsHistory = Booking::with(['user', 'package', 'caterer'])
             ->where('caterer_id', $user->id)
             ->where('status', 'completed')
+            ->whereNotNull('final_price')
             ->latest()
             ->paginate(15);
 

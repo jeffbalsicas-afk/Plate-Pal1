@@ -119,23 +119,21 @@
                         <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->package_name ?? 'Custom booking' }}</td>
                         <td class="px-6 py-4 text-[#8A7F72]">{{ number_format($booking->guests) }}</td>
                         <td class="px-6 py-4 text-[#8A7F72]">
-                            @if($booking->package_price)
+                            @if($booking->client_budget)
+                                ₱{{ number_format($booking->client_budget, 2) }}
+                            @elseif($booking->package_price)
                                 Bundle
                             @else
-                                ₱{{ number_format(($booking->caterer->price_min + $booking->caterer->price_max) / 2, 2) }}
+                                Custom
                             @endif
                         </td>
                         <td class="px-6 py-4 font-bold text-[#E8642A]">
-                            @if($booking->estimated_total)
-                                ₱{{ number_format($booking->estimated_total, 2) }}
-                            @else
-                                Unpriced
-                            @endif
+                            ₱{{ number_format($booking->final_price, 2) }}
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-[#8A7F72]">No completed bookings yet.</td>
+                        <td colspan="7" class="px-6 py-12 text-center text-[#8A7F72]">No completed bookings with final price set yet.</td>
                     </tr>
                     @endforelse
                 </tbody>

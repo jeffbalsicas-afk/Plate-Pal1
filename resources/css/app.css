@@ -48,6 +48,11 @@ body {
     overflow-x: hidden;
 }
 
+html.platepal-modal-open,
+body.platepal-modal-open {
+    overflow: hidden;
+}
+
 @layer utilities {
     .safe-mobile-text {
         overflow-wrap: anywhere;
@@ -64,4 +69,3 @@ body {
         min-width: 42rem;
     }
 }
-

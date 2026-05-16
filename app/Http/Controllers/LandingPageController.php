@@ -53,7 +53,7 @@ class LandingPageController extends Controller
                 'rating' => number_format($caterer->rating ?: 0, 1),
                 'reviews' => $caterer->reviews_count ?? 0,
                 'price' => $this->priceLabel($caterer->price_min, $caterer->price_max, $caterer->price_range),
-                'image' => $caterer->profile_image ?: '/assets/PlatePal_logo.jpg',
+                'image' => $caterer->profile_image_url ?: '/assets/PlatePal_logo.jpg',
                 'guests' => $this->guestLabel($caterer->min_guest, $caterer->max_guest),
                 'response' => 'Direct inquiry',
             ]);

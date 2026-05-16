@@ -1,5 +1,6 @@
 @php
     $initials = strtoupper(substr($user->name, 0, 1) . (str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
+    $profileImageUrl = $user->profile_image_url;
 @endphp
 
 <x-dashboard-layout
@@ -37,16 +38,31 @@
                 <p class="text-base sm:text-lg text-[#8A6D3F]">Manage your account information</p>
             </div>
 
-            <form method="POST" action="{{ route('client.profile.update') }}" class="p-6 sm:p-8 space-y-6">
+            <form method="POST" action="{{ route('client.profile.update') }}" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-6">
                 @csrf
 
                 <div class="flex items-center gap-4 pb-6 border-b border-[#EDE4D8]">
-                    <div class="w-16 h-16 rounded-full bg-[#E8642A] text-white text-2xl font-bold flex items-center justify-center">
-                        {{ $initials }}
+                    <div class="w-16 h-16 overflow-hidden rounded-full bg-[#E8642A] text-white text-2xl font-bold flex items-center justify-center shrink-0">
+                        @if($profileImageUrl)
+                            <img src="{{ $profileImageUrl }}" alt="{{ $user->name }} profile photo" class="h-full w-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <span class="hidden h-full w-full items-center justify-center">{{ $initials }}</span>
+                        @else
+                            {{ $initials }}
+                        @endif
                     </div>
-                    <div>
+                    <div class="min-w-0 flex-1">
                         <p class="text-sm font-bold text-[#1C1A17]">{{ $user->name }}</p>
                         <p class="text-xs text-[#8A7F72]">Member since {{ $user->created_at->format('M d, Y') }}</p>
+                        <input
+                            id="profile_image"
+                            name="profile_image"
+                            type="file"
+                            accept="image/*"
+                            class="mt-3 w-full text-xs text-[#8A7F72] file:mr-3 file:rounded-lg file:border-0 file:bg-[#E8642A] file:px-3 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-[#F07C42]"
+                        >
+                        @error('profile_image')
+                            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 

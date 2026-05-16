@@ -15,9 +15,13 @@ class Booking extends Model
         'event_title',
         'event_date',
         'guests',
+        'client_budget',
+        'price_per_head',
+        'final_price',
         'special_requests',
         'status',
         'decline_reason',
+        'client_viewed_at',
     ];
 
     protected $casts = [
@@ -52,6 +56,11 @@ class Booking extends Model
 
     public function getEstimatedTotalAttribute(): ?float
     {
+        // If final_price is set (agreed price), use it
+        if ($this->final_price !== null) {
+            return (float) $this->final_price;
+        }
+
         // If package_price is set, use it
         if ($this->package_price !== null) {
             return (float) $this->package_price;

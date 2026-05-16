@@ -3,7 +3,7 @@
 
         {{-- Logo --}}
         <a href="{{ route('home') }}" class="flex items-center gap-2 shrink-0">
-            <img src="/assets/PlatePal_logo.jpg" alt="PlatePal" class="size-8 rounded-lg object-cover">
+            <img src="/assets/PlatePal_logo.png" alt="PlatePal" class="size-8 rounded-lg object-cover">
             <span class="text-xl font-display font-black tracking-tight">
                 <span class="text-brand-dark text-display">PLATE</span><span class="text-brand-orange">PAL</span>
             </span>
@@ -19,6 +19,7 @@
                     $user = auth()->user();
                     $role = $user->role;
                     $initials = strtoupper(substr($user->name, 0, 1) . (str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
+                    $profileImageUrl = $user->profile_image_url;
                     $dashboardRoute = match ($role) {
                         'caterer' => route('caterer.dashboard'),
                         'admin' => route('admin.dashboard'),
@@ -32,7 +33,14 @@
                 @endphp
                 <div class="relative" x-data="{ open: false }">
                     <button type="button" @click="open = !open" class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-cream-dark hover:bg-brand-cream transition-colors">
-                        <div class="w-7 h-7 rounded-full bg-brand-orange text-white text-xs font-bold flex items-center justify-center">{{ $initials }}</div>
+                        <div class="w-7 h-7 overflow-hidden rounded-full bg-brand-orange text-white text-xs font-bold flex items-center justify-center">
+                            @if($profileImageUrl)
+                                <img src="{{ $profileImageUrl }}" alt="{{ $user->name }} profile photo" class="h-full w-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <span class="hidden h-full w-full items-center justify-center">{{ $initials }}</span>
+                            @else
+                                {{ $initials }}
+                            @endif
+                        </div>
                         <span class="text-sm font-bold text-brand-dark">{{ $user->name }}</span>
                         <svg class="size-3.5 text-brand-muted transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                     </button>

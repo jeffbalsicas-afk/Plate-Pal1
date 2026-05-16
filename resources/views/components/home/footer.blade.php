@@ -6,7 +6,7 @@
             {{-- Brand --}}
             <div>
                 <div class="flex items-center gap-2 mb-3 sm:mb-4">
-                    <img src="/assets/PlatePal_logo.jpg" alt="PlatePal" class="size-6 sm:size-7 rounded-lg object-cover">
+                    <img src="/assets/PlatePal_logo.png" alt="PlatePal" class="size-6 sm:size-7 rounded-lg object-cover">
                     <span class="text-base sm:text-lg font-black tracking-wider">PLATEPAL</span>
                 </div>
                 <p class="text-xs sm:text-sm text-white/45 leading-relaxed max-w-xs">

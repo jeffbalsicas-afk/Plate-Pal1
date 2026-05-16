@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'PlatePal – Tagum City\'s Home Kitchen Marketplace' }}</title>
+    
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" href="{{ asset('assets/PlatePal_logo.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('assets/PlatePal_logo.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,7 +48,7 @@
 
                     {{-- Logo --}}
                     <a href="{{ auth()->user()->role === 'caterer' ? route('caterer.dashboard') : (auth()->user()->role === 'admin' ? route('admin.dashboard') : route('client.dashboard')) }}" class="flex min-w-0 items-center gap-2">
-                        <img src="/assets/PlatePal_logo.jpg" alt="PlatePal" class="size-8 shrink-0 rounded-lg object-cover">
+                        <img src="/assets/PlatePal_logo.png" alt="PlatePal" class="size-8 shrink-0 rounded-lg object-cover">
                         <div class="flex min-w-0 flex-col">
                             <span class="text-lg font-display tracking-tight text-brand-dark leading-none">PLATE<span class="text-[#f44e08] ">PAL</span></span>
                         </div>
@@ -60,9 +64,19 @@
                 <div class="shrink-0">
                     @isset($username)
                     {{-- User Dropdown --}}
+                    @php
+                        $currentUserProfileImageUrl = auth()->user()?->profile_image_url;
+                    @endphp
                     <div class="relative" x-data="{ open: false }">
                         <button type="button" @click="open = !open" class="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-[#EDE4D8] bg-white hover:bg-[#FDF6EE] transition-colors">
-                            <div class="w-[34px] h-[34px] rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center shrink-0">{{ $initials ?? 'U' }}</div>
+                            <div class="w-[34px] h-[34px] overflow-hidden rounded-full bg-[#E8642A] text-white text-xs font-bold flex items-center justify-center shrink-0">
+                                @if($currentUserProfileImageUrl)
+                                    <img src="{{ $currentUserProfileImageUrl }}" alt="{{ $username }} profile photo" class="h-full w-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <span class="hidden h-full w-full items-center justify-center">{{ $initials ?? 'U' }}</span>
+                                @else
+                                    {{ $initials ?? 'U' }}
+                                @endif
+                            </div>
                             <div class="hidden sm:flex flex-col items-start">
                                 <span class="text-[12.5px] font-bold text-[#1C1A17] leading-tight">{{ $username }}</span>
                                 @isset($usersub)<span class="text-[10.5px] text-[#8A7F72]">{{ $usersub }}</span>@endisset
