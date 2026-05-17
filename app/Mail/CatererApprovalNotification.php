@@ -13,13 +13,11 @@ class CatererApprovalNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public User $caterer, public string $status, public ?string $reason = null)
-    {
-    }
+    public function __construct(public User $caterer, public string $status, public ?string $reason = null) {}
 
     public function envelope(): Envelope
     {
-        $subject = $this->status === 'approved' 
+        $subject = $this->status === 'approved'
             ? 'Your PlatePal Profile Has Been Approved! 🎉'
             : 'Your PlatePal Profile Needs Updates';
 

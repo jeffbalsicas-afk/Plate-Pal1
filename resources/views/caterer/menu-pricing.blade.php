@@ -10,15 +10,6 @@
     </x-slot:sidebar>
 
     @php
-        $activeTab = in_array(request('tab'), ['packages', 'items', 'addons'], true) ? request('tab') : 'packages';
-
-        $statusBadges = [
-            'live' => ['wrap' => 'bg-[#EAF5E9] text-[#2E7D32] border-[#CDE8CC]', 'dot' => 'bg-[#2E7D32]', 'label' => 'Live'],
-            'pending' => ['wrap' => 'bg-[#FFF8E1] text-[#B26A00] border-[#F3D68B]', 'dot' => 'bg-[#B26A00]', 'label' => 'Pending'],
-            'rejected' => ['wrap' => 'bg-red-50 text-red-700 border-red-200', 'dot' => 'bg-red-600', 'label' => 'Rejected'],
-            'draft' => ['wrap' => 'bg-[#F6EFE7] text-[#8A6D3F] border-[#EDE4D8]', 'dot' => 'bg-[#8A6D3F]', 'label' => 'Draft'],
-        ];
-
         $menuTypes = [
             'packages' => [
                 'label' => 'Packages',
@@ -146,6 +137,7 @@
                     @include('caterer.partials.menu-pricing.summary-card', [
                         'tabKey' => $tabKey,
                         'menuType' => $menuType,
+                        'activeTab' => $activeTab,
                     ])
                 @endforeach
             </div>
@@ -154,13 +146,12 @@
         </div>
 
         @include('caterer.partials.menu-pricing.filter-bar', ['activeTab' => $activeTab])
-        @include('caterer.partials.menu-pricing.tab-nav', ['menuTypes' => $menuTypes])
+        @include('caterer.partials.menu-pricing.tab-nav', ['menuTypes' => $menuTypes, 'activeTab' => $activeTab])
 
         @foreach($menuTypes as $tabKey => $menuType)
             @include('caterer.partials.menu-pricing.menu-section', [
                 'tabKey' => $tabKey,
                 'menuType' => $menuType,
-                'statusBadges' => $statusBadges,
             ])
         @endforeach
 

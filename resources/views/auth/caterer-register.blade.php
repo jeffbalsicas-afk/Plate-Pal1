@@ -1,7 +1,7 @@
 <x-layout title="Join as Caterer – PlatePal">
 <div class="flex min-h-screen font-sans">
     {{-- Left side --}}
-    <div class="w-full lg:w-1/2 flex flex-col px-8 lg:px-20 py-10 bg-white overflow-y-auto">
+    <div class="w-full lg:w-1/2 min-h-screen flex flex-col px-8 lg:px-20 py-10 bg-white overflow-y-auto">
         <div class="flex items-center justify-between mb-12">
             <a href="{{ route('home') }}" class="flex items-center gap-2">
                 <img src="/assets/PlatePal_logo.jpg" alt="PlatePal" class="w-10 h-10 rounded-xl object-cover">

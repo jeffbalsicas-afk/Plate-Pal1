@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PasswordChangedNotification;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password as PasswordBroker;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -20,6 +22,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return $this->redirectAuthenticatedUser();
         }
+
         return $this->withNoCacheHeaders(response()->view('auth.client-login'));
     }
 
@@ -36,16 +39,22 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
-            
-            // Redirect based on user role
+
+            if ($user->role === 'caterer') {
+                Auth::logout();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'This account is not registered as a client.',
+                ])->onlyInput('email');
+            }
+
             $redirectUrl = match ($user->role) {
                 'admin' => route('admin.dashboard'),
-                'caterer' => route('caterer.dashboard'),
                 'client' => route('client.dashboard'),
                 default => route('home'),
             };
 
-            // Handle redirect parameter for clients
             if ($user->role === 'client') {
                 $redirect = $this->safeRedirectTarget($request->input('redirect'));
                 if ($redirect) {
@@ -66,6 +75,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return $this->redirectAuthenticatedUser();
         }
+
         return view('auth.client-register');
     }
 
@@ -102,6 +112,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return $this->redirectAuthenticatedUser();
         }
+
         return $this->withNoCacheHeaders(response()->view('auth.caterer-login'));
     }
 
@@ -120,6 +131,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return $this->redirectAuthenticatedUser();
         }
+
         return view('auth.caterer-register');
     }
 
@@ -160,6 +172,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return $this->redirectAuthenticatedUser();
         }
+
         return $this->withNoCacheHeaders(response()->view('auth.admin-login'));
     }
 
@@ -189,15 +202,6 @@ class AuthController extends Controller
         $request->validate([
             'email' => ['required', 'email', 'exists:users,email'],
         ]);
-
-        if (app()->environment(['local', 'testing'])) {
-            $user = User::where('email', $request->email)->firstOrFail();
-            $token = PasswordBroker::createToken($user);
-
-            return redirect()
-                ->route('password.reset', ['token' => $token, 'email' => $user->email])
-                ->with('status', 'Simulation mode: reset link opened for you.');
-        }
 
         $status = PasswordBroker::sendResetLink($request->only('email'));
 
@@ -241,6 +245,8 @@ class AuthController extends Controller
                 ])->save();
 
                 event(new PasswordReset($user));
+
+                Mail::to($user->email)->send(new PasswordChangedNotification($user));
             }
         );
 
@@ -257,7 +263,7 @@ class AuthController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
+
         // Clear Livewire cache
         if (file_exists(storage_path('framework/cache/livewire-tmp'))) {
             array_map('unlink', glob(storage_path('framework/cache/livewire-tmp/*')));
@@ -302,12 +308,12 @@ class AuthController extends Controller
 
         // If it starts with 0, replace with +63
         if (str_starts_with($phone, '0')) {
-            return '+63' . substr($phone, 1);
+            return '+63'.substr($phone, 1);
         }
 
         // If it starts with 63, add +
         if (str_starts_with($phone, '63')) {
-            return '+' . $phone;
+            return '+'.$phone;
         }
 
         // If it already starts with +63, return as is
@@ -316,7 +322,7 @@ class AuthController extends Controller
         }
 
         // Otherwise, assume it's a local number and add +63
-        return '+63' . preg_replace('/\D/', '', $phone);
+        return '+63'.preg_replace('/\D/', '', $phone);
     }
 
     private function attemptRoleLogin(
@@ -398,7 +404,7 @@ class AuthController extends Controller
     private function redirectAuthenticatedUser()
     {
         $user = Auth::user();
-        
+
         $redirectUrl = match ($user->role) {
             'admin' => route('admin.dashboard'),
             'caterer' => route('caterer.dashboard'),

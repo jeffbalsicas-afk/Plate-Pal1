@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Mail\PasswordChangedNotification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class ClientProfileTest extends TestCase
@@ -13,6 +15,8 @@ class ClientProfileTest extends TestCase
 
     public function test_client_can_change_password_from_profile_settings(): void
     {
+        Mail::fake();
+
         $client = User::factory()->create([
             'role' => 'client',
             'password' => Hash::make('old-password'),
@@ -29,6 +33,7 @@ class ClientProfileTest extends TestCase
         $response->assertSessionHas('success', 'Password changed successfully!');
 
         $this->assertTrue(Hash::check('new-password', $client->refresh()->password));
+        Mail::assertSent(PasswordChangedNotification::class, fn (PasswordChangedNotification $mail) => $mail->hasTo($client->email));
     }
 
     public function test_client_password_change_requires_current_password(): void

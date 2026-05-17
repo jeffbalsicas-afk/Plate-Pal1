@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\Message;
 use App\Models\Booking;
+use App\Models\Message;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;

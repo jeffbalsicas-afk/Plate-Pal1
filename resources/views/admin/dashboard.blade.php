@@ -180,18 +180,18 @@
         @endif
     </div>
 
-    {{-- Pending Menu & Pricing --}}
+    {{-- Menu & Pricing --}}
     <div class="bg-white rounded-2xl p-[22px] border border-[#EDE4D8] mb-5">
         <div class="flex items-center justify-between gap-4 mb-4">
             <div>
-                <h3 class="text-base font-black text-[#1C1A17]">Pending Menu & Pricing</h3>
-                <p class="text-xs text-[#8A7F72] mt-1">Approve packages, menu items, and add-ons before they become visible to clients.</p>
+                <h3 class="text-base font-black text-[#1C1A17]">Menu & Pricing</h3>
+                <p class="text-xs text-[#8A7F72] mt-1">Packages, menu items, and add-ons are visible to clients as soon as caterers save them.</p>
             </div>
-            <span class="text-xs font-bold text-[#E8642A]">{{ $pendingPackages->count() + $pendingMenuItems->count() }} pending</span>
+            <span class="text-xs font-bold text-[#2E7D32]">No review queue</span>
         </div>
 
         @if($pendingPackages->isEmpty() && $pendingMenuItems->isEmpty())
-            <p class="text-sm text-[#8A7F72] text-center py-6">No pending menu submissions.</p>
+            <p class="text-sm text-[#8A7F72] text-center py-6">Menu and pricing changes no longer require admin approval.</p>
         @else
             <div class="grid lg:grid-cols-2 gap-4">
                 <div>
@@ -209,16 +209,6 @@
                                             @if($package->description)
                                                 <div class="text-xs text-[#8A7F72] mt-1 line-clamp-2">{{ $package->description }}</div>
                                             @endif
-                                        </div>
-                                        <div class="flex items-center gap-2 flex-shrink-0">
-                                            <form method="POST" action="{{ route('admin.packages.approve', $package) }}">
-                                                @csrf
-                                                <button type="submit" class="px-3 py-1 rounded-lg bg-[#EAF5E9] text-[#2E7D32] text-xs font-bold hover:bg-green-200 transition-colors">Approve</button>
-                                            </form>
-                                            <form method="POST" action="{{ route('admin.packages.reject', $package) }}">
-                                                @csrf
-                                                <button type="submit" class="px-3 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors">Reject</button>
-                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -242,16 +232,6 @@
                                             @if($item->description)
                                                 <div class="text-xs text-[#8A7F72] mt-1 line-clamp-2">{{ $item->description }}</div>
                                             @endif
-                                        </div>
-                                        <div class="flex items-center gap-2 flex-shrink-0">
-                                            <form method="POST" action="{{ route('admin.menu-items.approve', $item) }}">
-                                                @csrf
-                                                <button type="submit" class="px-3 py-1 rounded-lg bg-[#EAF5E9] text-[#2E7D32] text-xs font-bold hover:bg-green-200 transition-colors">Approve</button>
-                                            </form>
-                                            <form method="POST" action="{{ route('admin.menu-items.reject', $item) }}">
-                                                @csrf
-                                                <button type="submit" class="px-3 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors">Reject</button>
-                                            </form>
                                         </div>
                                     </div>
                                 </div>

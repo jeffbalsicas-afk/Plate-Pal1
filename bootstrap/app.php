@@ -1,9 +1,12 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\PreventBackHistory;
+use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,9 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'admin' => \App\Http\Middleware\AdminMiddleware::class,
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'prevent.back' => \App\Http\Middleware\PreventBackHistory::class,
+            'admin' => AdminMiddleware::class,
+            'role' => RoleMiddleware::class,
+            'prevent.back' => PreventBackHistory::class,
         ]);
 
         $middleware->redirectGuestsTo(function (Request $request): string {

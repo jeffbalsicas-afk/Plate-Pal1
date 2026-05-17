@@ -15,14 +15,14 @@ class MessageController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+
         // Mark all unviewed bookings as viewed for clients when they access messages
         if ($user->role === 'client') {
             Booking::where('user_id', $user->id)
                 ->whereNull('client_viewed_at')
                 ->update(['client_viewed_at' => now()]);
         }
-        
+
         // Recalculate stats AFTER marking as viewed
         [
             'activeBookings' => $activeBookings,
@@ -37,28 +37,28 @@ class MessageController extends Controller
 
         $conversations = Message::with(['user', 'caterer'])
             ->where(function ($query) use ($user) {
-            $query->where('user_id', $user->id)->orWhere('caterer_id', $user->id);
-        })
-        ->orderByDesc('created_at')
-        ->orderByDesc('id')
-        ->get()
-        ->groupBy(function ($message) use ($user) {
-            return $user->role === 'caterer' 
-                ? $message->user_id 
-                : $message->caterer_id;
-        })
-        ->map(function ($messages) use ($user) {
-            $lastMessage = $messages->first();
+                $query->where('user_id', $user->id)->orWhere('caterer_id', $user->id);
+            })
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get()
+            ->groupBy(function ($message) use ($user) {
+                return $user->role === 'caterer'
+                    ? $message->user_id
+                    : $message->caterer_id;
+            })
+            ->map(function ($messages) use ($user) {
+                $lastMessage = $messages->first();
 
-            return [
-                'recipient' => $user->role === 'caterer' ? $lastMessage->user : $lastMessage->caterer,
-                'lastMessage' => $lastMessage,
-                'unread' => $messages->where('is_read', false)->where('sender', '!=', $user->role)->count(),
-            ];
-        })
-        ->filter(fn ($conversation) => $conversation['recipient'] !== null)
-        ->sortByDesc(fn ($conversation) => $conversation['lastMessage']->created_at)
-        ->values();
+                return [
+                    'recipient' => $user->role === 'caterer' ? $lastMessage->user : $lastMessage->caterer,
+                    'lastMessage' => $lastMessage,
+                    'unread' => $messages->where('is_read', false)->where('sender', '!=', $user->role)->count(),
+                ];
+            })
+            ->filter(fn ($conversation) => $conversation['recipient'] !== null)
+            ->sortByDesc(fn ($conversation) => $conversation['lastMessage']->created_at)
+            ->values();
 
         $existingRecipientIds = $conversations
             ->map(fn ($conversation) => $conversation['recipient']->id)
@@ -73,20 +73,20 @@ class MessageController extends Controller
     {
         $user = auth()->user();
         [$clientId, $catererId] = $this->conversationPair($user, $recipient);
-        
+
         // Mark all unviewed bookings as viewed for clients when they access messages
         if ($user->role === 'client') {
             Booking::where('user_id', $user->id)
                 ->whereNull('client_viewed_at')
                 ->update(['client_viewed_at' => now()]);
         }
-        
+
         $messages = Message::with(['user', 'caterer'])
-        ->where('user_id', $clientId)
-        ->where('caterer_id', $catererId)
-        ->orderBy('created_at')
-        ->orderBy('id')
-        ->get();
+            ->where('user_id', $clientId)
+            ->where('caterer_id', $catererId)
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
 
         Message::where('user_id', $clientId)
             ->where('caterer_id', $catererId)
@@ -160,9 +160,9 @@ class MessageController extends Controller
     public function markAsRead(Message $message)
     {
         abort_unless(auth()->id() === $message->caterer_id || auth()->id() === $message->user_id, 403);
-        
+
         $message->update(['is_read' => true]);
-        
+
         return back();
     }
 
@@ -237,11 +237,11 @@ class MessageController extends Controller
 
         $messages = Message::where('user_id', $clientId)
             ->where('caterer_id', $catererId)
-            ->when($lastMessageId, fn($q) => $q->where('id', '>', $lastMessageId))
+            ->when($lastMessageId, fn ($q) => $q->where('id', '>', $lastMessageId))
             ->orderBy('created_at')
             ->orderBy('id')
             ->get()
-            ->map(fn($message) => $this->messagePayload($message));
+            ->map(fn ($message) => $this->messagePayload($message));
 
         Message::where('user_id', $clientId)
             ->where('caterer_id', $catererId)

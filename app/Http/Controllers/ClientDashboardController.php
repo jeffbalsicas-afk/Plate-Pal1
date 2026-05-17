@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Mail\NewBookingNotification;
+use App\Mail\PasswordChangedNotification;
 use App\Models\Booking;
+use App\Models\BookingItem;
+use App\Models\MenuItem;
 use App\Models\Message;
 use App\Models\Package;
 use App\Models\Review;
@@ -23,20 +26,20 @@ class ClientDashboardController extends Controller
     {
         $user = auth()->user();
 
-        $activeBookings    = Booking::where('user_id', $user->id)->whereNull('client_viewed_at')->count();
-        $completedEvents   = Booking::where('user_id', $user->id)->where('status', 'completed')->count();
-        $unreadMessages    = Message::where('user_id', $user->id)->where('is_read', false)->where('sender', 'caterer')->count();
+        $activeBookings = Booking::where('user_id', $user->id)->whereNull('client_viewed_at')->count();
+        $completedEvents = Booking::where('user_id', $user->id)->where('status', 'completed')->count();
+        $unreadMessages = Message::where('user_id', $user->id)->where('is_read', false)->where('sender', 'caterer')->count();
         $savedCaterersCount = SavedCaterer::where('user_id', $user->id)->count();
         $statusCounts = ['all' => Booking::where('user_id', $user->id)->count()];
 
-        $upcomingBookings  = Booking::with('caterer')
+        $upcomingBookings = Booking::with('caterer')
             ->where('user_id', $user->id)
             ->whereIn('status', ['pending', 'confirmed'])
             ->orderBy('event_date')
             ->take(3)
             ->get();
 
-        $recentMessages    = Message::with('caterer')
+        $recentMessages = Message::with('caterer')
             ->where('user_id', $user->id)
             ->latest()
             ->take(3)
@@ -52,14 +55,14 @@ class ClientDashboardController extends Controller
             ->limit(3)
             ->get()
             ->map(fn ($caterer) => [
-                'id'       => $caterer->id,
-                'name'     => $caterer->business_name ?? $caterer->name,
+                'id' => $caterer->id,
+                'name' => $caterer->business_name ?? $caterer->name,
                 'location' => $caterer->barangay ?? 'Tagum City',
-                'cuisine'  => $caterer->cuisine ?? 'Filipino Cuisine',
-                'rating'   => $caterer->rating ?? 4.5,
-                'reviews'  => $caterer->reviews_count ?? 0,
-                'price'    => 'PHP ' . ($caterer->price_min ?? 300) . '-' . ($caterer->price_max ?? 500) . '/head',
-                'image'    => $caterer->profile_image_url ?? '/assets/Pusit.png',
+                'cuisine' => $caterer->cuisine ?? 'Filipino Cuisine',
+                'rating' => $caterer->rating ?? 4.5,
+                'reviews' => $caterer->reviews_count ?? 0,
+                'price' => 'PHP '.($caterer->price_min ?? 300).'-'.($caterer->price_max ?? 500).'/head',
+                'image' => $caterer->profile_image_url ?? '/assets/Pusit.png',
                 'is_saved' => in_array($caterer->id, $savedCatererIds),
             ]);
 
@@ -81,7 +84,7 @@ class ClientDashboardController extends Controller
     public function browse()
     {
         $user = auth()->user();
-        $initials = strtoupper(substr($user->name, 0, 1) . (str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
+        $initials = strtoupper(substr($user->name, 0, 1).(str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
 
         $activeBookings = Booking::where('user_id', $user->id)->whereNull('client_viewed_at')->count();
         $completedEvents = Booking::where('user_id', $user->id)->where('status', 'completed')->count();
@@ -97,7 +100,7 @@ class ClientDashboardController extends Controller
 
         $caterers = $query->paginate(12)->withQueryString();
         $savedCatererIds = SavedCaterer::where('user_id', $user->id)->pluck('caterer_id')->toArray();
-        
+
         [$cuisines, $barangays] = $this->browseFilterOptions();
 
         return view('client.browse', compact(
@@ -365,7 +368,7 @@ class ClientDashboardController extends Controller
     public function bookings()
     {
         $user = auth()->user();
-        $initials = strtoupper(substr($user->name, 0, 1) . (str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
+        $initials = strtoupper(substr($user->name, 0, 1).(str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
         $selectedStatus = request('status', 'all');
         $allowedStatuses = ['all', 'confirmed', 'pending', 'completed', 'cancelled'];
 
@@ -396,7 +399,7 @@ class ClientDashboardController extends Controller
 
         // After marking as viewed, count should be 0
         $activeBookings = Booking::where('user_id', $user->id)->whereNull('client_viewed_at')->count();
-            
+
         $unreadMessages = Message::where('user_id', $user->id)
             ->where('is_read', false)
             ->where('sender', 'caterer')
@@ -423,7 +426,7 @@ class ClientDashboardController extends Controller
 
         $booking->load(['caterer', 'package', 'bookingItems']);
         $existingReview = Review::where('booking_id', $booking->id)->first();
-        $initials = strtoupper(substr($user->name, 0, 1) . (str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
+        $initials = strtoupper(substr($user->name, 0, 1).(str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
 
         $statusCounts = [
             'all' => Booking::where('user_id', $user->id)->count(),
@@ -513,8 +516,7 @@ class ClientDashboardController extends Controller
                 'nullable',
                 'integer',
                 Rule::exists('packages', 'id')->where(fn ($query) => $query
-                    ->where('caterer_id', $caterer->id)
-                    ->where('status', 'live')),
+                    ->where('caterer_id', $caterer->id)),
             ],
             'menu_items' => ['nullable', 'array'],
             'menu_items.*' => ['integer', 'exists:menu_items,id'],
@@ -524,11 +526,11 @@ class ClientDashboardController extends Controller
         ]);
 
         $package = isset($validated['package_id'])
-            ? Package::where('caterer_id', $caterer->id)->where('status', 'live')->find($validated['package_id'])
+            ? Package::where('caterer_id', $caterer->id)->find($validated['package_id'])
             : null;
 
         // Package min_guests is now just a guideline - caterer can accept any booking
-        
+
         $booking = Booking::create([
             'user_id' => auth()->id(),
             'caterer_id' => $caterer->id,
@@ -544,10 +546,10 @@ class ClientDashboardController extends Controller
         ]);
 
         // Store selected menu items
-        if (!empty($validated['menu_items'])) {
-            $menuItems = \App\Models\MenuItem::whereIn('id', $validated['menu_items'])->get();
+        if (! empty($validated['menu_items'])) {
+            $menuItems = MenuItem::whereIn('id', $validated['menu_items'])->get();
             foreach ($menuItems as $item) {
-                \App\Models\BookingItem::create([
+                BookingItem::create([
                     'booking_id' => $booking->id,
                     'menu_item_id' => $item->id,
                     'item_name' => $item->name,
@@ -559,10 +561,10 @@ class ClientDashboardController extends Controller
         }
 
         // Store selected add-ons
-        if (!empty($validated['addons'])) {
-            $addons = \App\Models\MenuItem::whereIn('id', $validated['addons'])->get();
+        if (! empty($validated['addons'])) {
+            $addons = MenuItem::whereIn('id', $validated['addons'])->get();
             foreach ($addons as $addon) {
-                \App\Models\BookingItem::create([
+                BookingItem::create([
                     'booking_id' => $booking->id,
                     'menu_item_id' => $addon->id,
                     'item_name' => $addon->name,
@@ -585,7 +587,7 @@ class ClientDashboardController extends Controller
     public function savedCaterers()
     {
         $user = auth()->user();
-        $initials = strtoupper(substr($user->name, 0, 1) . (str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
+        $initials = strtoupper(substr($user->name, 0, 1).(str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
 
         $activeBookings = Booking::where('user_id', $user->id)->whereNull('client_viewed_at')->count();
         $completedEvents = Booking::where('user_id', $user->id)->where('status', 'completed')->count();
@@ -620,6 +622,7 @@ class ClientDashboardController extends Controller
 
         if ($saved) {
             $saved->delete();
+
             return back()->with('success', 'Caterer removed from saved.');
         }
 
@@ -634,7 +637,7 @@ class ClientDashboardController extends Controller
     public function myReviews()
     {
         $user = auth()->user();
-        $initials = strtoupper(substr($user->name, 0, 1) . (str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
+        $initials = strtoupper(substr($user->name, 0, 1).(str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
 
         $activeBookings = Booking::where('user_id', $user->id)->whereNull('client_viewed_at')->count();
         $completedEvents = Booking::where('user_id', $user->id)->where('status', 'completed')->count();
@@ -662,7 +665,7 @@ class ClientDashboardController extends Controller
     public function editProfile()
     {
         $user = auth()->user();
-        $initials = strtoupper(substr($user->name, 0, 1) . (str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
+        $initials = strtoupper(substr($user->name, 0, 1).(str_contains($user->name, ' ') ? substr($user->name, strpos($user->name, ' ') + 1, 1) : ''));
 
         $activeBookings = Booking::where('user_id', $user->id)->whereNull('client_viewed_at')->count();
         $unreadMessages = Message::where('user_id', $user->id)->where('is_read', false)->where('sender', 'caterer')->count();
@@ -688,6 +691,8 @@ class ClientDashboardController extends Controller
                 'password' => $validated['password'],
             ]);
 
+            Mail::to($user->email)->send(new PasswordChangedNotification($user));
+
             return back()->with('success', 'Password changed successfully!');
         }
 
@@ -711,7 +716,7 @@ class ClientDashboardController extends Controller
             }
 
             $path = $request->file('profile_image')->store('profiles', 'public');
-            $validated['profile_image'] = '/storage/' . $path;
+            $validated['profile_image'] = '/storage/'.$path;
         }
 
         $user->update($validated);
@@ -730,12 +735,12 @@ class ClientDashboardController extends Controller
 
         // If it starts with 0, replace with +63
         if (str_starts_with($phone, '0')) {
-            return '+63' . substr($phone, 1);
+            return '+63'.substr($phone, 1);
         }
 
         // If it starts with 63, add +
         if (str_starts_with($phone, '63')) {
-            return '+' . $phone;
+            return '+'.$phone;
         }
 
         // If it already starts with +63, return as is
@@ -744,6 +749,6 @@ class ClientDashboardController extends Controller
         }
 
         // Otherwise, assume it's a local number and add +63
-        return '+63' . preg_replace('/\D/', '', $phone);
+        return '+63'.preg_replace('/\D/', '', $phone);
     }
 }

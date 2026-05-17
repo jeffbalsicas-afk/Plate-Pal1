@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'is_featured')) {
+            if (! Schema::hasColumn('users', 'is_featured')) {
                 $table->boolean('is_featured')->default(false);
             }
         });

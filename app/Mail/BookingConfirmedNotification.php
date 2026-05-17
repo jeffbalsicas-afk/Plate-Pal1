@@ -13,14 +13,12 @@ class BookingConfirmedNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Booking $booking)
-    {
-    }
+    public function __construct(public Booking $booking) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Booking Confirmed - ' . $this->booking->event_title,
+            subject: 'Booking Confirmed - '.$this->booking->event_title,
         );
     }
 

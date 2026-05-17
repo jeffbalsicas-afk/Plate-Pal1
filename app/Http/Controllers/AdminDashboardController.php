@@ -2,33 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Booking;
-use App\Models\MenuItem;
-use App\Models\Package;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
 {
     public function index()
     {
-        $user            = auth()->user();
-        $totalUsers      = User::where('role', 'client')->count();
-        $totalCaterers   = User::where('role', 'caterer')->where('approval_status', 'approved')->count();
-        $totalBookings   = Booking::count();
-        
+        $user = auth()->user();
+        $totalUsers = User::where('role', 'client')->count();
+        $totalCaterers = User::where('role', 'caterer')->where('approval_status', 'approved')->count();
+        $totalBookings = Booking::count();
+
         // Calculate total revenue using estimated_total attribute
         $completedBookingsList = Booking::where('status', 'completed')->with('caterer')->get();
-        $totalRevenue = $completedBookingsList->sum(function($booking) {
+        $totalRevenue = $completedBookingsList->sum(function ($booking) {
             return $booking->estimated_total;
         });
-        
+
         $pendingCaterers = User::where('role', 'caterer')->where('approval_status', 'pending')->get();
         $approvedCaterers = User::where('role', 'caterer')->where('approval_status', 'approved')->latest()->take(5)->get();
-        $pendingPackages = Package::with('caterer')->where('status', 'pending')->latest()->get();
-        $pendingMenuItems = MenuItem::with('caterer')->where('status', 'pending')->latest()->get();
-        $recentUsers     = User::where('role', 'client')->latest()->take(5)->get();
-        $recentBookings  = Booking::with(['user', 'caterer'])->latest()->take(5)->get();
+        $pendingPackages = collect();
+        $pendingMenuItems = collect();
+        $recentUsers = User::where('role', 'client')->latest()->take(5)->get();
+        $recentBookings = Booking::with(['user', 'caterer'])->latest()->take(5)->get();
 
         return response()
             ->view('admin.dashboard', compact(
@@ -51,8 +49,8 @@ class AdminDashboardController extends Controller
     {
         $user->update([
             'approval_status' => 'approved',
-            'is_verified'     => true,
-            'is_active'       => true,
+            'is_verified' => true,
+            'is_active' => true,
         ]);
 
         return back()->with('success', "{$user->business_name} has been approved.");
@@ -63,41 +61,13 @@ class AdminDashboardController extends Controller
         $request->validate(['rejection_reason' => ['nullable', 'string', 'max:500']]);
 
         $user->update([
-            'approval_status'  => 'rejected',
-            'is_verified'      => false,
-            'is_active'        => false,
+            'approval_status' => 'rejected',
+            'is_verified' => false,
+            'is_active' => false,
             'rejection_reason' => $request->rejection_reason,
         ]);
 
         return back()->with('success', "{$user->business_name} has been rejected.");
-    }
-
-    public function approvePackage(Package $package)
-    {
-        $package->update(['status' => 'live']);
-
-        return back()->with('success', "{$package->name} is now live.");
-    }
-
-    public function rejectPackage(Package $package)
-    {
-        $package->update(['status' => 'rejected']);
-
-        return back()->with('success', "{$package->name} has been rejected.");
-    }
-
-    public function approveMenuItem(MenuItem $menuItem)
-    {
-        $menuItem->update(['status' => 'live']);
-
-        return back()->with('success', "{$menuItem->name} is now live.");
-    }
-
-    public function rejectMenuItem(MenuItem $menuItem)
-    {
-        $menuItem->update(['status' => 'rejected']);
-
-        return back()->with('success', "{$menuItem->name} has been rejected.");
     }
 
     public function featuredCaterers()
@@ -118,9 +88,9 @@ class AdminDashboardController extends Controller
     {
         abort_unless($caterer->role === 'caterer', 404);
 
-        $caterer->update(['is_featured' => !$caterer->is_featured]);
+        $caterer->update(['is_featured' => ! $caterer->is_featured]);
 
-        return back()->with('success', "{$caterer->business_name} has been " . ($caterer->is_featured ? 'featured' : 'unfeatured') . ".");
+        return back()->with('success', "{$caterer->business_name} has been ".($caterer->is_featured ? 'featured' : 'unfeatured').'.');
     }
 
     public function reports(Request $request)
@@ -128,28 +98,28 @@ class AdminDashboardController extends Controller
         $user = auth()->user();
         $catererId = $request->get('caterer_id');
         $selectedCaterer = null;
-        
+
         // Get all approved caterers for dropdown
         $allCaterers = User::where('role', 'caterer')
             ->where('approval_status', 'approved')
             ->orderBy('business_name')
             ->get();
-        
+
         if ($catererId) {
             // Filter for specific caterer
             $selectedCaterer = User::where('role', 'caterer')->findOrFail($catererId);
-            
+
             $totalBookings = Booking::where('caterer_id', $catererId)->count();
             $completedBookings = Booking::where('caterer_id', $catererId)->where('status', 'completed')->count();
             $confirmedBookings = Booking::where('caterer_id', $catererId)->where('status', 'confirmed')->count();
             $pendingBookings = Booking::where('caterer_id', $catererId)->where('status', 'pending')->count();
             $cancelledBookings = Booking::where('caterer_id', $catererId)->where('status', 'cancelled')->count();
-            
+
             $completedBookingsList = Booking::where('caterer_id', $catererId)->where('status', 'completed')->with('caterer')->get();
-            $totalRevenue = $completedBookingsList->sum(function($booking) {
+            $totalRevenue = $completedBookingsList->sum(function ($booking) {
                 return $booking->estimated_total;
             });
-            
+
             $avgRating = $selectedCaterer->rating ?? 0;
             $topCaterers = collect(); // Empty for single caterer view
         } else {
@@ -159,12 +129,12 @@ class AdminDashboardController extends Controller
             $confirmedBookings = Booking::where('status', 'confirmed')->count();
             $pendingBookings = Booking::where('status', 'pending')->count();
             $cancelledBookings = Booking::where('status', 'cancelled')->count();
-            
+
             $completedBookingsList = Booking::where('status', 'completed')->with('caterer')->get();
-            $totalRevenue = $completedBookingsList->sum(function($booking) {
+            $totalRevenue = $completedBookingsList->sum(function ($booking) {
                 return $booking->estimated_total;
             });
-            
+
             $avgRating = User::where('role', 'caterer')->avg('rating') ?? 0;
             $topCaterers = User::where('role', 'caterer')
                 ->withCount('bookings')

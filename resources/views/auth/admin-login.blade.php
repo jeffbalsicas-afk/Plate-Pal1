@@ -1,6 +1,6 @@
 <x-layout title="Admin Login - PlatePal">
 <div class="flex min-h-screen font-sans flex-col lg:flex-row">
-    <div class="w-full lg:w-1/2 flex flex-col px-4 sm:px-8 lg:px-20 py-6 sm:py-10 bg-white">
+    <div class="w-full lg:w-1/2 min-h-screen flex flex-col px-4 sm:px-8 lg:px-20 py-6 sm:py-10 bg-white">
         <div class="flex items-center justify-between mb-8 sm:mb-16">
             <a href="{{ route('home') }}" class="flex items-center gap-2">
                 <img src="/assets/PlatePal_logo.jpg" alt="PlatePal" class="w-8 sm:w-10 h-8 sm:h-10 rounded-lg sm:rounded-xl object-cover">

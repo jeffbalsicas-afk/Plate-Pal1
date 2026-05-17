@@ -178,30 +178,12 @@
                     @enderror
                 </div>
 
-                @error('status')
-                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
-                @enderror
-
-                <div class="rounded-xl bg-sky-50 border border-sky-200 px-4 py-3 text-sm text-sky-800">
-                    Approved changes become live after admin review.
-                </div>
-
-                <div class="grid sm:grid-cols-3 gap-3 pt-4">
+                <div class="grid sm:grid-cols-2 gap-3 pt-4">
                     <button
                         type="submit"
-                        name="status"
-                        value="draft"
-                        class="px-5 py-3 rounded-xl border border-[#EDE4D8] text-[#1C1A17] text-sm font-bold hover:bg-[#FDF6EE] transition-colors"
-                    >
-                        Save Draft
-                    </button>
-                    <button
-                        type="submit"
-                        name="status"
-                        value="pending"
                         class="px-5 py-3 rounded-xl bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors"
                     >
-                        Submit for Approval
+                        Save Changes
                     </button>
                     <a
                         href="{{ route('caterer.menu-pricing') }}"

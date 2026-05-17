@@ -1,7 +1,7 @@
 <x-layout title="Create Account - PlatePal">
 <div class="flex min-h-screen font-sans flex-col lg:flex-row">
     {{-- Left side: Registration form --}}
-    <div class="w-full lg:w-1/2 flex flex-col px-4 sm:px-8 lg:px-20 py-6 sm:py-10 bg-white overflow-y-auto">
+    <div class="w-full lg:w-1/2 min-h-screen flex flex-col px-4 sm:px-8 lg:px-20 py-6 sm:py-10 bg-white overflow-y-auto">
         {{-- Top bar: Logo + Back to Home --}}
         <div class="flex items-center justify-between mb-8 sm:mb-12">
             <a href="{{ route('home') }}" class="flex items-center gap-2">

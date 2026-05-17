@@ -9,11 +9,10 @@ use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
-    private const CATERER_STATUS_RULE = 'required|string|in:draft,pending,live';
-
     public function editMenuItem(MenuItem $menuItem)
     {
         abort_if($menuItem->caterer_id !== auth()->id(), 403);
+
         return view('caterer.menu-edit', ['item' => $menuItem, 'type' => 'menu']);
     }
 
@@ -25,15 +24,12 @@ class MenuController extends Controller
             'price' => 'required|numeric|min:0',
             'unit' => 'required|string|in:head,tray,whole,bottle,box',
             'category' => 'required|string|in:main,side,dessert,beverage',
-            'status' => self::CATERER_STATUS_RULE,
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $validated['status'] = $this->statusForCaterer($validated['status']);
-
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('menu-items', 'public');
-            $validated['image_path'] = '/storage/' . $path;
+            $validated['image_path'] = '/storage/'.$path;
         }
 
         MenuItem::create([
@@ -44,7 +40,7 @@ class MenuController extends Controller
 
         return redirect()
             ->route('caterer.menu-pricing', ['tab' => 'items'])
-            ->with('success', $this->submissionMessage('Menu item', $validated['status'], 'created'));
+            ->with('success', 'Menu item created successfully.');
     }
 
     public function updateMenuItem(Request $request, MenuItem $menuItem)
@@ -57,25 +53,22 @@ class MenuController extends Controller
             'price' => 'required|numeric|min:0',
             'unit' => 'required|string|in:head,tray,whole,bottle,box',
             'category' => 'required|string|in:main,side,dessert,beverage',
-            'status' => self::CATERER_STATUS_RULE,
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
-
-        $validated['status'] = $this->statusForCaterer($validated['status']);
 
         if ($request->hasFile('image')) {
             if ($menuItem->image_path && str_starts_with($menuItem->image_path, '/storage/')) {
                 Storage::disk('public')->delete(str_replace('/storage/', '', $menuItem->image_path));
             }
             $path = $request->file('image')->store('menu-items', 'public');
-            $validated['image_path'] = '/storage/' . $path;
+            $validated['image_path'] = '/storage/'.$path;
         }
 
         $menuItem->update($validated);
 
         return redirect()
             ->route('caterer.menu-pricing', ['tab' => 'items'])
-            ->with('success', $this->submissionMessage('Menu item', $validated['status'], 'updated'));
+            ->with('success', 'Menu item updated successfully.');
     }
 
     public function destroyMenuItem(MenuItem $menuItem)
@@ -89,6 +82,7 @@ class MenuController extends Controller
     public function editAddOn(MenuItem $menuItem)
     {
         abort_if($menuItem->caterer_id !== auth()->id(), 403);
+
         return view('caterer.addon-edit', ['addon' => $menuItem]);
     }
 
@@ -99,15 +93,12 @@ class MenuController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'unit' => 'required|string|in:head,tray,bottle,box',
-            'status' => self::CATERER_STATUS_RULE,
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $validated['status'] = $this->statusForCaterer($validated['status']);
-
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('addons', 'public');
-            $validated['image_path'] = '/storage/' . $path;
+            $validated['image_path'] = '/storage/'.$path;
         }
 
         MenuItem::create([
@@ -119,7 +110,7 @@ class MenuController extends Controller
 
         return redirect()
             ->route('caterer.menu-pricing', ['tab' => 'addons'])
-            ->with('success', $this->submissionMessage('Add-on', $validated['status'], 'created'));
+            ->with('success', 'Add-on created successfully.');
     }
 
     public function updateAddOn(Request $request, MenuItem $menuItem)
@@ -131,25 +122,22 @@ class MenuController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'unit' => 'required|string|in:head,tray,bottle,box',
-            'status' => self::CATERER_STATUS_RULE,
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
-
-        $validated['status'] = $this->statusForCaterer($validated['status']);
 
         if ($request->hasFile('image')) {
             if ($menuItem->image_path && str_starts_with($menuItem->image_path, '/storage/')) {
                 Storage::disk('public')->delete(str_replace('/storage/', '', $menuItem->image_path));
             }
             $path = $request->file('image')->store('addons', 'public');
-            $validated['image_path'] = '/storage/' . $path;
+            $validated['image_path'] = '/storage/'.$path;
         }
 
         $menuItem->update($validated);
 
         return redirect()
             ->route('caterer.menu-pricing', ['tab' => 'addons'])
-            ->with('success', $this->submissionMessage('Add-on', $validated['status'], 'updated'));
+            ->with('success', 'Add-on updated successfully.');
     }
 
     public function destroyAddOn(MenuItem $menuItem)
@@ -168,11 +156,10 @@ class MenuController extends Controller
             'price' => 'required|numeric|min:0',
             'min_guests' => 'required|integer|min:1',
             'includes' => 'nullable|array',
-            'status' => self::CATERER_STATUS_RULE,
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $validated['status'] = $this->statusForCaterer($validated['status']);
+        $validated['status'] = 'live';
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('packages', 'public');
@@ -187,7 +174,7 @@ class MenuController extends Controller
 
         return redirect()
             ->route('caterer.menu-pricing', ['tab' => 'packages'])
-            ->with('success', $this->submissionMessage('Package', $validated['status'], 'created'));
+            ->with('success', 'Package created successfully.');
     }
 
     public function updatePackage(Request $request, Package $package)
@@ -200,11 +187,10 @@ class MenuController extends Controller
             'price' => 'required|numeric|min:0',
             'min_guests' => 'required|integer|min:1',
             'includes' => 'nullable|array',
-            'status' => self::CATERER_STATUS_RULE,
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $validated['status'] = $this->statusForCaterer($validated['status']);
+        $validated['status'] = 'live';
 
         if ($request->hasFile('image')) {
             if ($package->image && Storage::disk('public')->exists($package->image)) {
@@ -218,7 +204,7 @@ class MenuController extends Controller
 
         return redirect()
             ->route('caterer.menu-pricing', ['tab' => 'packages'])
-            ->with('success', $this->submissionMessage('Package', $validated['status'], 'updated'));
+            ->with('success', 'Package updated successfully.');
     }
 
     public function destroyPackage(Package $package)
@@ -232,20 +218,7 @@ class MenuController extends Controller
     public function editPackage(Package $package)
     {
         abort_if($package->caterer_id !== auth()->id(), 403);
+
         return view('caterer.package-edit', ['package' => $package]);
-    }
-
-    private function statusForCaterer(string $status): string
-    {
-        return $status === 'draft' ? 'draft' : 'pending';
-    }
-
-    private function submissionMessage(string $label, string $status, string $action): string
-    {
-        if ($status === 'draft') {
-            return "{$label} {$action} as draft.";
-        }
-
-        return "{$label} {$action} and submitted for admin approval.";
     }
 }

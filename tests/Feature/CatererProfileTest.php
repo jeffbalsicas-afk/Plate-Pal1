@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Mail\PasswordChangedNotification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -140,7 +142,7 @@ class CatererProfileTest extends TestCase
             'services_offered' => ['Weddings & Receptions', 'Fiestas'],
         ]);
 
-        $response->assertRedirect(route('caterer.profile') . '#about');
+        $response->assertRedirect(route('caterer.profile').'#about');
         $response->assertSessionHas('success', 'About section submitted for admin approval.');
 
         $caterer->refresh();
@@ -170,7 +172,7 @@ class CatererProfileTest extends TestCase
             ],
         ]);
 
-        $response->assertRedirect(route('caterer.profile') . '#gallery');
+        $response->assertRedirect(route('caterer.profile').'#gallery');
         $response->assertSessionHas('success', 'Gallery changes submitted for admin approval.');
 
         $caterer->refresh();
@@ -197,7 +199,7 @@ class CatererProfileTest extends TestCase
 
         $response = $this->actingAs($caterer)->delete(route('caterer.profile.gallery.delete', 0));
 
-        $response->assertRedirect(route('caterer.profile') . '#gallery');
+        $response->assertRedirect(route('caterer.profile').'#gallery');
         $response->assertSessionHas('success', 'Gallery changes submitted for admin approval.');
 
         $caterer->refresh();
@@ -209,6 +211,8 @@ class CatererProfileTest extends TestCase
 
     public function test_caterer_can_change_password_without_profile_approval_review(): void
     {
+        Mail::fake();
+
         $caterer = User::factory()->create([
             'role' => 'caterer',
             'approval_status' => 'approved',
@@ -223,7 +227,7 @@ class CatererProfileTest extends TestCase
             'password_confirmation' => 'new-password',
         ]);
 
-        $response->assertRedirect(route('caterer.profile') . '#security');
+        $response->assertRedirect(route('caterer.profile').'#security');
         $response->assertSessionHas('success', 'Password changed successfully.');
 
         $caterer->refresh();
@@ -231,6 +235,7 @@ class CatererProfileTest extends TestCase
         $this->assertTrue(Hash::check('new-password', $caterer->password));
         $this->assertSame('approved', $caterer->approval_status);
         $this->assertTrue((bool) $caterer->is_verified);
+        Mail::assertSent(PasswordChangedNotification::class, fn (PasswordChangedNotification $mail) => $mail->hasTo($caterer->email));
     }
 
     private function validPayload(array $overrides = []): array

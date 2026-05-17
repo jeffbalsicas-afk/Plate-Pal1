@@ -44,6 +44,7 @@ class User extends Authenticatable
         if (count($parts) > 1) {
             $initials .= strtoupper($parts[1][0] ?? '');
         }
+
         return $initials;
     }
 
@@ -63,7 +64,7 @@ class User extends Authenticatable
 
         return asset(str_starts_with($this->profile_image, 'storage/')
             ? $this->profile_image
-            : 'storage/' . ltrim($this->profile_image, '/'));
+            : 'storage/'.ltrim($this->profile_image, '/'));
     }
 
     public function bookings()

@@ -46,7 +46,7 @@ class BookingFlowTest extends TestCase
 
         $booking = Booking::first();
 
-        $response->assertRedirect(route('client.bookings.show', $booking));
+        $response->assertRedirect(route('caterer.detail', $caterer));
         $this->assertDatabaseHas('bookings', [
             'id' => $booking->id,
             'user_id' => $client->id,
@@ -76,7 +76,7 @@ class BookingFlowTest extends TestCase
         $this->assertSame('completed', $booking->refresh()->status);
     }
 
-    public function test_booking_package_must_match_caterer_and_minimum_guests(): void
+    public function test_package_minimum_guests_is_a_guideline_for_booking_requests(): void
     {
         Mail::fake();
 
@@ -103,8 +103,13 @@ class BookingFlowTest extends TestCase
             ]);
 
         $response->assertRedirect(route('caterer.detail', $caterer));
-        $response->assertSessionHasErrors('guests');
-        $this->assertDatabaseCount('bookings', 0);
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('bookings', [
+            'user_id' => $client->id,
+            'caterer_id' => $caterer->id,
+            'package_id' => $package->id,
+            'guests' => 40,
+        ]);
     }
 
     private function approvedCaterer(): User

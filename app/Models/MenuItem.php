@@ -14,7 +14,6 @@ class MenuItem extends Model
         'unit',
         'type',
         'category',
-        'status',
         'image_path',
     ];
 

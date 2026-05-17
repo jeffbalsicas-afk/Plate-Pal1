@@ -12,7 +12,7 @@ class MenuApprovalTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_caterer_menu_submissions_are_pending_until_admin_approval(): void
+    public function test_caterer_menu_items_are_available_without_admin_approval(): void
     {
         $caterer = $this->approvedCaterer();
 
@@ -22,51 +22,37 @@ class MenuApprovalTest extends TestCase
             'price' => '350',
             'unit' => 'tray',
             'category' => 'main',
-            'status' => 'live',
         ]);
 
         $response->assertRedirect(route('caterer.menu-pricing', ['tab' => 'items']));
-        $response->assertSessionHas('success', 'Menu item created and submitted for admin approval.');
+        $response->assertSessionHas('success', 'Menu item created successfully.');
 
         $item = MenuItem::where('name', 'Approval Test Chicken')->firstOrFail();
 
-        $this->assertSame('pending', $item->status);
-
-        $admin = $this->admin();
-
-        $this->actingAs($admin)
-            ->post(route('admin.menu-items.approve', $item))
-            ->assertRedirect()
-            ->assertSessionHas('success', 'Approval Test Chicken is now live.');
-
-        $this->assertSame('live', $item->refresh()->status);
+        $this->assertSame($caterer->id, $item->caterer_id);
+        $this->assertSame('menu', $item->type);
     }
 
-    public function test_package_submissions_can_be_rejected_by_admin(): void
+    public function test_package_submissions_are_live_without_admin_approval(): void
     {
         $caterer = $this->approvedCaterer();
 
-        $this->actingAs($caterer)->post(route('menu.packages.store'), [
+        $response = $this->actingAs($caterer)->post(route('menu.packages.store'), [
             'name' => 'Approval Test Package',
-            'description' => 'Package awaiting review.',
+            'description' => 'Package available immediately.',
             'price' => '450',
             'min_guests' => '30',
-            'status' => 'pending',
         ]);
+
+        $response->assertRedirect(route('caterer.menu-pricing', ['tab' => 'packages']));
+        $response->assertSessionHas('success', 'Package created successfully.');
 
         $package = Package::where('name', 'Approval Test Package')->firstOrFail();
 
-        $this->assertSame('pending', $package->status);
-
-        $this->actingAs($this->admin())
-            ->post(route('admin.packages.reject', $package))
-            ->assertRedirect()
-            ->assertSessionHas('success', 'Approval Test Package has been rejected.');
-
-        $this->assertSame('rejected', $package->refresh()->status);
+        $this->assertSame('live', $package->status);
     }
 
-    public function test_clients_only_see_live_menu_and_package_entries(): void
+    public function test_clients_see_saved_menu_and_package_entries_immediately(): void
     {
         $caterer = $this->approvedCaterer();
         $client = User::factory()->create(['role' => 'client']);
@@ -83,8 +69,8 @@ class MenuApprovalTest extends TestCase
 
         Package::create([
             'caterer_id' => $caterer->id,
-            'name' => 'Pending Fiesta Package',
-            'description' => 'Pending package.',
+            'name' => 'Formerly Pending Fiesta Package',
+            'description' => 'Visible without package approval.',
             'price' => 500,
             'min_guests' => 20,
             'status' => 'pending',
@@ -99,27 +85,123 @@ class MenuApprovalTest extends TestCase
             'unit' => 'tray',
             'type' => 'menu',
             'category' => 'main',
-            'status' => 'live',
         ]);
 
         MenuItem::create([
             'caterer_id' => $caterer->id,
-            'name' => 'Pending Roast Chicken',
-            'description' => 'Pending item.',
+            'name' => 'New Roast Chicken',
+            'description' => 'Visible without item approval.',
             'price' => 300,
             'unit' => 'tray',
             'type' => 'menu',
             'category' => 'main',
-            'status' => 'pending',
         ]);
 
         $response = $this->actingAs($client)->get(route('caterer.detail', $caterer));
 
         $response->assertOk();
         $response->assertSee('Visible Fiesta Package');
+        $response->assertSee('Formerly Pending Fiesta Package');
         $response->assertSee('Visible Roast Chicken');
-        $response->assertDontSee('Pending Fiesta Package');
-        $response->assertDontSee('Pending Roast Chicken');
+        $response->assertSee('New Roast Chicken');
+    }
+
+    public function test_caterer_menu_pricing_filters_active_menu_tab(): void
+    {
+        $caterer = $this->approvedCaterer();
+
+        MenuItem::create([
+            'caterer_id' => $caterer->id,
+            'name' => 'Chocolate Cake Tray',
+            'description' => 'Dessert table favorite.',
+            'price' => 750,
+            'unit' => 'tray',
+            'type' => 'menu',
+            'category' => 'dessert',
+        ]);
+
+        MenuItem::create([
+            'caterer_id' => $caterer->id,
+            'name' => 'Garlic Chicken Tray',
+            'description' => 'Main dish platter.',
+            'price' => 500,
+            'unit' => 'tray',
+            'type' => 'menu',
+            'category' => 'main',
+        ]);
+
+        MenuItem::create([
+            'caterer_id' => $caterer->id,
+            'name' => 'Iced Tea Dispenser',
+            'description' => 'Beverage service.',
+            'price' => 300,
+            'unit' => 'dispenser',
+            'type' => 'menu',
+            'category' => 'beverage',
+        ]);
+
+        $response = $this->actingAs($caterer)->get(route('caterer.menu-pricing', [
+            'tab' => 'items',
+            'category' => 'dessert',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Chocolate Cake Tray');
+        $response->assertDontSee('Garlic Chicken Tray');
+        $response->assertDontSee('Iced Tea Dispenser');
+    }
+
+    public function test_caterer_menu_pricing_price_sort_replaces_default_latest_sort(): void
+    {
+        $caterer = $this->approvedCaterer();
+
+        MenuItem::create([
+            'caterer_id' => $caterer->id,
+            'name' => 'Budget Noodles',
+            'description' => 'Affordable tray.',
+            'price' => 150,
+            'unit' => 'tray',
+            'type' => 'menu',
+            'category' => 'main',
+            'created_at' => now()->subMinutes(2),
+            'updated_at' => now()->subMinutes(2),
+        ]);
+
+        MenuItem::create([
+            'caterer_id' => $caterer->id,
+            'name' => 'Premium Roast Beef',
+            'description' => 'Premium tray.',
+            'price' => 900,
+            'unit' => 'tray',
+            'type' => 'menu',
+            'category' => 'main',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        MenuItem::create([
+            'caterer_id' => $caterer->id,
+            'name' => 'Classic Chicken',
+            'description' => 'Mid-range tray.',
+            'price' => 450,
+            'unit' => 'tray',
+            'type' => 'menu',
+            'category' => 'main',
+            'created_at' => now()->subMinute(),
+            'updated_at' => now()->subMinute(),
+        ]);
+
+        $response = $this->actingAs($caterer)->get(route('caterer.menu-pricing', [
+            'tab' => 'items',
+            'sort' => 'price_asc',
+        ]));
+
+        $response->assertOk();
+        $response->assertSeeInOrder([
+            'Budget Noodles',
+            'Classic Chicken',
+            'Premium Roast Beef',
+        ]);
     }
 
     private function approvedCaterer(): User
@@ -132,16 +214,6 @@ class MenuApprovalTest extends TestCase
             'approval_status' => 'approved',
             'is_active' => true,
             'is_verified' => true,
-        ]);
-    }
-
-    private function admin(): User
-    {
-        return User::factory()->create([
-            'role' => 'admin',
-            'is_active' => true,
-            'is_verified' => true,
-            'approval_status' => 'approved',
         ]);
     }
 }

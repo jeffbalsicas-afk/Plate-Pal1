@@ -1,13 +1,11 @@
 <section x-show="tab === @js($tabKey)" x-transition class="space-y-3">
     @forelse($menuType['entries'] as $entry)
-        @php($badge = $statusBadges[$entry->status] ?? $statusBadges['draft'])
         @php($deleteFormId = "delete-{$tabKey}-{$entry->getKey()}")
         <article class="bg-white rounded-2xl border border-[#EDE4D8] p-5 shadow-sm">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2 mb-2">
                         <h2 class="text-lg font-black text-[#1C1A17] truncate">{{ $entry->name }}</h2>
-                        @include('caterer.partials.menu-pricing.status-badge', ['badge' => $badge])
                     </div>
                     @if($entry->description)
                         <p class="text-sm text-[#8A7F72] mb-3 line-clamp-2">{{ $entry->description }}</p>

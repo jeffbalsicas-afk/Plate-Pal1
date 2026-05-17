@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PasswordChangedNotification;
 use App\Models\Booking;
-use App\Models\Message;
-use App\Models\User;
-use App\Models\Package;
 use App\Models\MenuItem;
+use App\Models\Message;
+use App\Models\Package;
 use App\Models\Review;
+use App\Models\SavedCaterer;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -20,10 +23,10 @@ class CatererController extends Controller
     {
         $user = auth()->user();
 
-        $totalBookings    = Booking::where('caterer_id', $user->id)->count();
-        $pendingBookings  = Booking::where('caterer_id', $user->id)->where('status', 'pending')->count();
-        $unreadMessages   = Message::where('caterer_id', $user->id)->where('is_read', false)->where('sender', 'client')->count();
-        $avgRating        = $user->rating ?? 0;
+        $totalBookings = Booking::where('caterer_id', $user->id)->count();
+        $pendingBookings = Booking::where('caterer_id', $user->id)->where('status', 'pending')->count();
+        $unreadMessages = Message::where('caterer_id', $user->id)->where('is_read', false)->where('sender', 'client')->count();
+        $avgRating = $user->rating ?? 0;
 
         $upcomingBookings = Booking::with('user')
             ->where('caterer_id', $user->id)
@@ -33,18 +36,18 @@ class CatererController extends Controller
             ->take(3)
             ->get();
 
-        $recentMessages   = Message::with('user')
+        $recentMessages = Message::with('user')
             ->where('caterer_id', $user->id)
             ->latest()
             ->take(3)
             ->get();
 
-        $currentMonth  = now()->month;
-        $currentYear   = now()->year;
-        $prevMonth     = now()->subMonth()->month;
-        $prevYear      = now()->subMonth()->year;
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        $prevMonth = now()->subMonth()->month;
+        $prevYear = now()->subMonth()->year;
 
-        $currentMonthTotal  = Booking::where('caterer_id', $user->id)
+        $currentMonthTotal = Booking::where('caterer_id', $user->id)
             ->whereMonth('event_date', $currentMonth)
             ->whereYear('event_date', $currentYear)
             ->count();
@@ -58,11 +61,11 @@ class CatererController extends Controller
             ? round((($currentMonthTotal - $previousMonthTotal) / $previousMonthTotal) * 100, 1)
             : ($currentMonthTotal > 0 ? 100 : 0);
 
-        $currentWeekly  = $this->weeklyBookings($user->id, $currentMonth, $currentYear);
+        $currentWeekly = $this->weeklyBookings($user->id, $currentMonth, $currentYear);
         $previousWeekly = $this->weeklyBookings($user->id, $prevMonth, $prevYear);
 
         $packages = Package::forCaterer($user->id)->get();
-        
+
         // Get all completed bookings in May with final_price set
         $mayBookings = Booking::with('caterer')
             ->where('caterer_id', $user->id)
@@ -71,38 +74,38 @@ class CatererController extends Controller
             ->whereMonth('event_date', 5)
             ->whereYear('event_date', now()->year)
             ->get();
-        
+
         $topPackages = $packages->map(function ($pkg) use ($user, $mayBookings) {
             // Filter bookings for this package
             $packageBookings = $mayBookings->where('package_id', $pkg->id);
-            
+
             $bookingsCount = $packageBookings->count();
             $revenue = $packageBookings->sum('final_price');
-            
+
             return [
                 'name' => $pkg->name,
                 'bookings' => $bookingsCount,
-                'revenue' => 'PHP ' . number_format($revenue, 0),
+                'revenue' => 'PHP '.number_format($revenue, 0),
                 'satisfaction' => number_format($user->rating ?? 0, 1),
-                'rank' => $bookingsCount > 0 ? '#' . ($bookingsCount >= 5 ? '1' : ($bookingsCount >= 3 ? '2' : '3')) : 'New'
+                'rank' => $bookingsCount > 0 ? '#'.($bookingsCount >= 5 ? '1' : ($bookingsCount >= 3 ? '2' : '3')) : 'New',
             ];
         });
-        
+
         // Add "Custom Bookings" for bookings without a package
         $customBookings = $mayBookings->whereNull('package_id');
         $customCount = $customBookings->count();
         $customRevenue = $customBookings->sum('final_price');
-        
+
         if ($customCount > 0) {
             $topPackages->push([
                 'name' => 'Custom Bookings',
                 'bookings' => $customCount,
-                'revenue' => 'PHP ' . number_format($customRevenue, 0),
+                'revenue' => 'PHP '.number_format($customRevenue, 0),
                 'satisfaction' => number_format($user->rating ?? 0, 1),
-                'rank' => $customCount >= 5 ? '#1' : ($customCount >= 3 ? '#2' : '#3')
+                'rank' => $customCount >= 5 ? '#1' : ($customCount >= 3 ? '#2' : '#3'),
             ]);
         }
-        
+
         $topPackages = $topPackages->sortByDesc('bookings')->take(3);
 
         return response()
@@ -183,59 +186,71 @@ class CatererController extends Controller
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
-    public function menuAndPricing()
+    public function menuAndPricing(Request $request)
     {
         $user = auth()->user();
         $catererId = $user->id;
         $displayName = $user->business_name ?? $user->name;
         $initials = $user->initials;
         $perPage = 10;
+        $activeTab = in_array($request->query('tab'), ['packages', 'items', 'addons'], true)
+            ? $request->query('tab')
+            : 'packages';
+        $search = trim((string) $request->query('search', ''));
+        $sort = in_array($request->query('sort'), ['newest', 'oldest', 'price_asc', 'price_desc'], true)
+            ? $request->query('sort')
+            : 'newest';
+        $category = in_array($request->query('category'), ['main', 'side', 'dessert', 'beverage'], true)
+            ? $request->query('category')
+            : null;
+
+        $applySearch = function ($query) use ($search) {
+            return $search === ''
+                ? $query
+                : $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('description', 'like', '%'.$search.'%');
+                });
+        };
+
+        $applySort = function ($query) use ($sort) {
+            return match ($sort) {
+                'oldest' => $query->reorder()->orderBy('created_at'),
+                'price_asc' => $query->reorder()->orderBy('price')->orderByDesc('created_at'),
+                'price_desc' => $query->reorder()->orderByDesc('price')->orderByDesc('created_at'),
+                default => $query->reorder()->orderByDesc('created_at'),
+            };
+        };
 
         $packages = Package::forCaterer($catererId)
-            ->when(request('search'), fn ($q) => $q->where('name', 'like', '%' . request('search') . '%'))
-            ->when(request('sort'), fn ($q) => match(request('sort')) {
-                'price_asc' => $q->orderBy('price'),
-                'price_desc' => $q->orderByDesc('price'),
-                'newest' => $q->orderByDesc('created_at'),
-                'oldest' => $q->orderBy('created_at'),
-                default => $q->orderByDesc('created_at')
-            }, fn ($q) => $q->orderByDesc('created_at'))
-            ->paginate($perPage, ['*'], 'packages_page');
+            ->when($activeTab === 'packages', fn ($query) => $applySort($applySearch($query)), fn ($query) => $query->reorder()->orderByDesc('created_at'))
+            ->paginate($perPage, ['*'], 'packages_page')
+            ->withQueryString();
 
         $menuItems = MenuItem::forCaterer($catererId)
             ->menuItems()
-            ->when(request('search'), fn ($q) => $q->where('name', 'like', '%' . request('search') . '%'))
-            ->when(request('sort'), fn ($q) => match(request('sort')) {
-                'price_asc' => $q->orderBy('price'),
-                'price_desc' => $q->orderByDesc('price'),
-                'newest' => $q->orderByDesc('created_at'),
-                'oldest' => $q->orderBy('created_at'),
-                default => $q->orderByDesc('created_at')
-            }, fn ($q) => $q->orderByDesc('created_at'))
-            ->paginate($perPage, ['*'], 'items_page');
+            ->when($activeTab === 'items', function ($query) use ($applySearch, $applySort, $category) {
+                $query = $applySearch($query);
+
+                if ($category) {
+                    $query->where('category', $category);
+                }
+
+                return $applySort($query);
+            }, fn ($query) => $query->reorder()->orderByDesc('created_at'))
+            ->paginate($perPage, ['*'], 'items_page')
+            ->withQueryString();
 
         $addOns = MenuItem::forCaterer($catererId)
             ->addOns()
-            ->when(request('search'), fn ($q) => $q->where('name', 'like', '%' . request('search') . '%'))
-            ->when(request('sort'), fn ($q) => match(request('sort')) {
-                'price_asc' => $q->orderBy('price'),
-                'price_desc' => $q->orderByDesc('price'),
-                'newest' => $q->orderByDesc('created_at'),
-                'oldest' => $q->orderBy('created_at'),
-                default => $q->orderByDesc('created_at')
-            }, fn ($q) => $q->orderByDesc('created_at'))
-            ->paginate($perPage, ['*'], 'addons_page');
+            ->when($activeTab === 'addons', fn ($query) => $applySort($applySearch($query)), fn ($query) => $query->reorder()->orderByDesc('created_at'))
+            ->paginate($perPage, ['*'], 'addons_page')
+            ->withQueryString();
 
         $menuSummary = [
             'packages' => Package::forCaterer($catererId)->count(),
             'items' => MenuItem::forCaterer($catererId)->menuItems()->count(),
             'addons' => MenuItem::forCaterer($catererId)->addOns()->count(),
-            'live' => Package::forCaterer($catererId)->where('status', 'live')->count()
-                + MenuItem::forCaterer($catererId)->where('status', 'live')->count(),
-            'pending' => Package::forCaterer($catererId)->where('status', 'pending')->count()
-                + MenuItem::forCaterer($catererId)->where('status', 'pending')->count(),
-            'draft' => Package::forCaterer($catererId)->where('status', 'draft')->count()
-                + MenuItem::forCaterer($catererId)->where('status', 'draft')->count(),
         ];
 
         $pendingBookings = Booking::where('caterer_id', $catererId)
@@ -257,7 +272,11 @@ class CatererController extends Controller
                 'addOns',
                 'menuSummary',
                 'pendingBookings',
-                'unreadMessages'
+                'unreadMessages',
+                'activeTab',
+                'search',
+                'sort',
+                'category'
             ))
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
@@ -288,7 +307,9 @@ class CatererController extends Controller
                 'password' => $validated['password'],
             ]);
 
-            return redirect()->to(route('caterer.profile') . '#security')->with('success', 'Password changed successfully.');
+            Mail::to($user->email)->send(new PasswordChangedNotification($user));
+
+            return redirect()->to(route('caterer.profile').'#security')->with('success', 'Password changed successfully.');
         }
 
         if ($formType === 'basic') {
@@ -298,8 +319,8 @@ class CatererController extends Controller
 
             $request->validate([
                 'business_name' => ['required', 'string', 'max:255'],
-                'barangay'      => ['required', 'string'],
-                'phone'         => [
+                'barangay' => ['required', 'string'],
+                'phone' => [
                     'required',
                     'string',
                     'regex:/^\+639\d{9}$/',
@@ -315,12 +336,12 @@ class CatererController extends Controller
                         }
                     },
                 ],
-                'description'   => ['nullable', 'string', 'max:2000'],
-                'cuisine'       => ['required', 'string', 'max:255'],
-                'price_min'     => ['required', 'numeric', 'min:0'],
-                'price_max'     => ['required', 'numeric', 'gte:price_min'],
-                'min_guest'     => ['required', 'integer', 'min:1'],
-                'max_guest'     => ['required', 'integer', 'gte:min_guest'],
+                'description' => ['nullable', 'string', 'max:2000'],
+                'cuisine' => ['required', 'string', 'max:255'],
+                'price_min' => ['required', 'numeric', 'min:0'],
+                'price_max' => ['required', 'numeric', 'gte:price_min'],
+                'min_guest' => ['required', 'integer', 'min:1'],
+                'max_guest' => ['required', 'integer', 'gte:min_guest'],
                 'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048'],
             ], [
                 'phone.regex' => 'Phone number must be in format +639XXXXXXXXX (10 digits starting with 9)',
@@ -343,10 +364,11 @@ class CatererController extends Controller
                     Storage::disk('public')->delete(str_replace('/storage/', '', $user->profile_image));
                 }
                 $path = $request->file('profile_image')->store('caterers', 'public');
-                $data['profile_image'] = '/storage/' . $path;
+                $data['profile_image'] = '/storage/'.$path;
             }
 
             $user->update($data);
+
             return redirect()->route('caterer.profile')->with('success', 'Basic information submitted for admin approval.');
         }
 
@@ -364,7 +386,7 @@ class CatererController extends Controller
                 'services_offered' => $this->arrayValue($request->input('services_offered', [])),
             ]));
 
-            return redirect()->to(route('caterer.profile') . '#about')->with('success', 'About section submitted for admin approval.');
+            return redirect()->to(route('caterer.profile').'#about')->with('success', 'About section submitted for admin approval.');
         }
 
         if ($formType === 'gallery') {
@@ -378,12 +400,13 @@ class CatererController extends Controller
             if ($request->hasFile('gallery_images')) {
                 foreach ($request->file('gallery_images') as $image) {
                     $path = $image->store('gallery', 'public');
-                    $existingImages[] = '/storage/' . $path;
+                    $existingImages[] = '/storage/'.$path;
                 }
             }
 
             $user->update($this->pendingReviewData(['gallery_images' => array_values($existingImages)]));
-            return redirect()->to(route('caterer.profile') . '#gallery')->with('success', 'Gallery changes submitted for admin approval.');
+
+            return redirect()->to(route('caterer.profile').'#gallery')->with('success', 'Gallery changes submitted for admin approval.');
         }
 
         return redirect()->route('caterer.profile');
@@ -395,7 +418,7 @@ class CatererController extends Controller
         $galleryImages = $this->arrayValue($user->gallery_images);
 
         if (! isset($galleryImages[$index])) {
-            return redirect()->to(route('caterer.profile') . '#gallery')->with('success', 'Image was already removed.');
+            return redirect()->to(route('caterer.profile').'#gallery')->with('success', 'Image was already removed.');
         }
 
         $imagePath = $galleryImages[$index];
@@ -407,7 +430,7 @@ class CatererController extends Controller
 
         $user->update($this->pendingReviewData(['gallery_images' => array_values($galleryImages)]));
 
-        return redirect()->to(route('caterer.profile') . '#gallery')->with('success', 'Gallery changes submitted for admin approval.');
+        return redirect()->to(route('caterer.profile').'#gallery')->with('success', 'Gallery changes submitted for admin approval.');
     }
 
     public function show($id)
@@ -420,21 +443,21 @@ class CatererController extends Controller
             ->where(function ($query) {
                 $authId = auth()->id();
                 $query->where('approval_status', 'approved')
-                      ->orWhere(function ($q) use ($authId) {
-                          $q->where('approval_status', 'pending')
+                    ->orWhere(function ($q) use ($authId) {
+                        $q->where('approval_status', 'pending')
                             ->where('id', $authId);
-                      })
-                      ->orWhere(function ($q) use ($authId) {
-                          $q->where('approval_status', 'rejected')
+                    })
+                    ->orWhere(function ($q) use ($authId) {
+                        $q->where('approval_status', 'rejected')
                             ->where('id', $authId);
-                      });
+                    });
             })
             ->where('is_active', true)
             ->findOrFail($id);
 
-        $packages = Package::forCaterer($caterer->id)->where('status', 'live')->get();
-        $menuItems = MenuItem::forCaterer($caterer->id)->menuItems()->where('status', 'live')->get();
-        $addOns = MenuItem::forCaterer($caterer->id)->addOns()->where('status', 'live')->get();
+        $packages = Package::forCaterer($caterer->id)->get();
+        $menuItems = MenuItem::forCaterer($caterer->id)->menuItems()->get();
+        $addOns = MenuItem::forCaterer($caterer->id)->addOns()->get();
         $publicReviews = Review::forCaterer($caterer->id)
             ->public()
             ->orderByDesc('is_featured')
@@ -446,13 +469,13 @@ class CatererController extends Controller
         $averageRating = Review::forCaterer($caterer->id)->public()->avg('rating') ?? ($caterer->rating ?? 0);
         $user = auth()->user();
         $initials = $user?->initials;
-        
+
         $savedCatererIds = [];
         $activeBookings = 0;
         $unreadMessages = 0;
         $statusCounts = ['all' => 0];
         if ($user && $user->role === 'client') {
-            $savedCatererIds = \App\Models\SavedCaterer::where('user_id', $user->id)->pluck('caterer_id')->toArray();
+            $savedCatererIds = SavedCaterer::where('user_id', $user->id)->pluck('caterer_id')->toArray();
             $activeBookings = Booking::where('user_id', $user->id)->whereIn('status', ['pending', 'confirmed'])->count();
             $unreadMessages = Message::where('user_id', $user->id)->where('is_read', false)->where('sender', 'caterer')->count();
             $statusCounts = ['all' => Booking::where('user_id', $user->id)->count()];
@@ -468,7 +491,6 @@ class CatererController extends Controller
             ->view($view, compact('caterer', 'packages', 'menuItems', 'addOns', 'publicReviews', 'reviewsCount', 'averageRating', 'user', 'initials', 'savedCatererIds', 'activeBookings', 'unreadMessages', 'statusCounts'))
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
-
 
     private function weeklyBookings($catererId, $month, $year): array
     {
@@ -561,12 +583,12 @@ class CatererController extends Controller
 
         // If it starts with 0, replace with +63
         if (str_starts_with($phone, '0')) {
-            return '+63' . substr($phone, 1);
+            return '+63'.substr($phone, 1);
         }
 
         // If it starts with 63, add +
         if (str_starts_with($phone, '63')) {
-            return '+' . $phone;
+            return '+'.$phone;
         }
 
         // If it already starts with +63, return as is
@@ -575,7 +597,7 @@ class CatererController extends Controller
         }
 
         // Otherwise, assume it's a local number and add +63
-        return '+63' . preg_replace('/\D/', '', $phone);
+        return '+63'.preg_replace('/\D/', '', $phone);
     }
 
     private function arrayValue(mixed $value): array

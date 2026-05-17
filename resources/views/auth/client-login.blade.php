@@ -4,7 +4,7 @@
 <meta http-equiv="Expires" content="0">
 <div class="flex min-h-screen font-sans flex-col lg:flex-row">
     {{-- Left side --}}
-    <div class="w-full lg:w-1/2 flex flex-col px-4 sm:px-8 lg:px-20 py-6 sm:py-10 bg-white">
+    <div class="w-full lg:w-1/2 min-h-screen flex flex-col px-4 sm:px-8 lg:px-20 py-6 sm:py-10 bg-white">
         {{-- Top bar --}}
         <div class="flex items-center justify-between mb-8 sm:mb-16">
             <a href="{{ route('home') }}" class="flex items-center gap-2">
@@ -23,7 +23,7 @@
 
         {{-- Form --}}
         <div class="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
-            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 text-center">Welcome Back</h1>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 text-center">Welcome Back, Client</h1>
             <p class="text-gray-500 text-sm sm:text-base md:text-lg mb-6 sm:mb-10 text-center">Sign in to access your account</p>
 
             @if(session('status'))

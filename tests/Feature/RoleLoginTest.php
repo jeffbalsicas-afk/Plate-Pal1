@@ -2,15 +2,21 @@
 
 namespace Tests\Feature;
 
+use App\Mail\PasswordChangedNotification;
 use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 class RoleLoginTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_login_pages_are_available_for_each_role(): void
+    public function test_login_pages_are_available_for_client_and_caterer(): void
     {
         $this->get('/login')
             ->assertOk()
@@ -19,10 +25,6 @@ class RoleLoginTest extends TestCase
         $this->get('/caterer/login')
             ->assertOk()
             ->assertSee('Welcome Back, Caterer');
-
-        $this->get('/admin/login')
-            ->assertOk()
-            ->assertSee('Welcome Back, Admin');
     }
 
     public function test_client_login_only_accepts_client_accounts(): void
@@ -40,7 +42,7 @@ class RoleLoginTest extends TestCase
         $this->assertAuthenticatedAs($client);
     }
 
-    public function test_client_login_rejects_caterer_and_admin_accounts(): void
+    public function test_client_login_rejects_caterer_accounts(): void
     {
         $caterer = User::factory()->create([
             'email' => 'caterer@example.com',
@@ -49,18 +51,6 @@ class RoleLoginTest extends TestCase
 
         $this->post('/login', [
             'email' => $caterer->email,
-            'password' => 'password',
-        ])->assertSessionHasErrors('email');
-
-        $this->assertGuest();
-
-        $admin = User::factory()->create([
-            'email' => 'admin@example.com',
-            'role' => 'admin',
-        ]);
-
-        $this->post('/login', [
-            'email' => $admin->email,
             'password' => 'password',
         ])->assertSessionHasErrors('email');
 
@@ -82,7 +72,7 @@ class RoleLoginTest extends TestCase
         $this->assertAuthenticatedAs($caterer);
     }
 
-    public function test_caterer_login_rejects_client_and_admin_accounts(): void
+    public function test_caterer_login_rejects_client_accounts(): void
     {
         $client = User::factory()->create([
             'email' => 'client@example.com',
@@ -95,60 +85,21 @@ class RoleLoginTest extends TestCase
         ])->assertSessionHasErrors('email');
 
         $this->assertGuest();
-
-        $admin = User::factory()->create([
-            'email' => 'admin@example.com',
-            'role' => 'admin',
-        ]);
-
-        $this->post('/caterer/login', [
-            'email' => $admin->email,
-            'password' => 'password',
-        ])->assertSessionHasErrors('email');
-
-        $this->assertGuest();
     }
 
-    public function test_admin_login_only_accepts_admin_accounts(): void
+    public function test_admin_can_still_use_the_regular_login_page(): void
     {
         $admin = User::factory()->create([
             'email' => 'admin@example.com',
             'role' => 'admin',
         ]);
 
-        $this->post('/admin/login', [
+        $this->post('/login', [
             'email' => 'admin@example.com',
             'password' => 'password',
         ])->assertRedirect(route('admin.dashboard'));
 
         $this->assertAuthenticatedAs($admin);
-    }
-
-    public function test_admin_login_rejects_client_and_caterer_accounts(): void
-    {
-        $client = User::factory()->create([
-            'email' => 'client@example.com',
-            'role' => 'client',
-        ]);
-
-        $this->post('/admin/login', [
-            'email' => $client->email,
-            'password' => 'password',
-        ])->assertSessionHasErrors('email');
-
-        $this->assertGuest();
-
-        $caterer = User::factory()->create([
-            'email' => 'caterer@example.com',
-            'role' => 'caterer',
-        ]);
-
-        $this->post('/admin/login', [
-            'email' => $caterer->email,
-            'password' => 'password',
-        ])->assertSessionHasErrors('email');
-
-        $this->assertGuest();
     }
 
     public function test_guests_are_sent_to_the_matching_login_page_for_protected_areas(): void
@@ -160,11 +111,13 @@ class RoleLoginTest extends TestCase
             ->assertRedirect(route('caterer.login'));
 
         $this->get('/admin/dashboard')
-            ->assertRedirect(route('admin.login'));
+            ->assertRedirect(route('login'));
     }
 
-    public function test_local_password_reset_request_redirects_to_reset_form_for_simulation(): void
+    public function test_password_reset_request_sends_reset_link_notification(): void
     {
+        Notification::fake();
+
         $user = User::factory()->create([
             'email' => 'client@example.com',
             'role' => 'client',
@@ -176,13 +129,36 @@ class RoleLoginTest extends TestCase
 
         $response
             ->assertRedirect()
-            ->assertSessionHas('status', 'Simulation mode: reset link opened for you.');
+            ->assertSessionHas('status');
 
-        $location = $response->headers->get('Location');
+        Notification::assertSentTo($user, ResetPassword::class);
+    }
 
-        $this->assertIsString($location);
-        $this->assertStringContainsString('/reset-password/', $location);
-        $this->assertStringContainsString('email='.urlencode($user->email), $location);
+    public function test_password_reset_sends_password_changed_email(): void
+    {
+        Mail::fake();
+
+        $user = User::factory()->create([
+            'email' => 'client@example.com',
+            'role' => 'client',
+            'password' => Hash::make('old-password'),
+        ]);
+
+        $token = Password::createToken($user);
+
+        $response = $this->post(route('password.update'), [
+            'token' => $token,
+            'email' => $user->email,
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ]);
+
+        $response
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('status');
+
+        $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
+        Mail::assertSent(PasswordChangedNotification::class, fn (PasswordChangedNotification $mail) => $mail->hasTo($user->email));
     }
 
     public function test_authenticated_users_cannot_cross_into_another_role_dashboard(): void

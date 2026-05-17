@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\BookingConfirmedNotification;
 use App\Models\Booking;
+use App\Models\Message;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -51,14 +52,14 @@ class BookingController extends Controller
         abort_unless($booking->status === 'confirmed', 422, 'Only confirmed bookings can be marked as complete.');
 
         // If no final_price is set, try to calculate from package or items
-        if (!$booking->final_price) {
+        if (! $booking->final_price) {
             // First try package price
             if ($booking->package_price) {
                 $booking->final_price = $booking->package_price;
             }
             // Otherwise calculate from booking items (menu items + add-ons)
             elseif ($booking->bookingItems()->exists()) {
-                $itemsTotal = $booking->bookingItems->sum(function($item) {
+                $itemsTotal = $booking->bookingItems->sum(function ($item) {
                     return ($item->item_price ?? 0) * ($item->quantity ?? 1);
                 });
                 if ($itemsTotal > 0) {
@@ -68,7 +69,7 @@ class BookingController extends Controller
         }
 
         // Caterer must set final price before completing (or have package/items price)
-        if (!$booking->final_price) {
+        if (! $booking->final_price) {
             return back()->withErrors(['final_price' => 'Please set the final agreed price before marking as complete.']);
         }
 
@@ -104,16 +105,12 @@ class BookingController extends Controller
 
         $booking->load('caterer');
         $packages = Package::where('caterer_id', $booking->caterer_id)
-            ->where(function ($query) use ($booking) {
-                $query->where('status', 'live')
-                    ->orWhere('id', $booking->package_id);
-            })
             ->orderBy('name')
             ->get();
 
         $user = auth()->user();
         $activeBookings = Booking::where('user_id', $user->id)->whereNull('client_viewed_at')->count();
-        $unreadMessages = \App\Models\Message::where('user_id', $user->id)->where('is_read', false)->where('sender', 'caterer')->count();
+        $unreadMessages = Message::where('user_id', $user->id)->where('is_read', false)->where('sender', 'caterer')->count();
         $statusCounts = [
             'all' => Booking::where('user_id', $user->id)->count(),
         ];
@@ -134,21 +131,13 @@ class BookingController extends Controller
                 'nullable',
                 'integer',
                 Rule::exists('packages', 'id')->where(fn ($query) => $query
-                    ->where('caterer_id', $booking->caterer_id)
-                    ->where(function ($query) use ($booking) {
-                        $query->where('status', 'live')
-                            ->orWhere('id', $booking->package_id);
-                    })),
+                    ->where('caterer_id', $booking->caterer_id)),
             ],
             'special_requests' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $package = isset($validated['package_id'])
             ? Package::where('caterer_id', $booking->caterer_id)
-                ->where(function ($query) use ($booking) {
-                    $query->where('status', 'live')
-                        ->orWhere('id', $booking->package_id);
-                })
                 ->find($validated['package_id'])
             : null;
 

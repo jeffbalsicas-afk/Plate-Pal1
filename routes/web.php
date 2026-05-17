@@ -1,16 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\ClientDashboardController;
-use App\Http\Controllers\CatererController;
-use App\Http\Controllers\MenuController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\CatererController;
+use App\Http\Controllers\ClientDashboardController;
+use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SystemFeedbackController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingPageController::class, 'index'])->name('home')->middleware('prevent.back');
 
@@ -119,10 +119,6 @@ Route::middleware(['auth', 'role:admin', 'prevent.back'])->group(function () {
     Route::get('/admin/bookings', [AdminDashboardController::class, 'bookings'])->name('admin.bookings');
     Route::post('/admin/caterers/{user}/approve', [AdminDashboardController::class, 'approve'])->name('admin.caterer.approve');
     Route::post('/admin/caterers/{user}/reject', [AdminDashboardController::class, 'reject'])->name('admin.caterer.reject');
-    Route::post('/admin/packages/{package}/approve', [AdminDashboardController::class, 'approvePackage'])->name('admin.packages.approve');
-    Route::post('/admin/packages/{package}/reject', [AdminDashboardController::class, 'rejectPackage'])->name('admin.packages.reject');
-    Route::post('/admin/menu-items/{menuItem}/approve', [AdminDashboardController::class, 'approveMenuItem'])->name('admin.menu-items.approve');
-    Route::post('/admin/menu-items/{menuItem}/reject', [AdminDashboardController::class, 'rejectMenuItem'])->name('admin.menu-items.reject');
     Route::get('/admin/featured-caterers', [AdminDashboardController::class, 'featuredCaterers'])->name('admin.featured-caterers.index');
     Route::post('/admin/featured-caterers/{caterer}/toggle', [AdminDashboardController::class, 'toggleFeatured'])->name('admin.featured-caterers.toggle');
     Route::get('/admin/reports', [AdminDashboardController::class, 'reports'])->name('admin.reports');
