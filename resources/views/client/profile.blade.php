@@ -40,6 +40,7 @@
 
             <form method="POST" action="{{ route('client.profile.update') }}" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-6">
                 @csrf
+                <input type="hidden" name="form_type" value="profile">
 
                 <div class="flex items-center gap-4 pb-6 border-b border-[#EDE4D8]">
                     <div class="w-16 h-16 overflow-hidden rounded-full bg-[#E8642A] text-white text-2xl font-bold flex items-center justify-center shrink-0">
@@ -134,6 +135,67 @@
                         Cancel
                     </a>
                 </div>
+            </form>
+        </div>
+
+        <div class="mt-6 bg-white rounded-2xl border border-[#EDE4D8] shadow-lg overflow-hidden">
+            <div class="p-6 sm:p-8 border-b border-[#EDE4D8]">
+                <h2 class="text-2xl font-black text-[#1C1A17] mb-2">Change Password</h2>
+                <p class="text-sm sm:text-base text-[#8A6D3F]">Use your current password to set a new one.</p>
+            </div>
+
+            <form method="POST" action="{{ route('client.profile.update') }}" class="p-6 sm:p-8 space-y-5">
+                @csrf
+                <input type="hidden" name="form_type" value="password">
+
+                <div>
+                    <label for="current_password" class="block text-sm font-bold text-[#1C1A17] mb-2">Current Password</label>
+                    <input
+                        id="current_password"
+                        name="current_password"
+                        type="password"
+                        required
+                        autocomplete="current-password"
+                        class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A]"
+                    >
+                    @error('current_password')
+                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-bold text-[#1C1A17] mb-2">New Password</label>
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        required
+                        autocomplete="new-password"
+                        class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A]"
+                    >
+                    @error('password')
+                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-bold text-[#1C1A17] mb-2">Confirm New Password</label>
+                    <input
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        type="password"
+                        required
+                        autocomplete="new-password"
+                        class="w-full px-4 py-3 rounded-xl bg-[#FDF6EE] border border-[#EDE4D8] text-sm text-[#1C1A17] focus:outline-none focus:border-[#E8642A]"
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    class="w-full px-5 py-3 rounded-xl bg-[#1C1A17] text-white text-sm font-bold hover:bg-[#3A332B] transition-colors"
+                >
+                    Update Password
+                </button>
             </form>
         </div>
     </div>

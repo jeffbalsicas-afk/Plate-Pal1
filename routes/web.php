@@ -93,6 +93,7 @@ Route::middleware(['auth', 'role:client', 'prevent.back'])->group(function () {
     Route::get('/client/bookings/{booking}', [ClientDashboardController::class, 'bookingDetails'])->name('client.bookings.show');
     Route::get('/client/bookings/{booking}/edit', [BookingController::class, 'edit'])->name('client.bookings.edit');
     Route::put('/client/bookings/{booking}', [BookingController::class, 'update'])->name('client.bookings.update');
+    Route::delete('/client/bookings/{booking}', [BookingController::class, 'cancel'])->name('client.bookings.cancel');
     Route::post('/client/bookings/{booking}/review', [ClientDashboardController::class, 'storeReview'])->name('client.bookings.review');
     Route::get('/client/saved-caterers', [ClientDashboardController::class, 'savedCaterers'])->name('client.saved-caterers');
     Route::post('/client/saved-caterers/{caterer}', [ClientDashboardController::class, 'toggleSavedCaterer'])->name('client.saved-caterers.toggle');

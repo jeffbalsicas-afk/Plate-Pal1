@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -204,6 +205,32 @@ class CatererProfileTest extends TestCase
         $this->assertSame(['/storage/gallery/keep-me.jpg'], $caterer->gallery_images);
         Storage::disk('public')->assertMissing('gallery/delete-me.jpg');
         $this->assertSubmittedForReview($caterer);
+    }
+
+    public function test_caterer_can_change_password_without_profile_approval_review(): void
+    {
+        $caterer = User::factory()->create([
+            'role' => 'caterer',
+            'approval_status' => 'approved',
+            'is_verified' => true,
+            'password' => Hash::make('old-password'),
+        ]);
+
+        $response = $this->actingAs($caterer)->post(route('caterer.profile.update'), [
+            'form_type' => 'password',
+            'current_password' => 'old-password',
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ]);
+
+        $response->assertRedirect(route('caterer.profile') . '#security');
+        $response->assertSessionHas('success', 'Password changed successfully.');
+
+        $caterer->refresh();
+
+        $this->assertTrue(Hash::check('new-password', $caterer->password));
+        $this->assertSame('approved', $caterer->approval_status);
+        $this->assertTrue((bool) $caterer->is_verified);
     }
 
     private function validPayload(array $overrides = []): array

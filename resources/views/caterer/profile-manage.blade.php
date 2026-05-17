@@ -18,6 +18,7 @@
     $galleryImages = is_array($user->gallery_images) ? $user->gallery_images : json_decode($user->gallery_images ?? '[]', true);
     $galleryImages = is_array($galleryImages) ? $galleryImages : [];
     $profileImageUrl = $user->profile_image_url;
+    $initialTab = old('form_type') === 'password' ? 'security' : null;
 @endphp
 
 <x-dashboard-layout
@@ -29,8 +30,8 @@
 >
     <div
         class="max-w-4xl mx-auto"
-        x-data="{ tab: ['basic', 'about', 'gallery'].includes(window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'basic' }"
-        x-init="window.addEventListener('hashchange', () => { const value = window.location.hash.slice(1); if (['basic', 'about', 'gallery'].includes(value)) tab = value })"
+        x-data="{ tab: '{{ $initialTab }}' || (['basic', 'about', 'gallery', 'security'].includes(window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'basic') }"
+        x-init="window.addEventListener('hashchange', () => { const value = window.location.hash.slice(1); if (['basic', 'about', 'gallery', 'security'].includes(value)) tab = value })"
     >
         @if(session('success'))
             <div class="mb-6 p-4 rounded-xl bg-green-50 border border-green-300 text-green-700 text-sm font-medium">
@@ -66,6 +67,9 @@
             </button>
             <button type="button" @click="tab = 'gallery'; window.location.hash = 'gallery'" :class="tab === 'gallery' ? 'bg-[#E8642A] text-white' : 'text-[#1C1A17] hover:bg-[#FDF6EE]'" class="px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors">
                 Gallery
+            </button>
+            <button type="button" @click="tab = 'security'; window.location.hash = 'security'" :class="tab === 'security' ? 'bg-[#E8642A] text-white' : 'text-[#1C1A17] hover:bg-[#FDF6EE]'" class="px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors">
+                Security
             </button>
         </div>
 
@@ -359,6 +363,63 @@
                     <p class="text-xs text-[#8A7F72] mt-1">Upload your best event setups, food spreads, and team photos.</p>
                 </div>
             @endif
+        </div>
+
+        <!-- Security Tab -->
+        <div x-show="tab === 'security'" x-cloak x-transition class="bg-white rounded-2xl p-6 border border-[#EDE4D8]">
+            <h2 class="text-xl font-black text-[#1C1A17] mb-2">Change Password</h2>
+            <p class="text-sm text-[#8A7F72] mb-6">Update your login password without changing your public caterer profile status.</p>
+
+            <form method="POST" action="{{ route('caterer.profile.update') }}" class="space-y-5">
+                @csrf
+                <input type="hidden" name="form_type" value="password">
+
+                <div>
+                    <label for="current_password" class="block text-sm font-bold text-[#1C1A17] mb-2">Current Password</label>
+                    <input
+                        id="current_password"
+                        type="password"
+                        name="current_password"
+                        required
+                        autocomplete="current-password"
+                        class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-[#1C1A17] focus:outline-none focus:ring-2 focus:ring-[#E8642A]"
+                    >
+                    @error('current_password')
+                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-bold text-[#1C1A17] mb-2">New Password</label>
+                    <input
+                        id="password"
+                        type="password"
+                        name="password"
+                        required
+                        autocomplete="new-password"
+                        class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-[#1C1A17] focus:outline-none focus:ring-2 focus:ring-[#E8642A]"
+                    >
+                    @error('password')
+                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-bold text-[#1C1A17] mb-2">Confirm New Password</label>
+                    <input
+                        id="password_confirmation"
+                        type="password"
+                        name="password_confirmation"
+                        required
+                        autocomplete="new-password"
+                        class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-[#1C1A17] focus:outline-none focus:ring-2 focus:ring-[#E8642A]"
+                    >
+                </div>
+
+                <button type="submit" class="w-full py-3 rounded-xl bg-[#1C1A17] text-white font-bold hover:bg-[#3A332B] transition-colors">
+                    Update Password
+                </button>
+            </form>
         </div>
     </div>
 </x-dashboard-layout>

@@ -117,7 +117,7 @@
                                     {{ $caterer->barangay }}, Tagum City
                                 </p>
                                 @if($caterer->description)
-                                <p class="text-sm text-[#1C1A17] leading-relaxed">{{ $caterer->description }}</p>
+                                <p class="text-sm text-[#1C1A17] leading-relaxed"><span class="font-semibold text-md text-[#000000]">Description:​</span> {{ $caterer->description }}</p>
                                 @endif
                             </div>
                             @if($user && $user->role === 'client')

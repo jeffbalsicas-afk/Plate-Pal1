@@ -112,7 +112,7 @@
                     </div>
                 @endif
 
-                <div class="rounded-2xl border border-[#EDE4D8] p-5">
+                <div class="rounded-2xl border border-[#EDE4D8] p-5 mb-5">
                     <h2 class="text-lg font-black text-[#1C1A17] mb-4">Caterer Details</h2>
                     <div class="grid sm:grid-cols-2 gap-4 text-sm text-[#8A6D3F]">
                         <p><span class="font-bold text-[#1C1A17]">Location:</span> {{ $booking->caterer->barangay ?? $booking->caterer->location ?? 'Tagum City' }}</p>
@@ -120,6 +120,21 @@
                         <p><span class="font-bold text-[#1C1A17]">Phone:</span> {{ $booking->caterer->phone ?? 'Not provided' }}</p>
                     </div>
                 </div>
+
+                @if(in_array($status, ['pending', 'confirmed']))
+                    <div class="flex gap-3">
+                        <a href="{{ route('client.bookings.edit', $booking) }}" class="px-5 py-3 rounded-xl bg-[#E8642A] text-white text-sm font-bold hover:bg-[#F07C42] transition-colors">
+                            Edit Booking
+                        </a>
+                        <form method="POST" action="{{ route('client.bookings.cancel', $booking) }}" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="px-5 py-3 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors">
+                                Cancel Booking
+                            </button>
+                        </form>
+                    </div>
+                @endif
 
                 @if($status === 'completed')
                     <div class="rounded-2xl border border-[#EDE4D8] p-5 mt-5">

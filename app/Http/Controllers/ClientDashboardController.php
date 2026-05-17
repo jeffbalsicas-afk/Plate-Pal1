@@ -14,6 +14,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use Throwable;
 
 class ClientDashboardController extends Controller
@@ -675,6 +676,20 @@ class ClientDashboardController extends Controller
     public function updateProfile(Request $request)
     {
         $user = auth()->user();
+        $formType = $request->input('form_type', 'profile');
+
+        if ($formType === 'password') {
+            $validated = $request->validate([
+                'current_password' => ['required', 'current_password'],
+                'password' => ['required', 'confirmed', PasswordRule::defaults()],
+            ]);
+
+            $user->update([
+                'password' => $validated['password'],
+            ]);
+
+            return back()->with('success', 'Password changed successfully!');
+        }
 
         $request->merge([
             'email' => strtolower(trim((string) $request->input('email'))),

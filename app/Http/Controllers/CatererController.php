@@ -11,6 +11,7 @@ use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class CatererController extends Controller
 {
@@ -276,6 +277,19 @@ class CatererController extends Controller
     {
         $user = auth()->user();
         $formType = $request->input('form_type', 'basic');
+
+        if ($formType === 'password') {
+            $validated = $request->validate([
+                'current_password' => ['required', 'current_password'],
+                'password' => ['required', 'confirmed', PasswordRule::defaults()],
+            ]);
+
+            $user->update([
+                'password' => $validated['password'],
+            ]);
+
+            return redirect()->to(route('caterer.profile') . '#security')->with('success', 'Password changed successfully.');
+        }
 
         if ($formType === 'basic') {
             $request->merge([

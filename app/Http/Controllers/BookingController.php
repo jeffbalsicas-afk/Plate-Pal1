@@ -166,4 +166,14 @@ class BookingController extends Controller
 
         return redirect()->route('client.bookings.show', $booking)->with('success', 'Booking updated successfully!');
     }
+
+    public function cancel(Booking $booking)
+    {
+        abort_unless($booking->user_id === auth()->id(), 403);
+        abort_unless(in_array($booking->status, ['pending', 'confirmed']), 422, 'Only pending or confirmed bookings can be cancelled.');
+
+        $booking->update(['status' => 'cancelled']);
+
+        return redirect()->route('client.bookings')->with('success', 'Booking cancelled successfully.');
+    }
 }
