@@ -51,20 +51,13 @@ class BookingController extends Controller
         abort_unless($booking->caterer_id === auth()->id(), 403);
         abort_unless($booking->status === 'confirmed', 422, 'Only confirmed bookings can be marked as complete.');
 
-        // If no final_price is set, try to calculate from package or items
+        $booking->loadMissing(['bookingItems', 'caterer']);
+
         if (! $booking->final_price) {
-            // First try package price
-            if ($booking->package_price) {
-                $booking->final_price = $booking->package_price;
-            }
-            // Otherwise calculate from booking items (menu items + add-ons)
-            elseif ($booking->bookingItems()->exists()) {
-                $itemsTotal = $booking->bookingItems->sum(function ($item) {
-                    return ($item->item_price ?? 0) * ($item->quantity ?? 1);
-                });
-                if ($itemsTotal > 0) {
-                    $booking->final_price = $itemsTotal;
-                }
+            $calculatedPrice = $booking->calculated_total;
+
+            if ($calculatedPrice > 0) {
+                $booking->final_price = $calculatedPrice;
             }
         }
 

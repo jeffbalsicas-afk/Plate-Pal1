@@ -27,6 +27,9 @@ class Booking extends Model
     protected $casts = [
         'event_date' => 'date',
         'package_price' => 'decimal:2',
+        'client_budget' => 'decimal:2',
+        'price_per_head' => 'decimal:2',
+        'final_price' => 'decimal:2',
     ];
 
     public function user()
@@ -56,23 +59,51 @@ class Booking extends Model
 
     public function getEstimatedTotalAttribute(): ?float
     {
-        // If final_price is set (agreed price), use it
         if ($this->final_price !== null) {
-            return (float) $this->final_price;
+            $finalPrice = (float) $this->final_price;
+
+            if (
+                $this->package_price === null
+                && $this->client_budget !== null
+                && $finalPrice <= $this->items_total
+                && $this->calculated_total > $finalPrice
+            ) {
+                return $this->calculated_total;
+            }
+
+            return $finalPrice;
         }
 
-        // If package_price is set, use it
+        return $this->calculated_total;
+    }
+
+    public function getCalculatedTotalAttribute(): float
+    {
+        return $this->base_price + $this->items_total;
+    }
+
+    public function getBasePriceAttribute(): float
+    {
+        $basePrice = 0;
+
         if ($this->package_price !== null) {
-            return (float) $this->package_price;
-        }
-
-        // Otherwise calculate: guests × caterer's average price
-        if ($this->guests && $this->caterer) {
+            $basePrice = (float) $this->package_price;
+        } elseif ($this->client_budget !== null) {
+            $basePrice = (float) $this->client_budget;
+        } elseif ($this->price_per_head !== null && $this->guests) {
+            $basePrice = (float) $this->price_per_head * (int) $this->guests;
+        } elseif ($this->guests && $this->caterer) {
             $avgPrice = ($this->caterer->price_min + $this->caterer->price_max) / 2;
-
-            return (float) $this->guests * $avgPrice;
+            $basePrice = (float) $this->guests * $avgPrice;
         }
 
-        return null;
+        return $basePrice;
+    }
+
+    public function getItemsTotalAttribute(): float
+    {
+        return (float) $this->bookingItems->sum(function ($item) {
+            return ($item->item_price ?? 0) * ($item->quantity ?? 1);
+        });
     }
 }

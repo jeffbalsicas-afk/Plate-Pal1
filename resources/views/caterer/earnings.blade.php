@@ -112,28 +112,36 @@
                 </thead>
                 <tbody class="divide-y divide-[#EDE4D8]">
                     @forelse($earningsHistory as $booking)
+                    @php
+                        $bookingTotal = $booking->estimated_total;
+                    @endphp
                     <tr class="hover:bg-[#FDF6EE] transition-colors">
                         <td class="px-6 py-4 font-medium text-[#1C1A17]">{{ $booking->user->name }}</td>
                         <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->event_title }}</td>
                         <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->event_date->format('M d, Y') }}</td>
-                        <td class="px-6 py-4 text-[#8A7F72]">{{ $booking->package_name ?? 'Custom booking' }}</td>
+                        <td class="px-6 py-4 text-[#8A7F72]">
+                            {{ $booking->package_name ?? 'Custom booking' }}
+                            @if($booking->bookingItems->count() > 0)
+                                <span class="text-xs text-[#E8642A]">+ {{ $booking->bookingItems->count() }} items</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-[#8A7F72]">{{ number_format($booking->guests) }}</td>
                         <td class="px-6 py-4 text-[#8A7F72]">
-                            @if($booking->client_budget)
+                            @if($booking->package_price)
+                                ₱{{ number_format($booking->package_price, 2) }}
+                            @elseif($booking->client_budget)
                                 ₱{{ number_format($booking->client_budget, 2) }}
-                            @elseif($booking->package_price)
-                                Bundle
                             @else
                                 Custom
                             @endif
                         </td>
                         <td class="px-6 py-4 font-bold text-[#E8642A]">
-                            ₱{{ number_format($booking->final_price, 2) }}
+                            ₱{{ number_format($bookingTotal, 2) }}
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-[#8A7F72]">No completed bookings with final price set yet.</td>
+                        <td colspan="7" class="px-6 py-12 text-center text-[#8A7F72]">No completed bookings yet.</td>
                     </tr>
                     @endforelse
                 </tbody>

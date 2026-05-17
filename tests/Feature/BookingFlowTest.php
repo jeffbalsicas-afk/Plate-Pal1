@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Mail\BookingConfirmedNotification;
 use App\Mail\NewBookingNotification;
 use App\Models\Booking;
+use App\Models\BookingItem;
+use App\Models\MenuItem;
 use App\Models\Package;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -110,6 +112,70 @@ class BookingFlowTest extends TestCase
             'package_id' => $package->id,
             'guests' => 40,
         ]);
+    }
+
+    public function test_custom_booking_budget_is_included_when_completed_with_items(): void
+    {
+        $client = User::factory()->create(['role' => 'client']);
+        $caterer = $this->approvedCaterer();
+
+        $booking = Booking::create([
+            'user_id' => $client->id,
+            'caterer_id' => $caterer->id,
+            'event_title' => 'Custom Birthday',
+            'event_date' => now()->addDays(3)->toDateString(),
+            'guests' => 50,
+            'client_budget' => 22000,
+            'status' => 'confirmed',
+        ]);
+
+        $riceTray = MenuItem::create([
+            'caterer_id' => $caterer->id,
+            'name' => 'Rice Tray',
+            'price' => 250,
+            'type' => 'addon',
+            'category' => 'main',
+        ]);
+
+        $caseOfCoke = MenuItem::create([
+            'caterer_id' => $caterer->id,
+            'name' => 'Case of Coke',
+            'price' => 500,
+            'type' => 'addon',
+            'category' => 'beverage',
+        ]);
+
+        BookingItem::create([
+            'booking_id' => $booking->id,
+            'menu_item_id' => $riceTray->id,
+            'item_name' => 'Rice Tray',
+            'item_type' => 'addon',
+            'item_price' => 250,
+            'quantity' => 1,
+        ]);
+
+        BookingItem::create([
+            'booking_id' => $booking->id,
+            'menu_item_id' => $caseOfCoke->id,
+            'item_name' => 'Case of Coke',
+            'item_type' => 'addon',
+            'item_price' => 500,
+            'quantity' => 1,
+        ]);
+
+        $this->actingAs($caterer)
+            ->post(route('bookings.complete', $booking))
+            ->assertSessionHas('success');
+
+        $booking->refresh()->load('bookingItems');
+
+        $this->assertSame('completed', $booking->status);
+        $this->assertSame(22750.0, (float) $booking->final_price);
+        $this->assertSame(22750.0, $booking->estimated_total);
+
+        $booking->forceFill(['final_price' => 750])->save();
+
+        $this->assertSame(22750.0, $booking->refresh()->load('bookingItems')->estimated_total);
     }
 
     private function approvedCaterer(): User
